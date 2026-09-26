@@ -1202,3 +1202,97 @@ h1 {
     min-width: 250px;
   }
 }
+
+.margin-alarm {
+  margin-bottom: 20px;
+}
+.margin-alarm .takaran-banner {
+  animation: margin-alarm-enter 160ms ease-out both;
+}
+.margin-alarm .takaran-banner__icon {
+  background: var(--caramel-700);
+}
+.margin-alarm__open {
+  min-height: 36px;
+  padding: 0 6px;
+}
+.margin-alarm__dialog {
+  width: min(520px, calc(100% - 32px));
+  max-height: min(82vh, 720px);
+  margin: auto;
+  padding: 22px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  color: var(--ink);
+  background: var(--surface);
+}
+.margin-alarm__dialog::backdrop {
+  background: rgb(35 27 22 / 45%);
+}
+.margin-alarm__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.margin-alarm__heading h2 {
+  margin: 0;
+  font:
+    28px / 1.15 "Instrument Serif",
+    serif;
+}
+.margin-alarm__list {
+  display: grid;
+  gap: 16px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.margin-alarm__list li {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+.margin-alarm__list a {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  color: var(--ink);
+  font:
+    24px / 1.1 "Instrument Serif",
+    serif;
+}
+.margin-alarm__list .button {
+  width: fit-content;
+  margin-top: 4px;
+}
+.recipe-margin-warning {
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--surface);
+  background: var(--danger, #8d3024);
+  font-size: 12px;
+  font-weight: 700;
+}
+@keyframes margin-alarm-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .margin-alarm .takaran-banner {
+    animation: none;
+  }
+}

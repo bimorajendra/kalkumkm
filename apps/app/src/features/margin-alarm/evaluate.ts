@@ -1,14 +1,13 @@
 import {
   actualMarginBp,
   CalcError,
-  suggestPrice,
   type RecipeResult,
+  suggestPrice,
 } from '@takaran/calc';
 import type { RecipeRow } from '../../db/schema';
 
 export interface AffectedRecipe {
   recipe: RecipeRow;
-  hpp: RecipeResult['hpp'];
   marginBp: number;
   suggestedPrice: number;
 }
@@ -36,7 +35,6 @@ export function evaluateAffectedRecipes(
       return [
         {
           recipe,
-          hpp: result.hpp,
           marginBp,
           suggestedPrice: suggestPrice(
             result.hpp,

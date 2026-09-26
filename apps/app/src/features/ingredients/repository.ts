@@ -3,7 +3,9 @@ import { toBaseUnits, unitPrice } from '@takaran/calc';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/db';
 import type { IngredientRow, PriceHistoryRow } from '../../db/schema';
+import { track } from '../../lib/analytics';
 import { createUlid } from '../../lib/ulid';
+import { evaluateAfterPriceChange } from '../margin-alarm/repository';
 
 export type IngredientInput = Omit<Ingredient, 'id'>;
 
@@ -211,23 +213,42 @@ export async function updatePrice(id: string, buyPrice: number): Promise<void> {
       'Harga beli harus Rp 1 sampai Rp 100.000.000.',
     );
   }
-  await db.transaction('rw', db.ingredients, db.priceHistory, async () => {
-    const current = await db.ingredients.get(id);
-    if (!current)
-      throw new IngredientRepositoryError(
-        'NOT_FOUND',
-        'Bahan tidak ditemukan.',
-      );
-    if (current.buyPrice === buyPrice) return;
-    const history: PriceHistoryRow = {
-      ingredientId: id,
-      changedAt: new Date().toISOString(),
-      oldPrice: current.buyPrice,
-      newPrice: buyPrice,
-    };
-    await db.ingredients.update(id, { buyPrice, updatedAt: history.changedAt });
-    await db.priceHistory.add(history);
-  });
+  let increased = false;
+  let alarmCount = 0;
+  await db.transaction(
+    'rw',
+    db.ingredients,
+    db.priceHistory,
+    db.recipes,
+    db.settings,
+    async () => {
+      const current = await db.ingredients.get(id);
+      if (!current)
+        throw new IngredientRepositoryError(
+          'NOT_FOUND',
+          'Bahan tidak ditemukan.',
+        );
+      if (current.buyPrice === buyPrice) return;
+      const history: PriceHistoryRow = {
+        ingredientId: id,
+        changedAt: new Date().toISOString(),
+        oldPrice: current.buyPrice,
+        newPrice: buyPrice,
+      };
+      await db.ingredients.update(id, {
+        buyPrice,
+        updatedAt: history.changedAt,
+      });
+      await db.priceHistory.add(history);
+      increased = buyPrice > current.buyPrice;
+      if (increased) alarmCount = await evaluateAfterPriceChange(id);
+    },
+  );
+  if (alarmCount > 0) {
+    track('margin_alarm_shown', {
+      count_bucket: alarmCount === 1 ? '1' : alarmCount <= 5 ? '2_5' : 'gt_5',
+    });
+  }
 }
 
 export async function deleteIngredient(id: string): Promise<void> {

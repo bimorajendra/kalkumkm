@@ -3,6 +3,7 @@ import { formatRupiah } from '@takaran/ui';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import type { RecipeRow } from '../../../db/schema';
+import { MarginAlarm } from '../../margin-alarm/components/margin-alarm';
 import { useSetting } from '../../settings/repository';
 import { recipeCopy } from '../copy';
 import { seedExample } from '../seed-example';
@@ -12,12 +13,13 @@ import { RecipeEditor } from './recipe-editor';
 export function RecipeList() {
   const data = useRecipeResults();
   const roundingStep = useSetting('roundingStep');
+  const marginAlarm = useSetting('marginAlarm');
   const [editorOpen, setEditorOpen] = useState(false);
   const [selected, setSelected] = useState<RecipeRow>();
   const [error, setError] = useState('');
   const navigate = useNavigate();
   if (!data)
-    return <output className="recipe-load-state">Memuat resep…</output>;
+    return <output className="recipe-load-state">Memuat resepâ€¦</output>;
   if (data.error)
     return (
       <p className="form-error" role="alert">
@@ -77,6 +79,7 @@ export function RecipeList() {
     );
   return (
     <>
+      <MarginAlarm data={{ recipes, results }} />
       <div className="recipe-page-heading">
         <p>HPP (modal per porsi), harga jual, dan untungmu.</p>
         <button
@@ -114,6 +117,13 @@ export function RecipeList() {
           }
           const aboveTarget =
             margin !== undefined && margin >= recipe.targetMarginBp;
+          const alarmAffected =
+            margin !== undefined &&
+            !aboveTarget &&
+            marginAlarm !== null &&
+            Array.isArray(marginAlarm.recipeIds) &&
+            !marginAlarm.dismissed &&
+            marginAlarm.recipeIds.includes(recipe.id);
           return (
             <li className="recipe-list-row" key={recipe.id}>
               <Link className="recipe-list-link" to={`/resep/${recipe.id}`}>
@@ -124,11 +134,11 @@ export function RecipeList() {
                   ) : result ? (
                     <>
                       HPP {formatRupiah(result.hpp)}{' '}
-                      <span aria-hidden="true">·</span> Harga{' '}
+                      <span aria-hidden="true">Â·</span> Harga{' '}
                       {price === undefined ? 'belum ada' : formatRupiah(price)}
                     </>
                   ) : (
-                    'Menghitung…'
+                    'Menghitungâ€¦'
                   )}
                 </span>
               </Link>
@@ -136,6 +146,11 @@ export function RecipeList() {
                 className={`recipe-margin ${aboveTarget ? 'is-above' : 'is-below'}`}
               >
                 <span className="recipe-margin-dot" aria-hidden="true" />
+                {alarmAffected ? (
+                  <span aria-hidden="true" className="recipe-margin-warning">
+                    !
+                  </span>
+                ) : null}
                 {margin === undefined
                   ? 'Belum bisa dihitung'
                   : aboveTarget

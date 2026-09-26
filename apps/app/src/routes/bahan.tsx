@@ -8,6 +8,8 @@ import {
   claimFirstIngredientEvent,
   useIngredients,
 } from '../features/ingredients/repository';
+import { MarginAlarm } from '../features/margin-alarm/components/margin-alarm';
+import { useRecipeResults } from '../features/recipes/use-recipe-results';
 import { track } from '../lib/analytics';
 
 export function BahanRoute() {
@@ -15,6 +17,7 @@ export function BahanRoute() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<IngredientRow>();
   const allIngredients = useIngredients('');
+  const recipeData = useRecipeResults();
 
   async function saved(_ingredient: Ingredient) {
     if (editing) return;
@@ -38,6 +41,7 @@ export function BahanRoute() {
 
   return (
     <main className="page ingredient-page">
+      {!recipeData.error ? <MarginAlarm data={recipeData} /> : null}
       <section aria-labelledby="page-title">
         <div className="ingredient-page-heading">
           <div>

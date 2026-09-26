@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { db } from '../db/db';
 import type { RecipeRow } from '../db/schema';
+import { MarginAlarm } from '../features/margin-alarm/components/margin-alarm';
 import { CalculatorResult } from '../features/pricing/components/calculator-result';
 import { CurrentPriceInput } from '../features/pricing/components/current-price-input';
 import { MarginNote } from '../features/pricing/components/margin-note';
@@ -115,7 +116,7 @@ function CalculatorScreen({
   if (result === undefined)
     return (
       <main className="page" aria-live="polite">
-        Menghitung HPP…
+        Menghitung HPPâ€¦
       </main>
     );
   if (result instanceof CalcError) {
@@ -197,6 +198,7 @@ function CalculatorScreen({
 
   return (
     <main className="page calculator-page">
+      <MarginAlarm data={data} />
       <section className="calculator-inputs" aria-labelledby="calculator-title">
         <RecipePicker
           onSelect={onSelect}
@@ -217,7 +219,7 @@ function CalculatorScreen({
             {formatRupiah(result.breakdown.packaging)}
           </p>
           <p>
-            HPP <strong>{formatRupiah(result.hpp)}</strong> per potong ·{' '}
+            HPP <strong>{formatRupiah(result.hpp)}</strong> per potong Â·{' '}
             {recipe.yieldPortions} potong per adonan
           </p>
         </section>
@@ -302,7 +304,7 @@ function CalculatorScreen({
             onClick={() => setDetailsOpen(false)}
             type="button"
           >
-            ×
+            Ã—
           </button>
         </div>
         <CalculatorResult
