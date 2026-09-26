@@ -1,0 +1,95 @@
+:root {
+  color-scheme: light;
+  --bg: #fbf6f1;
+  --surface: #ffffff;
+  --surface-soft: #f5ece3;
+  --line: #e7d9cb;
+  --ink: #2b1d14;
+  --ink-muted: #6e5a4b;
+  --caramel-300: #ffc08a;
+  --caramel-400: #ff9a4d;
+  --caramel-500: #f07a1f;
+  --caramel-600: #c85a0c;
+  --caramel-700: #9e4308;
+  --peach-100: #ffe3cc;
+  --tan-100: #f3e6d8;
+  --tan-200: #e8d2bc;
+  --tan-300: #d9b99a;
+  --tan-400: #c49a74;
+  --danger: #b42318;
+  --success: #1e7a4c;
+  --radius-control: 10px;
+  --radius-card: 20px;
+  --radius-result: 28px;
+  --radius-pill: 999px;
+  --shadow-floating: 0 12px 32px rgb(43 29 20 / 10%);
+}
+:root:not([data-theme="light"]) {
+  @media (prefers-color-scheme: dark) {
+    color-scheme: dark;
+    --bg: #17110d;
+    --surface: #221913;
+    --surface-soft: #2c211a;
+    --line: #3a2c22;
+    --ink: #f6ede4;
+    --ink-muted: #c4b2a3;
+    --caramel-400: #ff9a4d;
+    --caramel-300: #ffc08a;
+    --danger: #f97066;
+    --success: #4ade8a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #17110d;
+  --surface: #221913;
+  --surface-soft: #2c211a;
+  --line: #3a2c22;
+  --ink: #f6ede4;
+  --ink-muted: #c4b2a3;
+  --caramel-400: #ff9a4d;
+  --caramel-300: #ffc08a;
+  --danger: #f97066;
+  --success: #4ade8a;
+}
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-soft: var(--surface-soft);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-caramel-300: var(--caramel-300);
+  --color-caramel-400: var(--caramel-400);
+  --color-caramel-500: var(--caramel-500);
+  --color-caramel-600: var(--caramel-600);
+  --color-caramel-700: var(--caramel-700);
+  --color-peach-100: var(--peach-100);
+  --color-tan-100: var(--tan-100);
+  --color-tan-200: var(--tan-200);
+  --color-tan-300: var(--tan-300);
+  --color-tan-400: var(--tan-400);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --font-display: "Instrument Serif", serif;
+  --font-ui: "Plus Jakarta Sans", sans-serif;
+  --text-display-xl: 64px;
+  --text-display-xl--line-height: 64px;
+  --text-display-num: 72px;
+  --text-display-num--line-height: 72px;
+  --text-display-l: 44px;
+  --text-display-l--line-height: 48px;
+  --text-title: 20px;
+  --text-title--line-height: 28px;
+  --text-body: 16px;
+  --text-body--line-height: 24px;
+  --text-label: 14px;
+  --text-label--line-height: 20px;
+  --text-caption: 13px;
+  --text-caption--line-height: 18px;
+  --radius-control: 10px;
+  --radius-card: 20px;
+  --radius-result: 28px;
+  --radius-pill: 999px;
+  --shadow-floating: 0 12px 32px rgb(43 29 20 / 10%);
+}

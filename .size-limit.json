@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Initial app JavaScript",
+    "path": "apps/app/dist/assets/*.js",
+    "limit": "170 KB",
+    "gzip": true
+  },
+  {
+    "name": "Initial app payload",
+    "path": [
+      "apps/app/dist/assets/*.js",
+      "apps/app/dist/assets/*.css",
+      "apps/app/dist/assets/*.woff2"
+    ],
+    "limit": "250 KB",
+    "gzip": true
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
+  "files": {
+    "includes": [
+      "apps/**",
+      "packages/**",
+      "e2e/**",
+      "package.json",
+      "biome.json",
+      ".size-limit.json",
+      "playwright.config.ts",
+      "vitest.config.ts",
+      "!!**/node_modules",
+      "!!**/dist",
+      "!!**/.astro",
+      "!!**/.wrangler",
+      "!!**/coverage",
+      "!!test-results",
+      "!!playwright-report"
+    ]
+  },
+  "formatter": { "enabled": true, "indentStyle": "space", "indentWidth": 2 },
+  "linter": { "enabled": true, "rules": { "recommended": true } },
+  "javascript": { "formatter": { "quoteStyle": "single" } },
+  "css": { "parser": { "tailwindDirectives": true } }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "@takaran/web",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --host 0.0.0.0",
+    "build": "astro build",
+    "typecheck": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/check": "0.9.4",
+    "@astrojs/react": "4.4.2",
+    "@fontsource/instrument-serif": "5.2.8",
+    "@fontsource/plus-jakarta-sans": "5.2.6",
+    "@takaran/calc": "workspace:*",
+    "@takaran/schema": "workspace:*",
+    "@takaran/ui": "workspace:*",
+    "astro": "5.14.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "typescript": "5.9.3"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2"
+  }
+}
