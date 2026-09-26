@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { db } from '../db/db';
 import type { RecipeRow } from '../db/schema';
+import { BackupReminder } from '../features/backup/components/backup-reminder';
 import { MarginAlarm } from '../features/margin-alarm/components/margin-alarm';
 import { CalculatorResult } from '../features/pricing/components/calculator-result';
 import { CurrentPriceInput } from '../features/pricing/components/current-price-input';
@@ -198,6 +199,7 @@ function CalculatorScreen({
 
   return (
     <main className="page calculator-page">
+      <BackupReminder />
       <MarginAlarm data={data} />
       <section className="calculator-inputs" aria-labelledby="calculator-title">
         <RecipePicker

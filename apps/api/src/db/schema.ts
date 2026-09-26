@@ -20,6 +20,7 @@ export interface OrderRow {
   pay_method: PayMethod | null;
   mayar_invoice_id: string | null;
   claim_token_hash: string | null;
+  mayar_checked_at: string | null;
   paid_at: string | null;
   licensed_at: string | null;
   terminal_at: string | null;

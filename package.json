@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "pnpm --parallel --filter @takaran/app --filter @takaran/web --filter @takaran/api dev",
     "dev:app": "pnpm --filter @takaran/app dev",
+    "license:keys": "node scripts/gen-keys.mjs",
+    "license:issue": "node scripts/issue-license.mjs",
     "test": "vitest run",
     "test:calc:coverage": "vitest run --coverage",
     "test:calc:bench": "vitest bench packages/calc/bench/recalc.bench.ts",

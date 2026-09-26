@@ -1,6 +1,8 @@
-import { Hono } from 'hono';
+﻿import { Hono } from 'hono';
 import type { OrderRow, OrderStatus, PayMethod } from '../db/schema';
+import { issueLicense } from '../license';
 import type { AppEnv } from '../types';
+import { checkMayarOrder } from './checkout';
 
 const statuses: OrderStatus[] = [
   'waitlist',
@@ -69,6 +71,7 @@ adminRoutes.get('/', async (context) => {
               <th>WhatsApp</th>
               <th>Jenis</th>
               <th>Status</th>
+              <th>Invoice</th>
               <th>Dibuat</th>
               <th>Aksi</th>
             </tr>
@@ -80,6 +83,7 @@ adminRoutes.get('/', async (context) => {
                 <td>{order.whatsapp}</td>
                 <td>{order.product_type ?? 'Tidak dipilih'}</td>
                 <td>{order.status}</td>
+                <td>{order.mayar_invoice_id ?? '—'}</td>
                 <td>{order.created_at}</td>
                 <td class="actions">
                   {order.status === 'waitlist' ||
@@ -107,6 +111,40 @@ adminRoutes.get('/', async (context) => {
                       </label>
                       <button type="submit">Tandai lunas</button>
                     </form>
+                  ) : null}
+                  {order.status === 'paid' ? (
+                    <form
+                      method="post"
+                      action={`/admin/orders/${encodeURIComponent(order.id)}/license`}
+                    >
+                      <button type="submit">Terbitkan kode Pro</button>
+                    </form>
+                  ) : null}
+                  {order.status === 'checkout' ? (
+                    <form
+                      method="post"
+                      action={`/admin/orders/${encodeURIComponent(order.id)}/check-mayar`}
+                    >
+                      <button type="submit">Cek ulang status di Mayar</button>
+                    </form>
+                  ) : null}
+                  {order.status === 'licensed' ? (
+                    <>
+                      <form
+                        method="post"
+                        action={`/admin/orders/${encodeURIComponent(order.id)}/resend`}
+                      >
+                        <button type="submit">
+                          Tampilkan ulang tautan aktivasi
+                        </button>
+                      </form>
+                      <form
+                        method="post"
+                        action={`/admin/orders/${encodeURIComponent(order.id)}/refund`}
+                      >
+                        <button type="submit">Tandai refund manual</button>
+                      </form>
+                    </>
                   ) : null}
                   <form
                     method="post"
@@ -165,6 +203,239 @@ adminRoutes.post('/orders/:id/paid', async (context) => {
       404,
     );
   return context.redirect('/admin?status=paid', 303);
+});
+
+adminRoutes.post('/orders/:id/license', async (context) => {
+  const id = context.req.param('id');
+  const row = await context.env.DB.prepare(
+    "SELECT id, business_name, whatsapp FROM orders WHERE id = ? AND status = 'paid'",
+  )
+    .bind(id)
+    .first<{ id: string; business_name: string; whatsapp: string }>();
+  if (!row)
+    return context.json(
+      {
+        error: {
+          code: 'NOT_PAID',
+          message: 'Pesanan harus berstatus lunas sebelum kode diterbitkan.',
+        },
+      },
+      409,
+    );
+  if (!context.env.LICENSE_PRIVATE_KEY)
+    return context.json(
+      {
+        error: {
+          code: 'LICENSE_UNAVAILABLE',
+          message: 'Kunci penerbitan belum disiapkan.',
+        },
+      },
+      503,
+    );
+  const appUrl =
+    context.env.APP_URL ?? context.env.ALLOWED_ORIGINS.split(',')[0]?.trim();
+  let activationPath: URL;
+  try {
+    activationPath = new URL('/aktivasi', appUrl ?? '');
+  } catch {
+    return context.json(
+      {
+        error: {
+          code: 'APP_URL_MISSING',
+          message: 'Alamat aplikasi belum disiapkan.',
+        },
+      },
+      503,
+    );
+  }
+  try {
+    const { payload, code } = await issueLicense(
+      row.business_name,
+      context.env.LICENSE_PRIVATE_KEY,
+    );
+    const now = new Date().toISOString();
+    const results = await context.env.DB.batch([
+      context.env.DB.prepare(
+        "INSERT INTO licenses (id, order_id, plan, issued_at, license_code) SELECT ?, ?, 'pro', ?, ? WHERE EXISTS (SELECT 1 FROM orders WHERE id = ? AND status = 'paid')",
+      ).bind(payload.id, id, now, code, id),
+      context.env.DB.prepare(
+        "UPDATE orders SET status = 'licensed', licensed_at = ?, terminal_at = ? WHERE id = ? AND status = 'paid'",
+      ).bind(now, now, id),
+    ]);
+    if (!results[1]?.meta.changes)
+      return context.json(
+        { error: { code: 'NOT_PAID', message: 'Pesanan sudah diproses.' } },
+        409,
+      );
+    const link = `${activationPath.toString()}#${code}`;
+    const message = encodeURIComponent(
+      `Ini tautan aktivasi Takaran Pro untuk ${row.business_name}: ${link}`,
+    );
+    return context.html(
+      <main
+        lang="id"
+        style="font-family:system-ui,sans-serif;max-width:680px;margin:48px auto;padding:0 20px"
+      >
+        <h1>Kode Pro terbit</h1>
+        <p>
+          Pesanan {row.business_name} sudah berstatus berlisensi. Kirim tautan
+          ini lewat WhatsApp.
+        </p>
+        <p>
+          <a href={link}>Buka tautan aktivasi</a>
+        </p>
+        <textarea
+          aria-label="Tautan aktivasi"
+          readOnly
+          rows={4}
+          style="width:100%"
+        >
+          {link}
+        </textarea>
+        <p>
+          <a
+            href={`https://wa.me/${row.whatsapp.replace(/\D/g, '')}?text=${message}`}
+          >
+            Kirim lewat WhatsApp
+          </a>
+        </p>
+        <p>
+          <a href="/admin?status=licensed">Kembali ke pesanan</a>
+        </p>
+      </main>,
+    );
+  } catch {
+    return context.json(
+      {
+        error: {
+          code: 'LICENSE_ISSUE_FAILED',
+          message: 'Kode belum berhasil diterbitkan. Coba lagi.',
+        },
+      },
+      500,
+    );
+  }
+});
+
+adminRoutes.post('/orders/:id/refund', async (context) => {
+  const now = new Date().toISOString();
+  const result = await context.env.DB.prepare(
+    "UPDATE orders SET status = 'refunded', terminal_at = ? WHERE id = ? AND status IN ('paid', 'licensed')",
+  )
+    .bind(now, context.req.param('id'))
+    .run();
+  if (!result.meta.changes)
+    return context.json(
+      { error: { code: 'NOT_FOUND', message: 'Pesanan tidak ditemukan.' } },
+      404,
+    );
+  return context.redirect('/admin?status=refunded', 303);
+});
+
+adminRoutes.post('/orders/:id/check-mayar', async (context) => {
+  const order = await context.env.DB.prepare(
+    "SELECT * FROM orders WHERE id = ? AND status IN ('checkout', 'paid')",
+  )
+    .bind(context.req.param('id'))
+    .first<OrderRow>();
+  if (!order)
+    return context.json(
+      { error: { code: 'NOT_FOUND', message: 'Pesanan tidak ditemukan.' } },
+      404,
+    );
+  try {
+    await checkMayarOrder(context.env, order);
+    const updated = await context.env.DB.prepare(
+      'SELECT status FROM orders WHERE id = ?',
+    )
+      .bind(order.id)
+      .first<{ status: OrderStatus }>();
+    return context.redirect(
+      `/admin?status=${encodeURIComponent(updated?.status ?? order.status)}`,
+      303,
+    );
+  } catch {
+    return context.json(
+      {
+        error: {
+          code: 'MAYAR_UNAVAILABLE',
+          message: 'Status belum bisa diperiksa. Coba lagi.',
+        },
+      },
+      503,
+    );
+  }
+});
+
+adminRoutes.post('/orders/:id/resend', async (context) => {
+  const row = await context.env.DB.prepare(`
+    SELECT orders.business_name, orders.whatsapp, licenses.license_code
+    FROM orders JOIN licenses ON licenses.order_id = orders.id
+    WHERE orders.id = ? AND orders.status = 'licensed'
+  `)
+    .bind(context.req.param('id'))
+    .first<{
+      business_name: string;
+      whatsapp: string;
+      license_code: string | null;
+    }>();
+  if (!row?.license_code)
+    return context.json(
+      {
+        error: {
+          code: 'NOT_FOUND',
+          message: 'Tautan aktivasi tidak ditemukan.',
+        },
+      },
+      404,
+    );
+  let activationUrl: URL;
+  try {
+    const appUrl =
+      context.env.APP_URL ?? context.env.ALLOWED_ORIGINS.split(',')[0]?.trim();
+    activationUrl = new URL('/aktivasi', appUrl);
+  } catch {
+    return context.json(
+      {
+        error: {
+          code: 'APP_URL_MISSING',
+          message: 'Alamat aplikasi belum disiapkan.',
+        },
+      },
+      503,
+    );
+  }
+  activationUrl.hash = row.license_code;
+  const message = encodeURIComponent(
+    `Ini tautan aktivasi Takaran Pro untuk ${row.business_name}: ${activationUrl}`,
+  );
+  return context.html(
+    <main
+      lang="id"
+      style="font-family:system-ui,sans-serif;max-width:680px;margin:48px auto;padding:0 20px"
+    >
+      <h1>Tautan aktivasi siap dikirim</h1>
+      <p>Kirim tautan ini ke pemilik {row.business_name}.</p>
+      <textarea
+        aria-label="Tautan aktivasi"
+        readOnly
+        rows={4}
+        style="width:100%"
+      >
+        {activationUrl.toString()}
+      </textarea>
+      <p>
+        <a
+          href={`https://wa.me/${row.whatsapp.replace(/\D/g, '')}?text=${message}`}
+        >
+          Kirim lewat WhatsApp
+        </a>
+      </p>
+      <p>
+        <a href="/admin?status=licensed">Kembali ke pesanan</a>
+      </p>
+    </main>,
+  );
 });
 
 adminRoutes.post('/orders/:id/delete', async (context) => {

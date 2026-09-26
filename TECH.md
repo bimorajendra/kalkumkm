@@ -87,34 +87,34 @@ Versi di-pin saat inisialisasi project ke rilis stabil terbaru, lalu dicatat di 
 
 ```
 takaran/
-├─ apps/
-│  ├─ app/                  # PWA kalkulator
-│  │  ├─ src/
-│  │  │  ├─ routes/         # hitung, bahan, resep, penawaran, lainnya, aktivasi
-│  │  │  ├─ features/       # ingredients, recipes, pricing, quote, share, backup, license
-│  │  │  ├─ db/             # skema Dexie, migrasi, repository
-│  │  │  ├─ lib/            # format rupiah, analytics, storage.persist
-│  │  │  └─ main.tsx
-│  │  └─ vite.config.ts
-│  ├─ web/                  # landing Astro
-│  │  └─ src/pages/index.astro
-│  └─ api/                  # Worker Hono
-│     ├─ src/
-│     │  ├─ routes/public.ts
-│     │  ├─ routes/admin.tsx   # halaman admin (Hono JSX)
-│     │  ├─ db/schema.ts       # Drizzle
-│     │  └─ license.ts
-│     ├─ migrations/
-│     └─ wrangler.toml
-├─ packages/
-│  ├─ calc/                 # rumus HPP murni + test
-│  ├─ ui/                   # token warna, komponen tumpukan isometrik, slider
-│  └─ schema/               # skema Zod bersama (backup, preorder, lisensi)
-├─ scripts/
-│  ├─ gen-keys.ts           # buat pasangan kunci Ed25519
-│  └─ issue-license.ts      # cadangan: terbitkan kode dari laptop
-├─ PRD.md  DESIGN.md  TECH.md  antislop.md
-└─ .github/workflows/
+â”œâ”€ apps/
+â”‚  â”œâ”€ app/                  # PWA kalkulator
+â”‚  â”‚  â”œâ”€ src/
+â”‚  â”‚  â”‚  â”œâ”€ routes/         # hitung, bahan, resep, penawaran, lainnya, aktivasi
+â”‚  â”‚  â”‚  â”œâ”€ features/       # ingredients, recipes, pricing, quote, share, backup, license
+â”‚  â”‚  â”‚  â”œâ”€ db/             # skema Dexie, migrasi, repository
+â”‚  â”‚  â”‚  â”œâ”€ lib/            # format rupiah, analytics, storage.persist
+â”‚  â”‚  â”‚  â””â”€ main.tsx
+â”‚  â”‚  â””â”€ vite.config.ts
+â”‚  â”œâ”€ web/                  # landing Astro
+â”‚  â”‚  â””â”€ src/pages/index.astro
+â”‚  â””â”€ api/                  # Worker Hono
+â”‚     â”œâ”€ src/
+â”‚     â”‚  â”œâ”€ routes/public.ts
+â”‚     â”‚  â”œâ”€ routes/admin.tsx   # halaman admin (Hono JSX)
+â”‚     â”‚  â”œâ”€ db/schema.ts       # Drizzle
+â”‚     â”‚  â””â”€ license.ts
+â”‚     â”œâ”€ migrations/
+â”‚     â””â”€ wrangler.toml
+â”œâ”€ packages/
+â”‚  â”œâ”€ calc/                 # rumus HPP murni + test
+â”‚  â”œâ”€ ui/                   # token warna, komponen tumpukan isometrik, slider
+â”‚  â””â”€ schema/               # skema Zod bersama (backup, preorder, lisensi)
+â”œâ”€ scripts/
+â”‚  â”œâ”€ gen-keys.mjs           # buat pasangan kunci Ed25519
+â”‚  â””â”€ issue-license.mjs    # cadangan: terbitkan kode dari laptop
+â”œâ”€ PRD.md  DESIGN.md  TECH.md  antislop.md
+â””â”€ .github/workflows/
 ```
 
 ---
@@ -175,7 +175,7 @@ db.version(1).stores({
   channels:     'id, name',
   quoteOptions: 'id, recipeId',
   priceHistory: '++id, ingredientId, changedAt', // dicatat dari v1.0, dipakai di v1.2
-  settings:     'key',                            // businessName, roundingStep, defaultMarginBp, license, lastBackupAt
+  settings:     'key',                            // businessName, roundingStep, defaultMarginBp, license, lastBackupAt, backupReminderDismissedUntil
 });
 ```
 
@@ -204,19 +204,20 @@ db.version(1).stores({
 ```json
 {
   "app": "takaran",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "exportedAt": "2026-09-25T08:00:00.000Z",
   "data": { "ingredients": [], "recipes": [], "channels": [], "quoteOptions": [], "priceHistory": [], "settings": [] },
-  "sha256": "…"
+  "sha256": "â€¦"
 }
 ```
 
 - Nama file: `takaran-cadangan-YYYY-MM-DD.json`. Di HP memakai Web Share API dengan unduhan sebagai cadangan.
-- Pulihkan memvalidasi Zod, cek `sha256`, menampilkan ringkasan, meminta konfirmasi, lalu menulis semua tabel dalam satu transaksi Dexie.
+- Pulihkan memvalidasi Zod, cek `sha256`, menampilkan ringkasan, meminta konfirmasi, lalu menulis semua tabel dalam satu transaksi Dexie. Format v2 menyimpan lisensi sebagai `{ code, payload, activatedAt }`; file v1 tetap didukung dan kode lisensinya dimigrasikan saat dipulihkan.
 - Lisensi ikut tersimpan agar pindah HP tidak perlu kode baru. `pendingCheckout` tidak ikut dicadangkan karena token klaim hanya berlaku untuk checkout di perangkat saat ini.
+- Pengingat muncul jika resep tersimpan dan cadangan terakhir lebih dari 14 hari; penutupan menyimpan `backupReminderDismissedUntil` selama 7 hari.
 ### 7.5 Gambar daftar harga dan penawaran (FR-20 sampai FR-22)
 
-- Template ditulis sebagai komponen SVG, lalu digambar ke `<canvas>` dan diekspor ke PNG 1080×1920 atau 1080×1080. Font dimuat lewat `document.fonts.ready` sebelum menggambar.
+- Template ditulis sebagai komponen SVG, lalu digambar ke `<canvas>` dan diekspor ke PNG 1080Ã—1920 atau 1080Ã—1080. Font dimuat lewat `document.fonts.ready` sebelum menggambar.
 - Tombol bagikan memakai `navigator.share({ files, text })` dengan teks berisi `https://<domain>/?ref=share` agar target BG-3 bisa diukur.
 - PDF (jika jadi dibutuhkan): jsPDF dimuat dengan `import()` hanya saat tombol PDF ditekan.
 
@@ -248,10 +249,10 @@ Ada dua jalur yang memakai penanda tangan lisensi yang sama:
 1. **Mayar:** Worker membuat invoice lewat API v2. Setelah webhook atau cek ulang, Worker selalu meminta detail invoice dan hanya melanjutkan jika status `paid` dan nominal sama dengan `price_idr` pesanan. Worker mengubah status menjadi `paid`, menerbitkan kode, lalu menandai `licensed`.
 2. **Manual sebagai cadangan:** pembeli transfer atau membayar QRIS statis yang sudah dikonfigurasi, lalu mengirim bukti lewat `wa.me`. Admin memeriksa bukti, memilih **Tandai lunas**, mengisi nominal dan metode, lalu **Terbitkan kode**.
 
-Kembali ke status Mayar tersedia dari admin dan klaim lisensi. Redirect browser Mayar tidak pernah dianggap bukti pembayaran. Jika Worker bermasalah, skrip `pnpm license:issue --name "Kue Bu Rina"` tersedia sebagai prosedur darurat dan harus dicatat di pesanan.
+Kembali ke status Mayar tersedia dari admin dan klaim lisensi. Redirect browser Mayar tidak pernah dianggap bukti pembayaran. Jika Worker bermasalah, skrip `pnpm license:issue -- --name "Kue Bu Rina" --order ID_PESANAN` tersedia sebagai prosedur darurat dan harus dicatat di pesanan.
 ### 8.3 Pengelolaan kunci
 
-- `scripts/gen-keys.ts` membuat pasangan kunci sekali. Kunci privat disimpan sebagai Worker secret dan di password manager; **tidak pernah** di-commit.
+- `scripts/gen-keys.mjs` membuat pasangan kunci sekali. Kunci privat disimpan sebagai Worker secret dan di password manager; **tidak pernah** di-commit.
 - Kunci publik di-commit ke `apps/app/src/features/license/keys.ts`.
 
 ---
@@ -265,7 +266,7 @@ Kembali ke status Mayar tersedia dari admin dan klaim lisensi. Redirect browser 
 | `GET` | `/v1/health` | `{ ok: true }` | Monitoring |
 | `POST` | `/v1/preorders` | Data daftar tunggu menjadi `201 { data: { id } }` | Zod, Turnstile, 5 per IP per jam; fase validasi gratis |
 | `POST` | `/v1/checkout` | Nama, email, WhatsApp, nama usaha, persetujuan, token Turnstile menjadi `{ orderId, paymentUrl, claimToken }` | Harga berasal dari `PRICING`; Zod, Turnstile, batas 5 per IP per jam; Worker membuat invoice Mayar v2 |
-| `POST` | `/v1/webhooks/mayar?token=…` | Event `payment.received`; reminder diabaikan | Bandingkan token secara constant-time, simpan event unik, balas `200`, verifikasi invoice dalam `ctx.waitUntil` sebelum menerbitkan kode |
+| `POST` | `/v1/webhooks/mayar?token=â€¦` | Event `payment.received`; reminder diabaikan | Bandingkan token secara constant-time, simpan event unik, balas `200`, verifikasi invoice dalam `ctx.waitUntil` sebelum menerbitkan kode |
 | `GET` | `/v1/checkout/:orderId/license` | Header `X-Claim-Token`; kode lisensi atau `202` | Token salah mendapat `404`; cek Mayar paling sering sekali per 30 detik per pesanan |
 | `GET` | `/v1/licenses/revoked` | `{ ids: string[] }` | F36 belum dijadwalkan; jika dibangun, cache paling lama satu jam |
 
@@ -374,10 +375,10 @@ Umami dimuat dengan `defer` dan diabaikan jika gagal; aplikasi tidak menunggu an
 
 | Metrik | Batas | Alat |
 |---|---|---|
-| JS awal aplikasi (gzip) | ≤ 170 KB | `size-limit` di CI |
-| Total muatan awal termasuk font (gzip) | ≤ 250 KB (NFR-02) | `size-limit` |
-| Hitung ulang 100 resep | < 200 ms di profil CPU 4× lebih lambat | Benchmark Vitest |
-| Lighthouse (mobile) aplikasi dan landing | Performa ≥ 90, Aksesibilitas 100 | Lighthouse CI |
+| JS awal aplikasi (gzip) | â‰¤ 170 KB | `size-limit` di CI |
+| Total muatan awal termasuk font (gzip) | â‰¤ 250 KB (NFR-02) | `size-limit` |
+| Hitung ulang 100 resep | < 200 ms di profil CPU 4Ã— lebih lambat | Benchmark Vitest |
+| Lighthouse (mobile) aplikasi dan landing | Performa â‰¥ 90, Aksesibilitas 100 | Lighthouse CI |
 | Landing: JS di luar demo | 0 KB | Astro statis |
 
 ---
@@ -409,13 +410,13 @@ Hasil test ini menjadi bukti di Delivery Gate `antislop.md`.
 
 | Nama | Tempat | Rahasia? |
 |---|---|---|
-| `LICENSE_PRIVATE_KEY` | Worker secret | Ya |
+| `LICENSE_PRIVATE_KEY` | Worker secret; seed base64url yang sama tersimpan lokal di `.env.local` melalui `pnpm license:keys` | Ya |
 | `TURNSTILE_SECRET` | Worker secret | Ya |
 | `MAYAR_API_KEY` | Worker secret | Ya |
 | `MAYAR_WEBHOOK_TOKEN` | Worker secret | Ya |
 | `MAYAR_BASE_URL` | Worker var: `https://api.mayar.io/hl/v2` untuk sandbox atau `https://api.mayar.id/hl/v2` untuk produksi | Tidak |
 | `ACCESS_AUD`, `ACCESS_TEAM_DOMAIN` | Worker vars | Tidak |
-| `ALLOWED_ORIGINS` | Worker vars | Tidak |
+| `ALLOWED_ORIGINS`, `APP_URL` | Worker vars; `APP_URL` dipakai untuk tautan aktivasi dan skrip penerbitan darurat | Tidak |
 | `PUBLIC_TURNSTILE_SITEKEY` | Build `apps/web` | Tidak |
 | `VITE_TURNSTILE_SITEKEY` | Build `apps/app` untuk form checkout | Tidak |
 | `VITE_API_URL`, `VITE_UMAMI_WEBSITE_ID` | Build `apps/app` | Tidak |

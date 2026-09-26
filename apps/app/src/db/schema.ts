@@ -4,6 +4,7 @@ import type {
   QuoteOption,
   Recipe,
 } from '../../../../packages/calc/src/types';
+import type { LicenseRecord } from '../../../../packages/schema/src/license';
 
 export interface Timestamps {
   createdAt: string;
@@ -35,12 +36,19 @@ export interface MarginAlarm {
   dismissed: boolean;
 }
 
+export interface PendingCheckout {
+  orderId: string;
+  claimToken: string;
+}
+
 export type SettingKey =
   | 'businessName'
   | 'roundingStep'
   | 'defaultMarginBp'
   | 'license'
+  | 'pendingCheckout'
   | 'lastBackupAt'
+  | 'backupReminderDismissedUntil'
   | 'firstOpenedAt'
   | 'lastRecipeId'
   | 'marginAlarm'
@@ -51,8 +59,10 @@ export interface SettingValues {
   businessName: string;
   roundingStep: number;
   defaultMarginBp: number;
-  license: string | null;
+  license: LicenseRecord | string | null;
+  pendingCheckout: PendingCheckout | null;
   lastBackupAt: string | null;
+  backupReminderDismissedUntil: string | null;
   firstOpenedAt: string | null;
   lastRecipeId: string | null;
   marginAlarm: MarginAlarm | null;
@@ -70,7 +80,9 @@ export const settingDefaults: SettingValues = {
   roundingStep: 500,
   defaultMarginBp: 4000,
   license: null,
+  pendingCheckout: null,
   lastBackupAt: null,
+  backupReminderDismissedUntil: null,
   firstOpenedAt: null,
   lastRecipeId: null,
   marginAlarm: null,

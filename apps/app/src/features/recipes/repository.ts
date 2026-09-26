@@ -1,8 +1,13 @@
-import type { Recipe } from '@takaran/calc';
+﻿import type { Recipe } from '@takaran/calc';
 import { toBaseUnits } from '@takaran/calc';
 import { db } from '../../db/db';
 import type { RecipeRow } from '../../db/schema';
 import { createUlid } from '../../lib/ulid';
+import {
+  assertCanCreate,
+  hasProLicense,
+  ProRequiredError,
+} from '../license/limits';
 import type { ParsedRecipeFormValues } from './schema';
 
 export class RecipeRepositoryError extends Error {
@@ -35,8 +40,11 @@ export async function createRecipe(input: RecipeInput): Promise<RecipeRow> {
     createdAt: now,
     updatedAt: now,
   };
+  const isPro = await hasProLicense();
+  if (input.isSubRecipe && !isPro) throw new ProRequiredError();
   await db.transaction('rw', db.ingredients, db.recipes, async () => {
     await validateRecipe(input);
+    await assertCanCreate('recipe', isPro);
     await db.recipes.add(row);
   });
   return row;

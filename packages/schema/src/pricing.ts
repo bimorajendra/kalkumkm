@@ -5,3 +5,5 @@ export const PRICING = {
     founderLimit: 100,
   },
 } as const;
+
+export const FREE_LIMITS = { recipes: 3, channels: 1 } as const;

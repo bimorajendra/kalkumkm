@@ -15,6 +15,7 @@ function order(id: string, status: 'waitlist' | 'paid', created: string) {
     pay_method: null,
     mayar_invoice_id: null,
     claim_token_hash: null,
+    mayar_checked_at: null,
     paid_at: null,
     licensed_at: null,
     terminal_at: null,

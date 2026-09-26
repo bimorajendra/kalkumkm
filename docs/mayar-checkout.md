@@ -14,6 +14,14 @@
 | `MAYAR_API_KEY` | Worker secret | API key dari Mayar |
 | `MAYAR_WEBHOOK_TOKEN` | Worker secret | Token acak panjang untuk URL webhook |
 
+Sebelum menguji checkout lokal, terapkan migrasi D1:
+
+```sh
+pnpm --filter @takaran/api exec wrangler d1 migrations apply takaran-orders --local
+```
+
+Sebelum rilis, pemilik proyek mengganti `database_id` contoh di `wrangler.toml`, meninjau migrasi, lalu menerapkannya ke database produksi. Jangan jalankan migrasi produksi dari lingkungan preview.
+
 ## Cadangan pembayaran manual
 
 Jalur ini opsional. Atur semua nilai berikut pada build `apps/app` agar transfer/QRIS statis dan tombol WhatsApp tampil:
@@ -30,8 +38,8 @@ Jangan menulis nilai secret ke repo, contoh konfigurasi, log, atau browser. `MAY
 
 ## Checkout dan webhook
 
-1. Buat dan uji invoice di sandbox lebih dulu.
-2. Daftarkan URL webhook Worker di Mayar dengan event pembayaran diterima. Dokumentasi API yang diperiksa belum menetapkan kontrak signature/header; gunakan token webhook dan konfirmasi invoice lewat API. Tambahkan validasi signature jika Mayar menerbitkan kontrak resmi yang dapat diuji.
+1. Buat dan uji invoice di sandbox lebih dulu. Aplikasi memakai `POST /v1/checkout` dan menyimpan token klaim hanya di perangkat.
+2. Daftarkan `https://<domain-api>/v1/webhooks/mayar?token=<MAYAR_WEBHOOK_TOKEN>` di Mayar dengan event pembayaran diterima. Dokumentasi API yang diperiksa belum menetapkan kontrak signature/header; gunakan token webhook dan konfirmasi invoice lewat API. Tambahkan validasi signature jika Mayar menerbitkan kontrak resmi yang dapat diuji.
 3. Pastikan domain redirect, URL webhook, dan kanal pembayaran sudah terverifikasi sebelum membuka pembayaran produksi.
 4. Uji invoice belum dibayar, dibayar, kedaluwarsa, nominal tidak cocok, webhook berulang, serta pengecekan ulang admin.
 5. Harga pelanggan tetap mengikuti `PRICING`. Biaya platform dan kanal ditanggung proyek dan perlu diperiksa terhadap paket/kanal aktif.

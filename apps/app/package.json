@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@noble/ed25519": "3.2.0",
     "@fontsource/instrument-serif": "5.2.8",
     "@fontsource/plus-jakarta-sans": "5.2.6",
     "@takaran/schema": "workspace:*",

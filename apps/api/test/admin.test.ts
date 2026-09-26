@@ -1,3 +1,5 @@
+﻿import * as ed from '@noble/ed25519';
+import { decodeLicenseCode } from '@takaran/schema';
 import {
   afterEach,
   beforeAll,
@@ -8,6 +10,7 @@ import {
   vi,
 } from 'vitest';
 import { app } from '../src/index';
+import { issueLicense } from '../src/license';
 import { FakeD1 } from './fake-d1';
 
 const teamDomain = `test-${crypto.randomUUID()}.cloudflareaccess.com`;
@@ -22,6 +25,8 @@ const env = {
   ALLOWED_ORIGINS: 'https://takaran.example',
   ACCESS_AUD: audience,
   ACCESS_TEAM_DOMAIN: teamDomain,
+  LICENSE_PRIVATE_KEY: '',
+  APP_URL: 'https://app.takaran.test',
 };
 
 function base64Url(value: Uint8Array): string {
@@ -67,6 +72,7 @@ function order(id: string, businessName = 'Dapur Sari') {
     pay_method: null,
     mayar_invoice_id: null,
     claim_token_hash: null,
+    mayar_checked_at: null,
     paid_at: null,
     licensed_at: null,
     terminal_at: null,
@@ -95,6 +101,7 @@ beforeAll(async () => {
 });
 beforeEach(() => {
   database.orders = [];
+  database.licenses = [];
   vi.stubGlobal(
     'fetch',
     vi.fn(async () => Response.json({ keys: [publicJwk] })),
@@ -157,5 +164,58 @@ describe('admin pesanan di balik Cloudflare Access', () => {
     });
     expect(deleted.status).toBe(303);
     expect(database.orders).toHaveLength(0);
+  });
+});
+
+describe('admin penerbitan lisensi', () => {
+  it('menerbitkan kode bertanda tangan hanya untuk pesanan paid', async () => {
+    const seed = Uint8Array.from({ length: 32 }, (_, index) => index + 1);
+    env.LICENSE_PRIVATE_KEY = base64Url(seed);
+    await issueLicense('Dapur Sari', env.LICENSE_PRIVATE_KEY);
+    const paid = order('order-license');
+    paid.status = 'paid';
+    database.orders.push(paid);
+    const response = await authorizedRequest(
+      '/admin/orders/order-license/license',
+      { method: 'POST' },
+    );
+    expect(response.status).toBe(200);
+    const html = await response.text();
+    const code = html.match(/\/aktivasi#([A-Za-z0-9_.-]+)/)?.[1];
+    expect(code).toBeTruthy();
+    const decoded = decodeLicenseCode(code ?? '');
+    expect(
+      await ed.verifyAsync(
+        decoded.signature,
+        decoded.message,
+        await ed.getPublicKeyAsync(seed),
+      ),
+    ).toBe(true);
+    expect(decoded.payload.n).toBe('Dapur Sari');
+    expect(database.orders[0]?.status).toBe('licensed');
+    expect(database.licenses).toHaveLength(1);
+    expect(database.licenses[0]?.order_id).toBe('order-license');
+  });
+
+  it('menolak penerbitan tanpa JWT Cloudflare Access', async () => {
+    const response = await app.request(
+      '/admin/orders/order-license/license',
+      { method: 'POST' },
+      env,
+    );
+    expect(response.status).toBe(401);
+  });
+  it('menolak penerbitan untuk pesanan yang belum lunas', async () => {
+    env.LICENSE_PRIVATE_KEY = base64Url(
+      Uint8Array.from({ length: 32 }, (_, index) => index + 1),
+    );
+    database.orders.push(order('order-unpaid'));
+    const response = await authorizedRequest(
+      '/admin/orders/order-unpaid/license',
+      { method: 'POST' },
+    );
+    expect(response.status).toBe(409);
+    expect(database.licenses).toHaveLength(0);
+    expect(database.orders[0]?.status).toBe('waitlist');
   });
 });

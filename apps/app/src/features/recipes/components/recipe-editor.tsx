@@ -1,12 +1,14 @@
+﻿import { PRICING } from '@takaran/schema';
+import { formatRupiah } from '@takaran/ui';
 import type { FormEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import type { IngredientRow, RecipeRow } from '../../../db/schema';
 import { listIngredients } from '../../ingredients/repository';
+import { FreeLimitError, ProRequiredError } from '../../license/limits';
 import { recipeCopy } from '../copy';
 import {
   createRecipe,
   deleteRecipe,
-  RecipeRepositoryError,
   recipeInputFromForm,
   updateRecipe,
 } from '../repository';
@@ -65,6 +67,7 @@ export function RecipeEditor({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
+  const [showPaywallLink, setShowPaywallLink] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -138,17 +141,16 @@ export function RecipeEditor({
       onSaved?.(saved);
       onOpenChange(false);
     } catch (error) {
-      setMessage(
-        error instanceof RecipeRepositoryError
-          ? error.message
-          : recipeCopy.saveError,
+      setShowPaywallLink(
+        error instanceof FreeLimitError || error instanceof ProRequiredError,
       );
+      setMessage(error instanceof Error ? error.message : recipeCopy.saveError);
     } finally {
       setSaving(false);
     }
   }
   async function remove() {
-    if (!recipe || !window.confirm(`Hapus resep “${recipe.name}”?`)) return;
+    if (!recipe || !window.confirm(`Hapus resep â€œ${recipe.name}â€?`)) return;
     try {
       await deleteRecipe(recipe.id);
       onDeleted?.();
@@ -178,7 +180,7 @@ export function RecipeEditor({
             type="button"
             onClick={() => onOpenChange(false)}
           >
-            ×
+            Ã—
           </button>
         </div>
         <label className="ingredient-label" htmlFor="recipe-name">
@@ -335,6 +337,14 @@ export function RecipeEditor({
         {message && (
           <p className="form-error" role="alert">
             {message}
+            {showPaywallLink ? (
+              <>
+                {' '}
+                <a href="/beli">
+                  Takaran Pro, {formatRupiah(PRICING.pro.idr)} sekali bayar
+                </a>
+              </>
+            ) : null}
           </p>
         )}
         <div className="ingredient-form-actions">
@@ -359,7 +369,7 @@ export function RecipeEditor({
             type="submit"
             disabled={saving}
           >
-            {saving ? 'Menyimpan…' : 'Simpan resep'}
+            {saving ? 'Menyimpanâ€¦' : 'Simpan resep'}
           </button>
         </div>
       </form>

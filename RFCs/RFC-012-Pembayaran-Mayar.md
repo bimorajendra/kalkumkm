@@ -81,13 +81,13 @@ RU-19 s.d. RU-29, RU-31, RU-48, RU-63 s.d. RU-67.
 - Uji polling halaman aktivasi, aktivasi offline, dan hapus `pendingCheckout` setelah Pro aktif.
 
 ## Acceptance Criteria
-- [ ] Checkout server-side membuat invoice API v2 dengan harga yang diambil dari `PRICING`.
-- [ ] D1 menyimpan `email`, `mayar_invoice_id`, dan `claim_token_hash`; status yang berlaku meliputi `checkout`, `paid`, `licensed`, `refunded`, dan status daftar tunggu yang sudah ada.
-- [ ] Token klaim acak 32 byte hanya disimpan mentah di perangkat dan hanya hash tersimpan di server.
-- [ ] Webhook bertoken disimpan secara idempoten, cepat merespons, dan tidak menerbitkan lisensi sebelum `GET invoice` mengonfirmasi status serta nominal.
-- [ ] Klaim lisensi tidak membocorkan keberadaan pesanan ke token yang salah dan membatasi pengecekan invoice ke sekali per 30 detik.
-- [ ] Aplikasi membuka URL pembayaran dengan navigasi biasa, memeriksa pesanan, mengaktifkan kode secara offline, dan membersihkan checkout tertunda setelah berhasil.
-- [ ] Admin dapat cek ulang Mayar, menandai pembayaran manual, melihat status refund, dan mengirim ulang tautan aktivasi.
-- [ ] Jalur manual hanya tampil bila semua variabel manual yang disebutkan di atas lengkap; daftar tunggu gratis tetap aktif selama validasi.
-- [ ] Tidak ada data resep atau harga usaha yang dikirim; analytics hanya mencatat `checkout_started` dan `checkout_paid` tanpa PII.
-- [ ] Seluruh pengujian menggunakan sandbox atau mock; tidak ada kode atau konfigurasi produksi yang dibuat.
+- [x] Checkout server-side membuat invoice API v2 dengan harga yang diambil dari `PRICING`.
+- [x] D1 menyimpan `email`, `mayar_invoice_id`, dan `claim_token_hash`; status yang berlaku meliputi `checkout`, `paid`, `licensed`, `refunded`, dan status daftar tunggu yang sudah ada.
+- [x] Token klaim acak 32 byte hanya disimpan mentah di perangkat dan hanya hash tersimpan di server.
+- [x] Webhook bertoken disimpan secara idempoten, cepat merespons, dan tidak menerbitkan lisensi sebelum `GET invoice` mengonfirmasi status serta nominal.
+- [x] Klaim lisensi tidak membocorkan keberadaan pesanan ke token yang salah dan membatasi pengecekan invoice ke sekali per 30 detik.
+- [x] Aplikasi membuka URL pembayaran dengan navigasi biasa, memeriksa pesanan, mengaktifkan kode secara offline, dan membersihkan checkout tertunda setelah berhasil.
+- [x] Admin dapat cek ulang Mayar, menandai pembayaran manual, melihat status refund, dan mengirim ulang tautan aktivasi.
+- [x] Jalur manual hanya tampil bila semua variabel manual yang disebutkan di atas lengkap; daftar tunggu gratis tetap aktif selama validasi.
+- [x] Tidak ada data resep atau harga usaha yang dikirim; analytics hanya mencatat `checkout_started` dan `checkout_paid` tanpa PII.
+- [x] Seluruh pengujian menggunakan sandbox atau mock; tidak ada kode atau konfigurasi produksi yang dibuat.

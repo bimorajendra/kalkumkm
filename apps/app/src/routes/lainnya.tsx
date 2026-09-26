@@ -1,4 +1,6 @@
 ﻿import { ThemeToggle } from '@takaran/ui/theme-toggle';
+import { BackupPanel } from '../features/backup/components/backup-panel';
+import { BackupReminder } from '../features/backup/components/backup-reminder';
 
 export function LainnyaRoute() {
   const agent = navigator.userAgent;
@@ -12,6 +14,15 @@ export function LainnyaRoute() {
   return (
     <main className="page settings-page">
       <h1>Pengaturan</h1>
+      <BackupReminder />
+      <BackupPanel />
+      <section className="settings-card">
+        <h2>Takaran Pro</h2>
+        <p>Tambah resep dan saluran sesuai kebutuhan usahamu.</p>
+        <a className="button" href="/beli">
+          Lihat paket Pro
+        </a>
+      </section>
       <section className="settings-card">
         <h2>Tampilan</h2>
         <p>Pilih tema yang nyaman untuk dipakai.</p>

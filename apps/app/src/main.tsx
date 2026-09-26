@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router';
 import { db } from './db/db';
 import { track } from './lib/analytics';
 import { initializePersistence } from './lib/persist';
 import { UpdatePrompt } from './pwa/update-prompt';
+import { AktivasiRoute } from './routes/aktivasi';
 import { BahanRoute } from './routes/bahan';
+import { BeliRoute } from './routes/beli';
 import { HitungRoute } from './routes/hitung';
 import { LainnyaRoute } from './routes/lainnya';
 import { ResepRoute } from './routes/resep';
@@ -62,7 +64,7 @@ function App() {
   if (!ready)
     return (
       <main aria-live="polite" className="loading-state">
-        Menyiapkan Takaran…
+        Menyiapkan Takaranâ€¦
       </main>
     );
 
@@ -71,6 +73,8 @@ function App() {
       <Routes>
         <Route element={<RootLayout />}>
           <Route path="/" element={<HitungRoute />} />
+          <Route path="/beli" element={<BeliRoute />} />
+          <Route path="/aktivasi" element={<AktivasiRoute />} />
           <Route path="/bahan" element={<BahanRoute />} />
           <Route path="/resep" element={<ResepRoute />} />
           <Route path="/resep/:id" element={<ResepDetailRoute />} />

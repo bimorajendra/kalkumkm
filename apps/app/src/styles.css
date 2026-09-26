@@ -222,6 +222,24 @@ h1 {
   border-radius: var(--radius-card);
   background: var(--surface);
 }
+.license-code {
+  width: 100%;
+  min-height: 144px;
+  margin: 8px 0 16px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  color: var(--ink);
+  background: var(--surface);
+  font: inherit;
+  resize: vertical;
+}
+.payment-qris {
+  display: block;
+  width: min(100%, 320px);
+  height: auto;
+  margin: 12px 0 20px;
+}
 .settings-card h2 {
   margin-bottom: 8px;
   font:
@@ -234,6 +252,48 @@ h1 {
 }
 .settings-card .version {
   margin: 16px 0 0;
+}
+.checkout-form {
+  display: grid;
+  gap: 16px;
+}
+.checkout-form label:not(.checkout-consent) {
+  display: grid;
+  gap: 6px;
+  color: var(--ink);
+  font-size: 14px;
+}
+.checkout-form input:not([type="checkbox"]) {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1px solid var(--ink-muted);
+  border-radius: var(--radius-control);
+  color: var(--ink);
+  background: var(--surface);
+  font: inherit;
+  font-size: 16px;
+}
+.checkout-consent {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  line-height: 1.5;
+}
+.checkout-consent input {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--caramel-700);
+}
+.checkout-form output,
+.payment-status {
+  display: block;
+  line-height: 1.5;
+}
+.checkout-form .button {
+  width: 100%;
 }
 .install-help {
   padding: 12px;
@@ -1294,5 +1354,43 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
   .margin-alarm .takaran-banner {
     animation: none;
+  }
+}
+
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.backup-dialog {
+  width: min(480px, calc(100% - 32px));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  color: var(--ink);
+  background: var(--surface);
+}
+.backup-dialog::backdrop {
+  background: rgb(43 29 20 / 45%);
+}
+.backup-dialog h2 {
+  margin-bottom: 12px;
+  font:
+    24px "Instrument Serif",
+    serif;
+}
+.backup-dialog p {
+  line-height: 1.6;
+}
+.backup-dialog .backup-actions {
+  justify-content: end;
+  margin-top: 24px;
+}
+.backup-reminder {
+  margin-bottom: 20px;
+}
+@media (max-width: 480px) {
+  .backup-actions > .button {
+    flex: 1 1 100%;
   }
 }
