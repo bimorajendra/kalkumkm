@@ -1,5 +1,5 @@
-import { IsometricGlyph } from '@takaran/ui';
 import { formatRupiah } from '@takaran/ui/format';
+import { Cookie } from 'lucide-react';
 import { forwardRef } from 'react';
 
 export type PriceListFormat = 'story' | 'square';
@@ -68,8 +68,9 @@ export const PriceListImage = forwardRef<SVGSVGElement, PriceListImageProps>(
           x="88"
           y={format === 'story' ? 210 : 150}
           fill="var(--ink)"
-          fontFamily="Instrument Serif, Georgia, serif"
+          fontFamily="Plus Jakarta Sans, Arial, sans-serif"
           fontSize={format === 'story' ? 76 : 64}
+          fontWeight="700"
         >
           {ellipsize(businessName, 30)}
         </text>
@@ -107,7 +108,7 @@ export const PriceListImage = forwardRef<SVGSVGElement, PriceListImageProps>(
           );
         })}
         <g transform={`translate(900 ${height - bottom + 10})`}>
-          <IsometricGlyph size={120} />
+          <Cookie color="var(--caramel-500)" size={64} strokeWidth={1.5} />
         </g>
         {!isPro ? (
           <text x="88" y={height - 70} fill="var(--ink-muted)" fontSize="26">

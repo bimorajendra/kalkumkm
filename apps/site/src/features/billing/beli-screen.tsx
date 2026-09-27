@@ -103,9 +103,9 @@ export function BeliScreen() {
       </div>
       <section
         aria-label="Isi paket Pro"
-        className="grid gap-3 rounded-xl bg-card p-5"
+        className="grid gap-3 rounded-xl bg-card p-5 shadow-sm"
       >
-        <p className="font-display text-5xl">{formatRupiah(price)}</p>
+        <p className="font-display text-5xl font-bold">{formatRupiah(price)}</p>
         {price < PRICING.pro.idr ? (
           <p className="text-sm text-muted-foreground">
             Harga pendiri untuk {PRICING.pro.founderLimit} pembeli pertama.

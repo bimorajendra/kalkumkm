@@ -1,5 +1,4 @@
 export { formatPercent, formatRupiah } from './format';
-export { IsometricGlyph } from './isometric-glyph';
 export type { IsometricLayer, IsometricStackProps } from './isometric-stack';
 export { calculateLayerHeights, IsometricStack } from './isometric-stack';
 export type { ResultCardProps } from './result-card';

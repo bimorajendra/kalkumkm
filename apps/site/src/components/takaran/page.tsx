@@ -30,7 +30,7 @@ export function PageTitle({
   return (
     <h1
       id={id}
-      className="font-display text-[34px] leading-[38px] lg:text-[44px] lg:leading-[48px]"
+      className="font-display text-[34px] font-bold leading-[38px] lg:text-[44px] lg:leading-[48px]"
     >
       {children}
     </h1>
@@ -49,7 +49,7 @@ export function EmptyState({
 }) {
   return (
     <section className="grid justify-items-start gap-3 rounded-xl border border-dashed border-input p-6">
-      <h2 className="font-display text-3xl">{title}</h2>
+      <h2 className="font-display text-3xl font-semibold">{title}</h2>
       <p className="text-muted-foreground">{description}</p>
       {children ? <div className="flex flex-wrap gap-2">{children}</div> : null}
     </section>

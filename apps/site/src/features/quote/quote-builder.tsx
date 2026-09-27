@@ -356,7 +356,7 @@ export function QuoteBuilder() {
           <h2 id="quote-preview-title" className="text-xl font-semibold">
             Pratinjau untuk pelanggan
           </h2>
-          <div className="overflow-hidden rounded-xl border bg-card [&>svg]:h-auto [&>svg]:w-full">
+          <div className="overflow-hidden rounded-xl border bg-card shadow-sm [&>svg]:h-auto [&>svg]:w-full">
             <QuoteImage
               ref={svgRef}
               businessName={businessName || 'Nama usaha'}

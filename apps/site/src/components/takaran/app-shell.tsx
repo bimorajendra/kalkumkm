@@ -57,7 +57,7 @@ export function AppShell({
         <div className="mx-auto flex max-w-[1120px] items-center justify-between gap-3">
           <Link
             href="/hitung"
-            className="font-display text-2xl tracking-tight"
+            className="font-display text-2xl font-bold tracking-tight"
             aria-label="Takaran, ke Hitung"
           >
             Takaran

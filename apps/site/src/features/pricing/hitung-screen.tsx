@@ -153,7 +153,7 @@ function CalculatorScreen({
           />
         </div>
         <section role="alert" className="grid justify-items-start gap-3">
-          <h1 className="font-display text-3xl">
+          <h1 className="font-display text-3xl font-semibold">
             Belum bisa menghitung resep ini
           </h1>
           <p>{message}</p>
@@ -282,7 +282,7 @@ function CalculatorScreen({
           </div>
           <h1
             id="calculator-title"
-            className="font-display text-[34px] leading-[38px] lg:text-[44px] lg:leading-[48px]"
+            className="font-display text-[34px] font-bold leading-[38px] lg:text-[44px] lg:leading-[48px]"
           >
             Hitung untung {recipe.name.toLocaleLowerCase('id-ID')}
           </h1>
@@ -352,7 +352,7 @@ function CalculatorScreen({
           className="max-h-[92dvh] gap-4 overflow-y-auto rounded-t-xl p-4"
         >
           <SheetHeader className="p-0">
-            <SheetTitle className="font-display text-3xl font-normal">
+            <SheetTitle className="font-display text-3xl font-semibold">
               Hasil lengkap
             </SheetTitle>
             <SheetDescription className="sr-only">

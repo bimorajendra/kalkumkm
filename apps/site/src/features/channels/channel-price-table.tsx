@@ -28,7 +28,10 @@ function Shell({
   children?: React.ReactNode;
 }) {
   return (
-    <section aria-labelledby={id} className="grid gap-2 rounded-xl bg-card p-5">
+    <section
+      aria-labelledby={id}
+      className="grid gap-2 rounded-xl bg-card p-5 shadow-sm"
+    >
       <h2 id={id} className="text-xl font-semibold">
         Harga per saluran
       </h2>

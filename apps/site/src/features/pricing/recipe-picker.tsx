@@ -1,7 +1,6 @@
 'use client';
 
-import { IsometricGlyph } from '@takaran/ui';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Cookie } from 'lucide-react';
 import { useState } from 'react';
 import {
   Dialog,
@@ -31,9 +30,7 @@ export function RecipePicker({
         onClick={() => setOpen(true)}
         className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[var(--peach-100)] px-3 text-[#9e4308]"
       >
-        <span aria-hidden="true" className="size-4">
-          <IsometricGlyph />
-        </span>
+        <Cookie aria-hidden="true" className="size-4" strokeWidth={1.75} />
         <span>
           {selected?.name ?? 'Pilih resep'} · {selected?.yieldPortions ?? 0}{' '}
           potong
@@ -43,7 +40,7 @@ export function RecipePicker({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="font-display text-3xl font-normal">
+            <DialogTitle className="font-display text-3xl font-semibold">
               Pilih resep
             </DialogTitle>
             <DialogDescription className="sr-only">

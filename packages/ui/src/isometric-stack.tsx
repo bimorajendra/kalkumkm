@@ -52,6 +52,13 @@ export interface IsometricStackProps {
   profit: number | Big;
 }
 
+/**
+ * Komposisi per porsi: batang proporsional (tinggi tiap segmen sesuai nilai)
+ * di kiri, legenda teks biasa (baris tinggi tetap) di kanan. Legenda dipisah
+ * dari geometri batang karena nilai antar lapisan (misalnya energi vs bahan)
+ * sering jauh berbeda; menaruh teks di dalam segmen setipis itu membuatnya
+ * bertumpuk.
+ */
 export function IsometricStack({ layers, profit }: IsometricStackProps) {
   const profitValue = asBig(profit);
   const visibleLayers: IsometricLayer[] = [
@@ -73,65 +80,57 @@ export function IsometricStack({ layers, profit }: IsometricStackProps) {
       ? `Rugi ${formatRupiah(profitValue.abs())} per porsi`
       : `Untung ${formatRupiah(profitValue)}`,
   ].join(', ');
-  const baseY = 176;
-  const left = 10;
-  const width = 150;
-  const depth = 18;
-  let consumed = 0;
 
   return (
-    <svg
-      aria-label={`Komposisi per porsi: ${summary}. Total komponen ${formatRupiah(total)}.`}
-      className="takaran-isometric-stack"
-      role="img"
-      viewBox="0 0 420 220"
-    >
-      {visibleLayers.map((layer, index) => {
-        const height = heights[index] ?? 6;
-        const top = baseY - consumed - height;
-        consumed += height;
-        const center = left + width / 2;
-        const right = left + width;
-        const color =
-          layer.key === 'profit'
-            ? 'var(--caramel-500)'
-            : layerColors[index % layerColors.length];
-        const textY = top + height / 2 + depth / 2;
-        return (
-          <g key={layer.key}>
-            <polygon
-              fill={color}
-              points={`${left},${top} ${center},${top - depth / 2} ${right},${top} ${center},${top + depth / 2}`}
+    <div className="takaran-isometric-stack">
+      <div aria-hidden="true" className="takaran-isometric-stack__art">
+        {visibleLayers.map((layer, index) => (
+          <div
+            className="takaran-isometric-stack__segment"
+            key={layer.key}
+            style={{
+              background:
+                layer.key === 'profit'
+                  ? 'var(--caramel-500)'
+                  : layerColors[index % layerColors.length],
+              height: heights[index] ?? 6,
+            }}
+          />
+        ))}
+      </div>
+      <ul
+        aria-label={`Komposisi per porsi: ${summary}. Total komponen ${formatRupiah(total)}.`}
+        className="takaran-isometric-stack__legend"
+      >
+        {visibleLayers.map((layer, index) => (
+          <li key={layer.key}>
+            <span
+              aria-hidden="true"
+              className="takaran-isometric-stack__dot"
+              style={{
+                background:
+                  layer.key === 'profit'
+                    ? 'var(--caramel-500)'
+                    : layerColors[index % layerColors.length],
+              }}
             />
-            <polygon
-              fill="color-mix(in srgb, var(--ink) 12%, transparent)"
-              points={`${left},${top} ${center},${top + depth / 2} ${center},${top + depth / 2 + height} ${left},${top + height}`}
-            />
-            <polygon
-              fill="color-mix(in srgb, var(--ink) 22%, transparent)"
-              points={`${right},${top} ${center},${top + depth / 2} ${center},${top + depth / 2 + height} ${right},${top + height}`}
-            />
-            <text className="takaran-isometric-stack__label" x="190" y={textY}>
+            <span className="takaran-isometric-stack__label">
               {layer.label}
-            </text>
-            <text
-              className="takaran-isometric-stack__value"
-              x="190"
-              y={textY + 15}
-            >
+            </span>
+            <span className="takaran-isometric-stack__value">
               {formatRupiah(layer.value)}
-            </text>
-          </g>
-        );
-      })}
-      {profitValue.lt(0) ? (
-        <g className="takaran-isometric-stack__loss">
-          <line x1={left} x2={left + width} y1={baseY + 12} y2={baseY + 12} />
-          <text x={left + width + 16} y={baseY + 16}>
-            Rugi {formatRupiah(profitValue.abs())} per porsi
-          </text>
-        </g>
-      ) : null}
-    </svg>
+            </span>
+          </li>
+        ))}
+        {profitValue.lt(0) ? (
+          <li className="takaran-isometric-stack__loss">
+            <span className="takaran-isometric-stack__label">Rugi</span>
+            <span className="takaran-isometric-stack__value">
+              {formatRupiah(profitValue.abs())} per porsi
+            </span>
+          </li>
+        ) : null}
+      </ul>
+    </div>
   );
 }

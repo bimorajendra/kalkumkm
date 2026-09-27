@@ -261,7 +261,7 @@ export function RecipeEditor({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92dvh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle className="font-display text-3xl font-normal">
+          <DialogTitle className="font-display text-3xl font-semibold">
             {recipe ? 'Ubah resep' : 'Buat resep'}
           </DialogTitle>
           <DialogDescription className="sr-only">

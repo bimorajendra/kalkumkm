@@ -51,7 +51,7 @@ export function BusinessNameDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-3xl font-normal">
+          <DialogTitle className="font-display text-3xl font-semibold">
             Nama usaha
           </DialogTitle>
           <DialogDescription>{description}</DialogDescription>

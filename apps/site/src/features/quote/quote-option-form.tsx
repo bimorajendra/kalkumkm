@@ -90,7 +90,7 @@ export function QuoteOptionForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-3xl font-normal">
+          <DialogTitle className="font-display text-3xl font-semibold">
             {option ? 'Ubah opsi' : 'Tambah opsi'}
           </DialogTitle>
           <DialogDescription className="sr-only">

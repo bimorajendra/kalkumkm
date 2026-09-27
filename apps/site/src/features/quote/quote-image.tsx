@@ -35,8 +35,9 @@ export const QuoteImage = forwardRef<SVGSVGElement, QuoteImageProps>(
           x="88"
           y="332"
           fill="#2b1d14"
-          fontFamily="Instrument Serif, Georgia, serif"
+          fontFamily="Plus Jakarta Sans, Arial, sans-serif"
           fontSize="72"
+          fontWeight="700"
         >
           Penawaran pesanan
         </text>
@@ -82,8 +83,9 @@ export const QuoteImage = forwardRef<SVGSVGElement, QuoteImageProps>(
           x="88"
           y="1190"
           fill="#9e4308"
-          fontFamily="Instrument Serif, Georgia, serif"
+          fontFamily="Plus Jakarta Sans, Arial, sans-serif"
           fontSize="78"
+          fontWeight="700"
         >
           {formatRupiah(totalPrice)}
         </text>

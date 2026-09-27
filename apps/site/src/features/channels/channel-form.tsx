@@ -108,7 +108,7 @@ export function ChannelForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-3xl font-normal">
+          <DialogTitle className="font-display text-3xl font-semibold">
             {channel ? 'Ubah saluran' : 'Tambah saluran'}
           </DialogTitle>
           <DialogDescription className="sr-only">

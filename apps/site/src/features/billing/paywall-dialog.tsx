@@ -37,7 +37,7 @@ export function PaywallDialog({
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-3xl font-normal">
+          <DialogTitle className="font-display text-3xl font-semibold">
             Fitur Takaran Pro
           </DialogTitle>
           <DialogDescription>{copy[trigger]}</DialogDescription>

@@ -193,9 +193,6 @@ importers:
 
   apps/site:
     dependencies:
-      '@fontsource/instrument-serif':
-        specifier: 5.2.8
-        version: 5.2.8
       '@fontsource/plus-jakarta-sans':
         specifier: 5.2.6
         version: 5.2.6
@@ -1017,9 +1014,6 @@ packages:
 
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
-
-  '@fontsource/instrument-serif@5.2.8':
-    resolution: {integrity: sha512-s+bkz+syj2rO00Rmq9g0P+PwuLig33DR1xDR8pTWmovH1pUjwnncrFk++q9mmOex8fUQ7oW80gPpPDaw7V1MMw==}
 
   '@fontsource/plus-jakarta-sans@5.2.6':
     resolution: {integrity: sha512-mvUiz1ta3bCVhP/DPmAOmuzhHQi6ddOo1GgaW58rpojr510Rx9BkqXqcnMhGEOMZZB3+84frvfFmw/jKCctHLw==}
@@ -3691,8 +3685,6 @@ snapshots:
       react-dom: 19.3.0(react@19.3.0)
 
   '@floating-ui/utils@0.2.12': {}
-
-  '@fontsource/instrument-serif@5.2.8': {}
 
   '@fontsource/plus-jakarta-sans@5.2.6': {}
 

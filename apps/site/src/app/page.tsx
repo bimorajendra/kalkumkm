@@ -68,8 +68,16 @@ export default async function LandingPage({
             ))}
           </nav>
           <Button asChild className="ml-1">
-            <Link href={start}>
-              {user ? 'Buka kalkulator' : 'Coba hitung resepmu'}
+            <Link
+              href={start}
+              aria-label={user ? 'Buka kalkulator' : 'Coba hitung resepmu'}
+            >
+              <span aria-hidden="true" className="hidden sm:inline">
+                {user ? 'Buka kalkulator' : 'Coba hitung resepmu'}
+              </span>
+              <span aria-hidden="true" className="sm:hidden">
+                {user ? 'Kalkulator' : 'Coba gratis'}
+              </span>
             </Link>
           </Button>
         </div>
@@ -263,7 +271,7 @@ export default async function LandingPage({
               Mulai gratis. Buka lebih banyak saat siap.
             </h2>
             <div className="grid gap-6 md:grid-cols-2">
-              <article className="grid content-start gap-3 rounded-xl bg-card p-6">
+              <article className="grid content-start gap-3 rounded-xl bg-card p-6 shadow-sm">
                 <h3 className="text-xl font-semibold">Gratis</h3>
                 <p className="font-display text-5xl">Rp 0</p>
                 <ul className="grid list-disc gap-1 pl-5">
@@ -276,7 +284,7 @@ export default async function LandingPage({
                   <Link href={start}>Coba hitung resep</Link>
                 </Button>
               </article>
-              <article className="grid content-start gap-3 rounded-xl bg-card p-6 ring-2 ring-foreground">
+              <article className="grid content-start gap-3 rounded-xl bg-card p-6 shadow-sm ring-2 ring-foreground">
                 <h3 className="text-xl font-semibold">Pro</h3>
                 <p className="font-display text-5xl">
                   {formatRupiah(PRICING.pro.idr)}{' '}
@@ -322,7 +330,7 @@ export default async function LandingPage({
       </main>
 
       <footer className="mx-auto flex max-w-[1120px] flex-wrap items-center justify-between gap-3 px-4 py-8 lg:px-8">
-        <a href="#awal" className="font-display text-2xl">
+        <a href="#awal" className="font-display text-2xl font-bold">
           Takaran
         </a>
         <p className="text-sm text-muted-foreground">

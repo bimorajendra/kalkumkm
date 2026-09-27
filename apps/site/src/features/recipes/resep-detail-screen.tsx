@@ -42,7 +42,9 @@ export function ResepDetailScreen({ id }: { id: string }) {
   if (error)
     return (
       <Page>
-        <h1 className="font-display text-3xl">Resep belum terbaca.</h1>
+        <h1 className="font-display text-3xl font-semibold">
+          Resep belum terbaca.
+        </h1>
         <p className="my-3">{recipeCopy.loadError}</p>
         <Button asChild>
           <Link href="/resep">Kembali ke resep</Link>
@@ -52,7 +54,9 @@ export function ResepDetailScreen({ id }: { id: string }) {
   if (!recipe)
     return (
       <Page>
-        <h1 className="font-display text-3xl">Resep tidak ditemukan.</h1>
+        <h1 className="font-display text-3xl font-semibold">
+          Resep tidak ditemukan.
+        </h1>
         <p className="my-3">Resep ini mungkin sudah dihapus.</p>
         <Button asChild>
           <Link href="/resep">Kembali ke resep</Link>
@@ -173,13 +177,13 @@ export function ResepDetailScreen({ id }: { id: string }) {
       ) : null}
       <section
         aria-label="Hasil hitung resep"
-        className="grid gap-4 rounded-xl bg-card p-5 sm:grid-cols-3"
+        className="grid gap-4 rounded-xl bg-card p-5 shadow-sm sm:grid-cols-3"
       >
         <div>
           <span className="block text-sm text-muted-foreground">
             HPP per porsi
           </span>
-          <strong className="font-display text-4xl font-normal">
+          <strong className="font-display text-4xl font-bold">
             {formatRupiah(result.hpp)}
           </strong>
         </div>
@@ -187,7 +191,7 @@ export function ResepDetailScreen({ id }: { id: string }) {
           <span className="block text-sm text-muted-foreground">
             Harga {recipe.currentPrice ? 'sekarang' : 'saran'}
           </span>
-          <strong className="font-display text-4xl font-normal">
+          <strong className="font-display text-4xl font-bold">
             {price === null ? 'Belum tersedia' : formatRupiah(price)}
           </strong>
         </div>

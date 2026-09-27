@@ -93,7 +93,7 @@ export function WaitlistForm() {
     <form
       onSubmit={submit}
       noValidate
-      className="grid gap-4 rounded-xl bg-card p-5 sm:p-6"
+      className="grid gap-4 rounded-xl bg-card p-5 shadow-sm sm:p-6"
     >
       {/* Kolom jebakan bot: tersembunyi dari pengguna dan pembaca layar. */}
       <div aria-hidden="true" className="absolute -left-[9999px]">

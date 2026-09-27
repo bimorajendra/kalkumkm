@@ -101,7 +101,7 @@ export function PriceListBuilder() {
   if (error)
     return (
       <Page>
-        <h1 className="font-display text-3xl">
+        <h1 className="font-display text-3xl font-semibold">
           Daftar harga belum bisa dibuka.
         </h1>
         <p role="alert">{priceListCopy.loadError}</p>
@@ -274,7 +274,7 @@ export function PriceListBuilder() {
             Pratinjau gambar
           </h2>
           <div
-            className={`mx-auto w-full overflow-hidden rounded-xl border bg-card [&>svg]:h-auto [&>svg]:w-full ${
+            className={`mx-auto w-full overflow-hidden rounded-xl border bg-card shadow-sm [&>svg]:h-auto [&>svg]:w-full ${
               format === 'story' ? 'max-w-xs' : 'max-w-md'
             }`}
           >

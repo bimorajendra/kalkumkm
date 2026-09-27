@@ -32,7 +32,7 @@ export function ResultCard({
 }: ResultCardProps) {
   return (
     <section
-      className={`takaran-result-card${compact ? ' takaran-result-card--compact' : ''}${visual && !compact ? ' takaran-result-card--with-visual' : ''}`}
+      className={`takaran-result-card${compact ? ' takaran-result-card--compact' : ''}`}
     >
       {tab ? <div className="takaran-result-card__tab">{tab}</div> : null}
       <p className="takaran-result-card__value">{formatRupiah(value)}</p>

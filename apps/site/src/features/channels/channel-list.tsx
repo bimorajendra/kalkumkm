@@ -32,7 +32,7 @@ export function ChannelList() {
   return (
     <section
       aria-labelledby="channel-settings-title"
-      className="grid gap-3 rounded-xl bg-card p-5"
+      className="grid gap-3 rounded-xl bg-card p-5 shadow-sm"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>

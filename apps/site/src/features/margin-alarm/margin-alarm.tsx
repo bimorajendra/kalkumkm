@@ -132,7 +132,7 @@ export function MarginAlarm() {
       <Dialog open={listOpen} onOpenChange={setListOpen}>
         <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-display text-3xl font-normal">
+            <DialogTitle className="font-display text-3xl font-semibold">
               {marginAlarmCopy.listTitle}
             </DialogTitle>
             <DialogDescription className="sr-only">

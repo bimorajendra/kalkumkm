@@ -34,13 +34,16 @@ export default async function MasukPage({
   const { galat } = await searchParams;
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4 py-12">
-      <Link href="/" className="mb-8 font-display text-3xl tracking-tight">
+      <Link
+        href="/"
+        className="mb-8 font-display text-3xl font-bold tracking-tight"
+      >
         Takaran
       </Link>
       <Card className="rounded-xl">
         <CardHeader>
           <CardTitle>
-            <h1 className="font-display text-4xl font-normal leading-tight">
+            <h1 className="font-display text-4xl font-bold leading-tight">
               Masuk ke Takaran
             </h1>
           </CardTitle>

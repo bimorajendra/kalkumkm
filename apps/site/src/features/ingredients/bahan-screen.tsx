@@ -24,7 +24,7 @@ export function BahanScreen() {
   }
 
   return (
-    <Page>
+    <Page className="pb-36 lg:pb-12">
       <MarginAlarm />
       <section aria-labelledby="page-title" className="grid gap-4">
         <div className="flex items-end justify-between gap-4">

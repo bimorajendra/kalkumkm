@@ -83,7 +83,7 @@ function IngredientRowView({
   }
 
   return (
-    <li className="flex min-h-14 flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3">
+    <li className="flex min-h-14 flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <div className="min-w-0">
         <button
           type="button"
@@ -180,7 +180,7 @@ function IngredientRowView({
         <p
           id={`price-error-${ingredient.id}`}
           role="alert"
-          className="basis-full text-sm text-destructive"
+          className="text-sm text-destructive"
         >
           {error}
         </p>

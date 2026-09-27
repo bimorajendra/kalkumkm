@@ -4,12 +4,6 @@
   outline: 2px solid var(--caramel-600);
   outline-offset: 3px;
 }
-.takaran-isometric-glyph {
-  display: block;
-  width: 16px;
-  height: 16px;
-  flex: none;
-}
 .takaran-slider {
   min-width: 0;
   margin: 0;
@@ -178,7 +172,7 @@
 .takaran-result-card__value,
 .takaran-result-card__secondary p {
   margin: 0;
-  font-family: var(--font-display, "Instrument Serif"), serif;
+  font-family: var(--font-display, "Plus Jakarta Sans"), sans-serif;
   font-size: clamp(44px, 12vw, 72px);
   font-weight: 400;
   line-height: 1;
@@ -240,40 +234,66 @@
   cursor: pointer;
 }
 .takaran-isometric-stack {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 16px;
   width: 100%;
-  max-width: 420px;
-  overflow: visible;
 }
-.takaran-isometric-stack__label,
-.takaran-isometric-stack__value,
-.takaran-isometric-stack__loss text {
-  fill: var(--ink);
+.takaran-isometric-stack__art {
+  display: flex;
+  width: 40px;
+  height: 144px;
+  flex-shrink: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-control);
+}
+.takaran-isometric-stack__segment {
+  width: 100%;
+}
+.takaran-isometric-stack__legend {
+  display: grid;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  gap: 4px;
+  list-style: none;
+}
+.takaran-isometric-stack__legend li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
   font-family: var(--font-ui, "Plus Jakarta Sans"), sans-serif;
   font-size: 13px;
+  line-height: 20px;
+  color: var(--ink);
+}
+.takaran-isometric-stack__dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
 }
 .takaran-isometric-stack__value {
   font-size: 12px;
+  color: var(--ink-muted);
 }
-.takaran-isometric-stack__loss line {
-  stroke: var(--danger);
-  stroke-dasharray: 5 4;
-  stroke-width: 2;
+.takaran-isometric-stack__loss {
+  color: var(--danger);
 }
-.takaran-isometric-stack__loss text {
-  fill: var(--danger);
+.takaran-isometric-stack__loss .takaran-isometric-stack__value {
+  color: inherit;
 }
-.takaran-result-card .takaran-isometric-stack__label,
+.takaran-result-card .takaran-isometric-stack__legend li {
+  color: #2b1d14;
+}
 .takaran-result-card .takaran-isometric-stack__value {
-  fill: #2b1d14;
+  color: color-mix(in srgb, #2b1d14 75%, transparent);
 }
 
 @media (max-width: 420px) {
   .takaran-result-card {
     padding: 20px;
-  }
-  .takaran-isometric-stack {
-    min-width: 280px;
   }
 }
 :root[data-theme="dark"] .takaran-slider__custom-toggle {
@@ -293,42 +313,4 @@
 }
 .takaran-result-card__metrics {
   background: rgb(255 255 255 / 58%);
-}
-
-@media (min-width: 768px) {
-  .takaran-result-card--with-visual {
-    display: grid;
-    grid-template-areas:
-      "tab visual"
-      "value visual"
-      "label visual"
-      "secondary visual"
-      "metrics visual"
-      "actions visual";
-    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
-    align-content: center;
-    align-items: center;
-  }
-  .takaran-result-card--with-visual .takaran-result-card__tab {
-    grid-area: tab;
-  }
-  .takaran-result-card--with-visual .takaran-result-card__value {
-    grid-area: value;
-  }
-  .takaran-result-card--with-visual .takaran-result-card__label {
-    grid-area: label;
-  }
-  .takaran-result-card--with-visual .takaran-result-card__secondary {
-    grid-area: secondary;
-  }
-  .takaran-result-card--with-visual .takaran-result-card__metrics {
-    grid-area: metrics;
-  }
-  .takaran-result-card--with-visual .takaran-result-card__visual {
-    grid-area: visual;
-    width: 100%;
-  }
-  .takaran-result-card--with-visual .takaran-result-card__actions {
-    grid-area: actions;
-  }
 }

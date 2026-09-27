@@ -30,13 +30,6 @@ const jakarta = localFont({
   display: 'swap',
 });
 
-const instrument = localFont({
-  src: '../../node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2',
-  weight: '400',
-  variable: '--font-instrument',
-  display: 'swap',
-});
-
 export const metadata: Metadata = {
   title: { default: 'Takaran', template: '%s | Takaran' },
   description:
@@ -53,11 +46,7 @@ export default async function RootLayout({
 }) {
   const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
-    <html
-      lang="id"
-      suppressHydrationWarning
-      className={`${jakarta.variable} ${instrument.variable}`}
-    >
+    <html lang="id" suppressHydrationWarning className={jakarta.variable}>
       <head>
         <script nonce={nonce} src="/theme-init.js" />
       </head>

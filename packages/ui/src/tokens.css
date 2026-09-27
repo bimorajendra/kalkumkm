@@ -71,7 +71,7 @@
   --color-tan-400: var(--tan-400);
   --color-danger: var(--danger);
   --color-success: var(--success);
-  --font-display: "Instrument Serif", serif;
+  --font-display: "Plus Jakarta Sans", sans-serif;
   --font-ui: "Plus Jakarta Sans", sans-serif;
   --text-display-xl: 64px;
   --text-display-xl--line-height: 64px;

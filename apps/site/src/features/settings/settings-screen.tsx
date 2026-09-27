@@ -27,7 +27,7 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="grid content-start justify-items-start gap-3 rounded-xl bg-card p-5">
+    <section className="grid content-start justify-items-start gap-3 rounded-xl bg-card p-5 shadow-sm">
       <h2 className="text-xl font-semibold">{title}</h2>
       {children}
     </section>
@@ -118,7 +118,7 @@ export function SettingsScreen({
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-display text-3xl font-normal">
+            <DialogTitle className="font-display text-3xl font-semibold">
               Hapus akun?
             </DialogTitle>
             <DialogDescription>

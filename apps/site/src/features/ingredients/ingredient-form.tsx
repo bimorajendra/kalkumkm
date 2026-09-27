@@ -145,7 +145,7 @@ export function IngredientForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-3xl font-normal">
+          <DialogTitle className="font-display text-3xl font-semibold">
             {ingredient ? 'Ubah bahan' : 'Tambah bahan'}
           </DialogTitle>
           <DialogDescription className="sr-only">

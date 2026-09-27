@@ -1,5 +1,7 @@
 # DESIGN.md: Takaran (nama kerja)
 
+> **Diubah oleh `docs/CHANGE-002-visual-identity-flat.md` (27 September 2026):** judul dan angka besar pindah dari serif ke sans-serif tebal, motif tumpukan isometrik diganti batang flat + legenda, ikon dekoratif isometrik diganti ikon lucide, dan kartu konten memakai bayangan lembut. Bagian tipografi (§5), motif isometrik (§9.6, §9.10), dan aturan elevasi "kartu lain datar dengan garis" (§6, §14) di dokumen ini **tidak berlaku lagi**; lihat dokumen itu untuk rinciannya. Warna, layout, dan bahasa tetap seperti di bawah.
+
 > Arah visual untuk aplikasi kalkulator HPP dan landing page-nya. File ini adalah **data arah desain** yang dibaca bersama `antislop.md` (filter). `antislop.md` menyaring slop; file ini memberi karakter.
 > Kebutuhan fungsional ada di `PRD.md`. Jika keduanya bertentangan, `PRD.md` yang menang untuk fungsi, file ini yang menang untuk tampilan.
 > Status: Draf v0.2, 25 September 2026.
