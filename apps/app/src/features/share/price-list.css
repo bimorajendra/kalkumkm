@@ -1,0 +1,206 @@
+.price-list-page {
+  display: grid;
+  gap: 28px;
+}
+
+.price-list-heading h1 {
+  margin: 8px 0;
+}
+
+.price-list-heading p {
+  max-width: 560px;
+  color: var(--ink-muted);
+}
+
+.price-list-layout {
+  display: grid;
+  grid-template-columns: minmax(270px, 0.85fr) minmax(320px, 1fr);
+  align-items: start;
+  gap: 28px;
+}
+
+.price-list-controls,
+.price-list-preview-section {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+}
+
+.price-list-controls {
+  display: grid;
+  gap: 24px;
+}
+
+.price-list-controls fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.price-list-controls legend,
+.price-list-preview-section h2 {
+  margin: 0 0 12px;
+  font:
+    24px / 1.1 var(--font-display, "Instrument Serif"),
+    serif;
+}
+
+.price-list-menu-list {
+  display: grid;
+  gap: 8px;
+  max-height: 340px;
+  overflow: auto;
+}
+
+.price-list-menu {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.price-list-menu input,
+.price-list-formats input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--caramel-700);
+}
+
+.price-list-menu span {
+  overflow-wrap: anywhere;
+}
+
+.price-list-menu strong {
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.price-list-formats {
+  display: grid;
+  gap: 8px;
+}
+
+.price-list-formats label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.price-list-create {
+  width: 100%;
+}
+
+.price-list-message,
+.price-list-note,
+.price-list-copy-link p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+.price-list-preview-section h2 {
+  font-family: var(--font-ui, "Plus Jakarta Sans"), sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.price-list-preview {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  max-height: min(72vh, 760px);
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg);
+}
+
+.price-list-preview svg {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: calc(min(72vh, 760px) - 30px);
+}
+
+.price-list-preview--square svg {
+  width: min(100%, 540px);
+}
+
+.price-list-note {
+  margin-top: 12px;
+}
+
+.price-list-copy-link {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.price-list-copy-link a {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: var(--caramel-700);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.price-list-page :focus-visible {
+  outline: 2px solid var(--caramel-600);
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .price-list-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .price-list-preview-section {
+    grid-row: 1;
+  }
+
+  .price-list-controls,
+  .price-list-preview-section {
+    padding: 16px;
+  }
+
+  .price-list-menu {
+    grid-template-columns: 22px minmax(0, 1fr);
+  }
+
+  .price-list-menu strong {
+    grid-column: 2;
+    text-align: left;
+  }
+}
+
+@media (max-width: 380px) {
+  .price-list-page {
+    gap: 20px;
+  }
+
+  .price-list-controls,
+  .price-list-preview-section {
+    padding: 12px;
+  }
+
+  .price-list-preview {
+    padding: 8px;
+  }
+}

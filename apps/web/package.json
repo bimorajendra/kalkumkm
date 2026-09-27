@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev --host 0.0.0.0",
+    "preview": "astro preview --host 0.0.0.0",
     "build": "astro build",
     "typecheck": "astro check"
   },

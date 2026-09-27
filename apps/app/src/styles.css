@@ -253,6 +253,137 @@ h1 {
 .settings-card .version {
   margin: 16px 0 0;
 }
+.channel-settings__heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.channel-settings__heading p {
+  margin-bottom: 0;
+}
+.channel-list {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.channel-list li,
+.channel-list li > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.channel-list li {
+  min-height: 56px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.channel-list li > div:first-child {
+  align-items: start;
+  flex-direction: column;
+  gap: 2px;
+}
+.channel-list li span,
+.channel-settings__message {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+.channel-list__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.channel-list__actions button {
+  min-height: 44px;
+}
+.channel-price-table {
+  min-width: 0;
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+.channel-price-table h2 {
+  margin: 0;
+  font:
+    24px / 1.1 "Instrument Serif",
+    serif;
+}
+.channel-price-table__heading p,
+.channel-price-table__status {
+  margin: 6px 0 0;
+  color: var(--ink-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.channel-price-table__scroll {
+  overflow-x: auto;
+}
+.channel-price-table table {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+.channel-price-table th,
+.channel-price-table td {
+  padding: 10px 7px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.channel-price-table thead th {
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.channel-price-table tbody th {
+  font-weight: 650;
+}
+.channel-price-table small {
+  display: block;
+  margin-top: 3px;
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+.channel-price-table td .channel-price-table__above {
+  color: var(--success, #287a4d);
+}
+.channel-price-table td .channel-price-table__below {
+  color: var(--danger);
+}
+.calculator-details .channel-price-table {
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+}
+.calculator-result-desktop .channel-price-table {
+  background: var(--surface);
+}
+.channel-unavailable {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 6px 24px rgb(50 34 25 / 14%);
+}
+.channel-unavailable p {
+  margin: 0;
+  color: var(--danger);
+  font-size: 14px;
+}
+.channel-unavailable .button {
+  min-height: 44px;
+}
 .checkout-form {
   display: grid;
   gap: 16px;
@@ -300,7 +431,6 @@ h1 {
   border-left: 3px solid var(--caramel-500);
   background: var(--surface-soft);
 }
-.loading-state,
 .error-state {
   width: min(600px, calc(100% - 40px));
   margin: 18vh auto 0;
@@ -497,6 +627,35 @@ h1 {
 }
 .ingredient-dialog::backdrop {
   background: rgb(38 27 19 / 42%);
+}
+.paywall-sheet-dialog {
+  position: fixed;
+  inset: auto 0 0;
+  width: 100%;
+  max-width: none;
+  margin: auto 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+.paywall-sheet-dialog::backdrop {
+  background: rgb(38 27 19 / 42%);
+}
+.paywall-sheet {
+  display: grid;
+  gap: 14px;
+  width: min(100%, 560px);
+  margin: 0 auto;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  background: var(--bg);
+  color: var(--ink);
+}
+.paywall-sheet h2,
+.paywall-sheet p {
+  margin: 0;
 }
 .ingredient-form {
   display: grid;
@@ -1241,6 +1400,9 @@ h1 {
   .calculator-result-mobile .takaran-result-card__compact-margin {
     grid-column: 1;
     margin: 0;
+  }
+  .calculator-result-mobile .takaran-result-card__actions {
+    grid-column: 1 / -1;
   }
   .calculator-result-mobile .takaran-result-card__details {
     grid-column: 2;

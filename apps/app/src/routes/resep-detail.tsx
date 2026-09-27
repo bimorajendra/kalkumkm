@@ -3,9 +3,11 @@ import { formatRupiah } from '@takaran/ui';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import type { RecipeRow } from '../db/schema';
+import { FreeLimitError } from '../features/license/limits';
 import { HppBreakdown } from '../features/recipes/components/hpp-breakdown';
 import { RecipeEditor } from '../features/recipes/components/recipe-editor';
 import { recipeCopy } from '../features/recipes/copy';
+import { duplicateRecipe } from '../features/recipes/duplicate';
 import { claimFirstHppEvent } from '../features/recipes/repository';
 import { useRecipeResults } from '../features/recipes/use-recipe-results';
 import { setSetting, useSetting } from '../features/settings/repository';
@@ -16,6 +18,7 @@ export function ResepDetailRoute() {
   const data = useRecipeResults();
   const roundingStep = useSetting('roundingStep');
   const [editing, setEditing] = useState(false);
+  const [duplicateMessage, setDuplicateMessage] = useState('');
   const navigate = useNavigate();
   const recipe = data?.recipes.find((item) => item.id === id);
   const result = data?.results.get(id);
@@ -112,6 +115,19 @@ export function ResepDetailRoute() {
     price !== null && price > 0
       ? actualMarginBp(price, result.hpp, 0)
       : undefined;
+  async function duplicate() {
+    setDuplicateMessage('');
+    try {
+      const copy = await duplicateRecipe(recipe as RecipeRow);
+      navigate(`/resep/${copy.id}`);
+    } catch (error) {
+      setDuplicateMessage(
+        error instanceof FreeLimitError
+          ? `${error.message} Takaran Pro, lihat di /beli.`
+          : 'Resep belum bisa diduplikasi. Coba lagi.',
+      );
+    }
+  }
   return (
     <main className="page recipe-detail-page">
       <Link className="back-link" to="/resep">
@@ -130,7 +146,22 @@ export function ResepDetailRoute() {
         >
           Ubah resep
         </button>
+        <button
+          className="button"
+          type="button"
+          onClick={() => void duplicate()}
+        >
+          Duplikat
+        </button>
       </div>
+      {duplicateMessage && (
+        <p className="form-error" role="alert">
+          {duplicateMessage}{' '}
+          {duplicateMessage.includes('/beli') && (
+            <Link to="/beli">Lihat Takaran Pro</Link>
+          )}
+        </p>
+      )}
       <section
         className="recipe-result-summary"
         aria-label="Hasil hitung resep"

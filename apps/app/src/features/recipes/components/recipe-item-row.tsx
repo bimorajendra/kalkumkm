@@ -20,7 +20,9 @@ export function unitsFor(ingredient: IngredientRow): string[] {
 }
 
 interface RecipeItemRowProps {
-  ingredient?: IngredientRow;
+  name?: string;
+  units?: string[];
+  missing?: boolean;
   index: number;
   quantity: string;
   unit: string;
@@ -30,7 +32,9 @@ interface RecipeItemRowProps {
 }
 
 export function RecipeItemRow({
-  ingredient,
+  name,
+  units = [],
+  missing = false,
   index,
   quantity,
   unit,
@@ -42,21 +46,21 @@ export function RecipeItemRow({
   return (
     <li className="recipe-item-row">
       <div className="recipe-item-name">
-        <strong>{ingredient?.name ?? 'Bahan ini sudah dihapus'}</strong>
-        {!ingredient && (
+        <strong>{name ?? 'Bahan ini sudah dihapus'}</strong>
+        {missing && (
           <span className="field-error">
             {error ?? 'Hapus baris ini atau pilih bahan lain.'}
           </span>
         )}
       </div>
-      {ingredient && (
+      {!missing && name && (
         <>
           <label className="sr-only" htmlFor={`${fieldId}-quantity`}>
-            Takaran {ingredient.name}
+            Takaran {name}
           </label>
           <input
             id={`${fieldId}-quantity`}
-            aria-label={`Takaran ${ingredient.name}`}
+            aria-label={`Takaran ${name}`}
             aria-invalid={Boolean(error)}
             inputMode="decimal"
             value={quantity}
@@ -65,15 +69,15 @@ export function RecipeItemRow({
             }
           />
           <label className="sr-only" htmlFor={`${fieldId}-unit`}>
-            Satuan {ingredient.name}
+            Satuan {name}
           </label>
           <select
             id={`${fieldId}-unit`}
-            aria-label={`Satuan ${ingredient.name}`}
+            aria-label={`Satuan ${name}`}
             value={unit}
             onChange={(event) => onChange(index, 'unit', event.target.value)}
           >
-            {unitsFor(ingredient).map((option) => (
+            {units.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>
@@ -88,7 +92,7 @@ export function RecipeItemRow({
       >
         Hapus
       </button>
-      {error && ingredient && (
+      {error && !missing && (
         <span className="field-error recipe-item-error">{error}</span>
       )}
     </li>

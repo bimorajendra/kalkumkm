@@ -2,17 +2,19 @@ import {
   actualMarginBp,
   CalcError,
   markupBp,
+  priceForChannel,
   profitPerHour,
   profitPerPortion,
   type RecipeResult,
-  suggestPrice,
 } from '@takaran/calc';
 import { formatRupiah } from '@takaran/ui';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { db } from '../db/db';
-import type { RecipeRow } from '../db/schema';
+import type { ChannelRow, RecipeRow } from '../db/schema';
 import { BackupReminder } from '../features/backup/components/backup-reminder';
+import { ChannelPriceTable } from '../features/channels/components/channel-price-table';
+import { useChannels } from '../features/channels/repository';
 import { MarginAlarm } from '../features/margin-alarm/components/margin-alarm';
 import { CalculatorResult } from '../features/pricing/components/calculator-result';
 import { CurrentPriceInput } from '../features/pricing/components/current-price-input';
@@ -27,6 +29,7 @@ import { setSetting, useSetting } from '../features/settings/repository';
 
 export function HitungRoute() {
   const data = useRecipeResults();
+  const channels = useChannels();
   const lastRecipeId = useSetting('lastRecipeId');
   const recipe =
     data.recipes.find((item) => item.id === lastRecipeId) ?? data.recipes[0];
@@ -74,6 +77,7 @@ export function HitungRoute() {
   return (
     <CalculatorScreen
       data={data}
+      channels={channels}
       recipes={data.recipes}
       recipe={recipe}
       onSelect={(next) => void setSetting('lastRecipeId', next.id)}
@@ -82,18 +86,26 @@ export function HitungRoute() {
 }
 
 function CalculatorScreen({
+  channels,
   data,
   onSelect,
   recipe,
   recipes,
 }: {
   data: NonNullable<ReturnType<typeof useRecipeResults>>;
+  channels: ChannelRow[];
   onSelect: (recipe: RecipeRow) => void;
   recipe: RecipeRow;
   recipes: RecipeRow[];
 }) {
   const calculator = useCalculator(recipe);
   const roundingStep = useSetting('roundingStep');
+  const [selectedChannelId, setSelectedChannelId] = useState('');
+  const directChannel =
+    channels.find((channel) => channel.name === 'Langsung') ?? channels[0];
+  const selectedChannel =
+    channels.find((channel) => channel.id === selectedChannelId) ??
+    directChannel;
   const result = data.results.get(recipe.id);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const detailsDragStart = useRef<number | null>(null);
@@ -107,6 +119,14 @@ function CalculatorScreen({
     if (!detailsOpen && dialog.open) dialog.close();
   }, [detailsOpen]);
 
+  useEffect(() => {
+    if (
+      selectedChannel &&
+      !channels.some((channel) => channel.id === selectedChannelId)
+    )
+      setSelectedChannelId(selectedChannel.id);
+  }, [channels, selectedChannel, selectedChannelId]);
+
   async function savePrice(price: number) {
     const latest = await db.recipes.get(recipe.id);
     if (!latest) throw new Error('Resep tidak ditemukan.');
@@ -118,6 +138,12 @@ function CalculatorScreen({
     return (
       <main className="page" aria-live="polite">
         Menghitung HPPâ€¦
+      </main>
+    );
+  if (!selectedChannel || !directChannel)
+    return (
+      <main className="page" aria-live="polite">
+        Menyiapkan saluran jual…
       </main>
     );
   if (result instanceof CalcError) {
@@ -147,41 +173,55 @@ function CalculatorScreen({
     );
   }
 
-  let price: number;
-  let actualMargin: number;
-  let markup: number;
-  let hourlyProfit: RecipeResult['hpp'] | null;
+  let price = 0;
+  let actualMargin = 0;
+  let markup = 0;
+  let hourlyProfit: RecipeResult['hpp'] | null = null;
+  let channelError = '';
+  const commissionBp =
+    selectedChannel.kind === 'commission' ? selectedChannel.rateBp : 0;
   try {
-    price = suggestPrice(
+    const directSuggested = priceForChannel(
       result.hpp,
       calculator.targetMarginBp,
-      0,
+      null,
+      directChannel,
+      roundingStep,
+    ).price;
+    const retailPrice = recipe.currentPrice ?? directSuggested;
+    const channelResult = priceForChannel(
+      result.hpp,
+      calculator.targetMarginBp,
+      retailPrice,
+      selectedChannel,
       roundingStep,
     );
-    actualMargin = price > 0 ? actualMarginBp(price, result.hpp, 0) : 0;
+    price =
+      selectedChannel.id === directChannel.id && recipe.currentPrice !== null
+        ? recipe.currentPrice
+        : channelResult.price;
+    actualMargin =
+      price > 0
+        ? price === channelResult.price
+          ? channelResult.marginBp
+          : actualMarginBp(price, result.hpp, commissionBp)
+        : 0;
     markup = result.hpp.gt(0) ? markupBp(price, result.hpp) : 0;
     hourlyProfit =
       calculator.laborMinutesPerBatch > 0
         ? profitPerHour(
             price,
             result.hpp,
-            0,
+            commissionBp,
             recipe.yieldPortions,
             calculator.laborMinutesPerBatch,
           )
         : null;
   } catch (error) {
-    const message =
-      error instanceof CalcError
-        ? pricingCopy.fixMargin
+    channelError =
+      error instanceof CalcError && error.code === 'MARGIN_TOO_HIGH'
+        ? 'Komisi terlalu besar untuk target untung ini.'
         : pricingCopy.genericError;
-    return (
-      <main className="page">
-        <p className="calculator-error" role="alert">
-          {message}
-        </p>
-      </main>
-    );
   }
 
   const layers = [
@@ -226,6 +266,9 @@ function CalculatorScreen({
           </p>
         </section>
         <SliderPanel
+          channels={channels}
+          selectedChannelId={selectedChannel.id}
+          onChannelChange={setSelectedChannelId}
           laborMinutesPerBatch={calculator.laborMinutesPerBatch}
           onLaborMinutesChange={calculator.setLaborMinutesPerBatch}
           onTargetMarginChange={calculator.setTargetMarginBp}
@@ -243,44 +286,84 @@ function CalculatorScreen({
           onSave={savePrice}
           targetMarginBp={calculator.targetMarginBp}
         />
-        {result.hpp.gt(0) && price > 0 ? (
+        {!channelError && result.hpp.gt(0) && price > 0 ? (
           <MarginNote
             marginBp={actualMargin}
             markupBp={markup}
             price={price}
-            profit={profitPerPortion(price, result.hpp, 0)}
+            profit={profitPerPortion(price, result.hpp, commissionBp)}
           />
         ) : null}
       </section>
       <aside aria-label="Hasil kalkulasi" className="calculator-result-desktop">
-        <CalculatorResult
+        {channelError ? (
+          <p className="calculator-error" role="alert">
+            {channelError}
+          </p>
+        ) : (
+          <CalculatorResult
+            canSavePrice={
+              selectedChannel.id === directChannel.id &&
+              recipe.currentPrice === null
+            }
+            channelName={selectedChannel.name}
+            commissionBp={commissionBp}
+            hpp={result.hpp}
+            hourlyProfit={hourlyProfit}
+            laborMinutes={calculator.laborMinutesPerBatch}
+            laborRatePerHour={recipe.laborRatePerHour}
+            layers={layers}
+            marginBp={actualMargin}
+            markupBp={markup}
+            onSavePrice={() => savePrice(price)}
+            price={price}
+            recipeId={recipe.id}
+            targetMarginBp={calculator.targetMarginBp}
+          />
+        )}
+        <ChannelPriceTable
+          channels={channels}
           hpp={result.hpp}
-          hourlyProfit={hourlyProfit}
-          laborMinutes={calculator.laborMinutesPerBatch}
-          laborRatePerHour={recipe.laborRatePerHour}
-          layers={layers}
-          marginBp={actualMargin}
-          markupBp={markup}
-          onSavePrice={() => savePrice(price)}
-          price={price}
           targetMarginBp={calculator.targetMarginBp}
+          currentPrice={recipe.currentPrice}
+          roundingStep={roundingStep}
         />
       </aside>
       <div className="calculator-result-mobile">
-        <CalculatorResult
-          compact
-          hpp={result.hpp}
-          hourlyProfit={hourlyProfit}
-          laborMinutes={calculator.laborMinutesPerBatch}
-          laborRatePerHour={recipe.laborRatePerHour}
-          layers={layers}
-          marginBp={actualMargin}
-          markupBp={markup}
-          onDetails={() => setDetailsOpen(true)}
-          onSavePrice={() => savePrice(price)}
-          price={price}
-          targetMarginBp={calculator.targetMarginBp}
-        />
+        {channelError ? (
+          <div className="channel-unavailable">
+            <p role="alert">{channelError}</p>
+            <button
+              className="button"
+              type="button"
+              onClick={() => setDetailsOpen(true)}
+            >
+              Detail saluran
+            </button>
+          </div>
+        ) : (
+          <CalculatorResult
+            compact
+            canSavePrice={
+              selectedChannel.id === directChannel.id &&
+              recipe.currentPrice === null
+            }
+            channelName={selectedChannel.name}
+            commissionBp={commissionBp}
+            hpp={result.hpp}
+            hourlyProfit={hourlyProfit}
+            laborMinutes={calculator.laborMinutesPerBatch}
+            laborRatePerHour={recipe.laborRatePerHour}
+            layers={layers}
+            marginBp={actualMargin}
+            markupBp={markup}
+            onDetails={() => setDetailsOpen(true)}
+            onSavePrice={() => savePrice(price)}
+            price={price}
+            recipeId={recipe.id}
+            targetMarginBp={calculator.targetMarginBp}
+          />
+        )}
       </div>
       <dialog
         aria-labelledby="calculator-details-title"
@@ -309,17 +392,38 @@ function CalculatorScreen({
             Ã—
           </button>
         </div>
-        <CalculatorResult
+        {channelError ? (
+          <p className="calculator-error" role="alert">
+            {channelError}
+          </p>
+        ) : (
+          <CalculatorResult
+            canSavePrice={
+              selectedChannel.id === directChannel.id &&
+              recipe.currentPrice === null
+            }
+            channelName={selectedChannel.name}
+            commissionBp={commissionBp}
+            hpp={result.hpp}
+            hourlyProfit={hourlyProfit}
+            laborMinutes={calculator.laborMinutesPerBatch}
+            laborRatePerHour={recipe.laborRatePerHour}
+            layers={layers}
+            marginBp={actualMargin}
+            markupBp={markup}
+            onSavePrice={() => savePrice(price)}
+            price={price}
+            recipeId={recipe.id}
+            targetMarginBp={calculator.targetMarginBp}
+          />
+        )}
+        <ChannelPriceTable
+          compact
+          channels={channels}
           hpp={result.hpp}
-          hourlyProfit={hourlyProfit}
-          laborMinutes={calculator.laborMinutesPerBatch}
-          laborRatePerHour={recipe.laborRatePerHour}
-          layers={layers}
-          marginBp={actualMargin}
-          markupBp={markup}
-          onSavePrice={() => savePrice(price)}
-          price={price}
           targetMarginBp={calculator.targetMarginBp}
+          currentPrice={recipe.currentPrice}
+          roundingStep={roundingStep}
         />
       </dialog>
       {result.hpp.lte(0) ? (

@@ -118,11 +118,19 @@ export async function listIngredients(query = ''): Promise<IngredientRow[]> {
 
 export async function usageCount(id: string): Promise<number> {
   const recipes = await db.recipes.toArray();
-  return recipes.filter((recipe) =>
-    recipe.items.some(
-      (item) => item.refType === 'ingredient' && item.refId === id,
-    ),
-  ).length;
+  const uses = (recipeId: string, visited: Set<string>): boolean => {
+    if (visited.has(recipeId)) return false;
+    visited.add(recipeId);
+    const recipe = recipes.find((item) => item.id === recipeId);
+    return (
+      recipe?.items.some((item) =>
+        item.refType === 'ingredient'
+          ? item.refId === id
+          : uses(item.refId, visited),
+      ) ?? false
+    );
+  };
+  return recipes.filter((recipe) => uses(recipe.id, new Set())).length;
 }
 
 export async function listIngredientUsage(

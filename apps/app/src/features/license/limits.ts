@@ -27,8 +27,12 @@ export async function hasProLicense(): Promise<boolean> {
 }
 
 export class ProRequiredError extends Error {
-  constructor() {
-    super('Fitur subresep ada di Takaran Pro.');
+  constructor(readonly trigger: 'sub_recipe' | 'quote' = 'sub_recipe') {
+    super(
+      trigger === 'quote'
+        ? 'Penawaran pesanan custom ada di Takaran Pro.'
+        : 'Fitur subresep ada di Takaran Pro.',
+    );
     this.name = 'ProRequiredError';
   }
 }

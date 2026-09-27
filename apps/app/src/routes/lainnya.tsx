@@ -1,6 +1,7 @@
 ﻿import { ThemeToggle } from '@takaran/ui/theme-toggle';
 import { BackupPanel } from '../features/backup/components/backup-panel';
 import { BackupReminder } from '../features/backup/components/backup-reminder';
+import { ChannelList } from '../features/channels/components/channel-list';
 
 export function LainnyaRoute() {
   const agent = navigator.userAgent;
@@ -16,6 +17,14 @@ export function LainnyaRoute() {
       <h1>Pengaturan</h1>
       <BackupReminder />
       <BackupPanel />
+      <ChannelList />
+      <section className="settings-card">
+        <h2>Penawaran pesanan</h2>
+        <p>Buat rincian harga untuk pesanan dengan tambahan khusus.</p>
+        <a className="button" href="/penawaran">
+          Buka penawaran
+        </a>
+      </section>
       <section className="settings-card">
         <h2>Takaran Pro</h2>
         <p>Tambah resep dan saluran sesuai kebutuhan usahamu.</p>

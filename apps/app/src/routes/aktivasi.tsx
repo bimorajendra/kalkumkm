@@ -8,7 +8,7 @@ import { track } from '../lib/analytics';
 
 const apiBaseUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
 
-export function AktivasiRoute() {
+export default function AktivasiRoute() {
   const [code, setCode] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);

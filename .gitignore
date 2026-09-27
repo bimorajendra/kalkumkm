@@ -4,6 +4,7 @@ dist/
 .wrangler/
 coverage/
 playwright-report/
+.lighthouseci/
 test-results/
 .env
 .env.*

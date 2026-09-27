@@ -1,6 +1,7 @@
 import { profitPerPortion, type RecipeResult } from '@takaran/calc';
 import { type IsometricLayer, IsometricStack, ResultCard } from '@takaran/ui';
 import { useState } from 'react';
+import { Link } from 'react-router';
 import { pricingCopy } from '../copy';
 
 interface CalculatorResultProps {
@@ -16,6 +17,10 @@ interface CalculatorResultProps {
   onSavePrice: () => Promise<void>;
   compact?: boolean;
   onDetails?: () => void;
+  channelName?: string;
+  commissionBp?: number;
+  canSavePrice?: boolean;
+  recipeId?: string;
 }
 
 export function CalculatorResult({
@@ -31,37 +36,53 @@ export function CalculatorResult({
   onSavePrice,
   price,
   targetMarginBp,
+  channelName = 'Langsung',
+  commissionBp = 0,
+  canSavePrice = true,
+  recipeId,
 }: CalculatorResultProps) {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
   const belowTarget = marginBp < targetMarginBp;
-  const profit = profitPerPortion(price, hpp, 0);
+  const profit = profitPerPortion(price, hpp, commissionBp);
   const duration = new Intl.NumberFormat('id-ID', {
     maximumFractionDigits: 1,
   }).format(laborMinutes / 60);
   const secondary = hpp.lte(0) ? null : hourlyProfit;
   const actions = (
-    <button
-      className="button button-primary"
-      onClick={async () => {
-        try {
-          await onSavePrice();
-          setSaved(true);
-          setError('');
-          window.setTimeout(() => setSaved(false), 2400);
-        } catch {
-          setError(pricingCopy.saveFailed);
-        }
-      }}
-      type="button"
-    >
-      {saved ? pricingCopy.saved : 'Simpan harga ini'}
-    </button>
+    <>
+      {canSavePrice ? (
+        <button
+          className="button button-primary"
+          onClick={async () => {
+            try {
+              await onSavePrice();
+              setSaved(true);
+              setError('');
+              window.setTimeout(() => setSaved(false), 2400);
+            } catch {
+              setError(pricingCopy.saveFailed);
+            }
+          }}
+          type="button"
+        >
+          {saved ? pricingCopy.saved : 'Simpan harga ini'}
+        </button>
+      ) : null}
+      {recipeId ? (
+        <Link
+          className="button result-share-link"
+          to={`/bagikan?recipe=${encodeURIComponent(recipeId)}`}
+        >
+          Buat gambar daftar harga
+        </Link>
+      ) : null}
+    </>
   );
   const card = (
     <ResultCard
-      actions={actions}
-      label="harga jual per potong"
+      actions={canSavePrice || recipeId ? actions : undefined}
+      label={`harga jual per potong di ${channelName}`}
       marginBp={marginBp}
       markupBp={markupBp}
       onDetails={onDetails}

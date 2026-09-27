@@ -18,13 +18,20 @@ export function evaluateAffectedRecipes(
   results: Map<string, RecipeResult | CalcError>,
   roundingStep: number,
 ): AffectedRecipe[] {
+  const usesIngredient = (recipeId: string, visited: Set<string>): boolean => {
+    if (visited.has(recipeId)) return false;
+    visited.add(recipeId);
+    const recipe = recipes.find((item) => item.id === recipeId);
+    return (
+      recipe?.items.some((item) =>
+        item.refType === 'ingredient'
+          ? item.refId === ingredientId
+          : usesIngredient(item.refId, visited),
+      ) ?? false
+    );
+  };
   return recipes.flatMap((recipe) => {
-    if (
-      recipe.currentPrice === null ||
-      !recipe.items.some(
-        (item) => item.refType === 'ingredient' && item.refId === ingredientId,
-      )
-    ) {
+    if (recipe.currentPrice === null || !usesIngredient(recipe.id, new Set())) {
       return [];
     }
     const result = results.get(recipe.id);

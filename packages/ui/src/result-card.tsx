@@ -38,11 +38,16 @@ export function ResultCard({
       <p className="takaran-result-card__value">{formatRupiah(value)}</p>
       <p className="takaran-result-card__label">{label}</p>
       {compact ? (
-        marginBp !== undefined ? (
-          <p className="takaran-result-card__compact-margin">
-            Margin {formatPercent(marginBp)}
-          </p>
-        ) : null
+        <>
+          {marginBp !== undefined ? (
+            <p className="takaran-result-card__compact-margin">
+              Margin {formatPercent(marginBp)}
+            </p>
+          ) : null}
+          {actions ? (
+            <div className="takaran-result-card__actions">{actions}</div>
+          ) : null}
+        </>
       ) : (
         <>
           {secondaryValue !== undefined && secondaryValue !== null ? (

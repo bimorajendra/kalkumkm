@@ -1,8 +1,9 @@
-export function IsometricGlyph() {
+export function IsometricGlyph({ size = 16 }: { size?: number } = {}) {
   return (
     <svg
       aria-hidden="true"
       className="takaran-isometric-glyph"
+      style={{ width: size, height: size }}
       viewBox="0 0 24 24"
       focusable="false"
     >

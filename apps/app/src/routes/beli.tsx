@@ -26,7 +26,7 @@ const manualReady =
     payment.qrisImage?.startsWith('/') && !payment.qrisImage.startsWith('//'),
   );
 
-export function BeliRoute() {
+export default function BeliRoute() {
   const [turnstileToken, setTurnstileToken] = useState('');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');

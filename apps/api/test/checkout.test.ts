@@ -213,6 +213,19 @@ describe('checkout Mayar', () => {
     expect(details).toHaveLength(1);
   });
 
+  it('membatalkan checkout saat invoice sudah kedaluwarsa', async () => {
+    mockMayar('expired');
+    const { result } = await createCheckout();
+    const response = await app.request(
+      `/v1/checkout/${result.data.orderId}/license`,
+      { headers: { 'X-Claim-Token': result.data.claimToken } },
+      env,
+    );
+    expect(response.status).toBe(202);
+    expect(db.orders[0]?.status).toBe('cancelled');
+    expect(db.licenses).toHaveLength(0);
+  });
+
   it('menyimpan webhook sebelum merespons dan memproses ulang secara idempoten', async () => {
     const details = mockMayar();
     env.LICENSE_PRIVATE_KEY = base64Url(seed);

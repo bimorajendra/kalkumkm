@@ -1,19 +1,28 @@
-﻿import { PRICING } from '@takaran/schema';
+﻿import { unitFactor } from '@takaran/calc';
+import { PRICING } from '@takaran/schema';
 import { formatRupiah } from '@takaran/ui';
 import type { FormEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import type { IngredientRow, RecipeRow } from '../../../db/schema';
 import { listIngredients } from '../../ingredients/repository';
-import { FreeLimitError, ProRequiredError } from '../../license/limits';
+import { PaywallSheet } from '../../license/components/paywall-sheet';
+import {
+  FreeLimitError,
+  hasProLicense,
+  ProRequiredError,
+} from '../../license/limits';
 import { recipeCopy } from '../copy';
 import {
   createRecipe,
   deleteRecipe,
+  listRecipes,
   recipeInputFromForm,
   updateRecipe,
 } from '../repository';
 import { type RecipeFormValues, recipeFormSchema } from '../schema';
+import { IngredientOrRecipePicker } from './ingredient-or-recipe-picker';
 import { RecipeItemRow } from './recipe-item-row';
+import { SubRecipeSettings } from './sub-recipe-settings';
 
 const blank: RecipeFormValues = {
   name: '',
@@ -22,6 +31,9 @@ const blank: RecipeFormValues = {
   energyPerBatch: '0',
   laborMinutesPerBatch: '0',
   laborRatePerHour: '',
+  isSubRecipe: false,
+  subRecipeYieldQty: '1',
+  subRecipeYieldUnit: 'g',
   items: [],
 };
 function valuesFor(recipe?: RecipeRow): RecipeFormValues {
@@ -34,13 +46,15 @@ function valuesFor(recipe?: RecipeRow): RecipeFormValues {
     laborMinutesPerBatch: String(recipe.laborMinutesPerBatch),
     laborRatePerHour:
       recipe.laborRatePerHour === null ? '' : String(recipe.laborRatePerHour),
-    items: recipe.items
-      .filter((item) => item.refType === 'ingredient')
-      .map(({ refId, quantity, unit }) => ({
-        refId,
-        quantity: String(quantity),
-        unit,
-      })),
+    isSubRecipe: recipe.isSubRecipe,
+    subRecipeYieldQty: String(recipe.subRecipeYield?.qty ?? 1),
+    subRecipeYieldUnit: recipe.subRecipeYield?.unit ?? 'g',
+    items: recipe.items.map(({ refType, refId, quantity, unit }) => ({
+      refType,
+      refId,
+      quantity: String(quantity),
+      unit,
+    })),
   };
 }
 
@@ -64,18 +78,23 @@ export function RecipeEditor({
     valuesFor(recipe),
   );
   const [ingredients, setIngredients] = useState<IngredientRow[]>([]);
+  const [recipes, setRecipes] = useState<RecipeRow[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
   const [showPaywallLink, setShowPaywallLink] = useState(false);
+  const [paywallOpen, setPaywallOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
       setValues(valuesFor(recipe));
       setErrors({});
       setMessage('');
-      void listIngredients()
-        .then(setIngredients)
+      void Promise.all([listIngredients(), listRecipes()])
+        .then(([ingredientRows, recipeRows]) => {
+          setIngredients(ingredientRows);
+          setRecipes(recipeRows);
+        })
         .catch(() =>
           setMessage('Daftar bahan belum terbaca. Coba tutup lalu buka lagi.'),
         );
@@ -108,14 +127,28 @@ export function RecipeEditor({
     }));
     setErrors((current) => ({ ...current, [`items.${index}.${field}`]: '' }));
   }
-  function addIngredient(id: string) {
+  function addItem(refType: 'ingredient' | 'recipe', id: string) {
     const ingredient = ingredients.find((item) => item.id === id);
-    if (!ingredient || values.items.some((item) => item.refId === id)) return;
+    const subRecipe = recipes.find((item) => item.id === id);
+    if (
+      values.items.some((item) => item.refType === refType && item.refId === id)
+    )
+      return;
+    if (
+      (refType === 'ingredient' && !ingredient) ||
+      (refType === 'recipe' && !subRecipe?.subRecipeYield)
+    )
+      return;
     setValues((current) => ({
       ...current,
       items: [
         ...current.items,
-        { refId: id, quantity: '1', unit: ingredient.buyUnit },
+        {
+          refType,
+          refId: id,
+          quantity: '1',
+          unit: ingredient?.buyUnit ?? subRecipe?.subRecipeYield?.unit ?? 'g',
+        },
       ],
     }));
   }
@@ -141,9 +174,8 @@ export function RecipeEditor({
       onSaved?.(saved);
       onOpenChange(false);
     } catch (error) {
-      setShowPaywallLink(
-        error instanceof FreeLimitError || error instanceof ProRequiredError,
-      );
+      setShowPaywallLink(error instanceof FreeLimitError);
+      if (error instanceof ProRequiredError) setPaywallOpen(true);
       setMessage(error instanceof Error ? error.message : recipeCopy.saveError);
     } finally {
       setSaving(false);
@@ -155,8 +187,10 @@ export function RecipeEditor({
       await deleteRecipe(recipe.id);
       onDeleted?.();
       onOpenChange(false);
-    } catch {
-      setMessage(recipeCopy.deleteError);
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : recipeCopy.deleteError,
+      );
     }
   }
 
@@ -205,8 +239,18 @@ export function RecipeEditor({
             <ul className="recipe-item-list">
               {values.items.map((item, index) => (
                 <RecipeItemRow
-                  key={`${item.refId}-${index}`}
-                  ingredient={ingredients.find(({ id }) => id === item.refId)}
+                  key={`${item.refType}-${item.refId}-${index}`}
+                  name={
+                    item.refType === 'ingredient'
+                      ? ingredients.find(({ id }) => id === item.refId)?.name
+                      : recipes.find(({ id }) => id === item.refId)?.name
+                  }
+                  missing={
+                    item.refType === 'ingredient'
+                      ? !ingredients.some(({ id }) => id === item.refId)
+                      : !recipes.some(({ id }) => id === item.refId)
+                  }
+                  units={getUnits(item, ingredients, recipes)}
                   index={index}
                   quantity={item.quantity}
                   unit={item.unit}
@@ -227,33 +271,32 @@ export function RecipeEditor({
               ))}
             </ul>
           )}
-          {ingredients.length > 0 ? (
-            <label className="ingredient-label" htmlFor="recipe-add-item">
-              Tambah bahan ke resep
-              <select
-                id="recipe-add-item"
-                value=""
-                onChange={(event) => addIngredient(event.target.value)}
-              >
-                <option value="">Pilih bahan</option>
-                {ingredients
-                  .filter(
-                    (item) =>
-                      !values.items.some(
-                        (selected) => selected.refId === item.id,
-                      ),
-                  )
-                  .map((item) => (
-                    <option value={item.id} key={item.id}>
-                      {item.name}
-                    </option>
-                  ))}
-              </select>
-            </label>
+          {ingredients.length > 0 ||
+          recipes.some((item) => item.isSubRecipe) ? (
+            <IngredientOrRecipePicker
+              ingredients={ingredients}
+              recipes={recipes}
+              currentRecipeId={recipe?.id}
+              selected={values.items}
+              onAdd={addItem}
+            />
           ) : (
             <p className="recipe-no-ingredients">{recipeCopy.noIngredients}</p>
           )}
         </fieldset>
+        <SubRecipeSettings
+          enabled={values.isSubRecipe}
+          quantity={values.subRecipeYieldQty}
+          unit={values.subRecipeYieldUnit}
+          onChange={(field, value) => {
+            if (field === 'isSubRecipe' && value === true) {
+              void hasProLicense().then((isPro) => {
+                if (isPro) update('isSubRecipe', true);
+                else setPaywallOpen(true);
+              });
+            } else setValues((current) => ({ ...current, [field]: value }));
+          }}
+        />
         <div className="recipe-number-fields">
           <label className="ingredient-label" htmlFor="recipe-yield">
             Hasil per adonan (porsi)
@@ -373,6 +416,52 @@ export function RecipeEditor({
           </button>
         </div>
       </form>
+      <PaywallSheet
+        open={paywallOpen}
+        trigger="sub_recipe"
+        onClose={() => setPaywallOpen(false)}
+      />
     </dialog>
   );
+}
+
+function getUnits(
+  item: RecipeFormValues['items'][number],
+  ingredients: IngredientRow[],
+  recipes: RecipeRow[],
+): string[] {
+  const ingredient =
+    item.refType === 'ingredient'
+      ? ingredients.find((row) => row.id === item.refId)
+      : undefined;
+  const subRecipe =
+    item.refType === 'recipe'
+      ? recipes.find((row) => row.id === item.refId)
+      : undefined;
+  const unit = ingredient?.buyUnit ?? subRecipe?.subRecipeYield?.unit;
+  if (!unit) return [];
+  const customUnits = ingredient?.customUnits ?? [];
+  let dimension: string;
+  try {
+    dimension = unitFactor(unit, customUnits).base;
+  } catch {
+    return [unit];
+  }
+  return [
+    ...new Set([
+      'g',
+      'kg',
+      'ml',
+      'l',
+      'butir',
+      'pcs',
+      ...customUnits.map((row) => row.name),
+    ]),
+  ].filter((candidate) => {
+    try {
+      return unitFactor(candidate, customUnits).base === dimension;
+    } catch {
+      return false;
+    }
+  });
 }

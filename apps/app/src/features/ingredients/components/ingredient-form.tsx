@@ -1,6 +1,7 @@
 import type { BaseUnit, Ingredient } from '@takaran/calc';
 import { type FormEvent, useEffect, useRef, useState } from 'react';
 import type { IngredientRow } from '../../../db/schema';
+import { findCommonIngredient } from '../common-ingredients';
 import { ingredientCopy } from '../copy';
 import {
   createIngredient,
@@ -13,6 +14,7 @@ import {
   ingredientFormSchema,
   ingredientInputFromForm,
 } from '../schema';
+import { CommonIngredientPicker } from './common-ingredient-picker';
 import { UnitPicker } from './unit-picker';
 
 interface IngredientFormProps {
@@ -172,9 +174,15 @@ export function IngredientForm({
             id="ingredient-name"
             autoComplete="off"
             autoFocus={!ingredient}
+            list="common-ingredient-suggestions"
             maxLength={60}
             value={values.name}
-            onChange={(event) => change('name', event.target.value)}
+            onChange={(event) => {
+              const name = event.target.value;
+              change('name', name);
+              const suggestion = findCommonIngredient(name);
+              if (suggestion) change('buyUnit', suggestion.buyUnit);
+            }}
             aria-invalid={Boolean(errors.name)}
             aria-describedby={errors.name ? 'ingredient-name-error' : undefined}
           />
@@ -183,6 +191,9 @@ export function IngredientForm({
               {errors.name}
             </span>
           )}
+          {!ingredient ? (
+            <CommonIngredientPicker id="common-ingredient-suggestions" />
+          ) : null}
         </label>
         <label className="ingredient-label" htmlFor="ingredient-price">
           {ingredientCopy.priceLabel}

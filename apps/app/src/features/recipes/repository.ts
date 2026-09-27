@@ -1,5 +1,5 @@
 ﻿import type { Recipe } from '@takaran/calc';
-import { toBaseUnits } from '@takaran/calc';
+import { findCycles, toBaseUnits } from '@takaran/calc';
 import { db } from '../../db/db';
 import type { RecipeRow } from '../../db/schema';
 import { createUlid } from '../../lib/ulid';
@@ -12,7 +12,7 @@ import type { ParsedRecipeFormValues } from './schema';
 
 export class RecipeRepositoryError extends Error {
   constructor(
-    readonly code: 'INVALID' | 'NOT_FOUND' | 'MISSING_REF',
+    readonly code: 'INVALID' | 'NOT_FOUND' | 'MISSING_REF' | 'IN_USE',
     message: string,
   ) {
     super(message);
@@ -41,9 +41,10 @@ export async function createRecipe(input: RecipeInput): Promise<RecipeRow> {
     updatedAt: now,
   };
   const isPro = await hasProLicense();
-  if (input.isSubRecipe && !isPro) throw new ProRequiredError();
+  if ((input.isSubRecipe || hasRecipeRefs(input)) && !isPro)
+    throw new ProRequiredError('sub_recipe');
   await db.transaction('rw', db.ingredients, db.recipes, async () => {
-    await validateRecipe(input);
+    await validateRecipe(input, row.id);
     await assertCanCreate('recipe', isPro);
     await db.recipes.add(row);
   });
@@ -54,12 +55,29 @@ export async function updateRecipe(
   id: string,
   input: RecipeInput,
 ): Promise<RecipeRow> {
+  const isPro = await hasProLicense();
+  if ((input.isSubRecipe || hasRecipeRefs(input)) && !isPro)
+    throw new ProRequiredError('sub_recipe');
   let saved: RecipeRow | undefined;
   await db.transaction('rw', db.ingredients, db.recipes, async () => {
-    await validateRecipe(input);
     const existing = await db.recipes.get(id);
     if (!existing)
       throw new RecipeRepositoryError('NOT_FOUND', 'Resep tidak ditemukan.');
+    await validateRecipe(input, id);
+    const parents = await recipesUsing(id);
+    if (
+      parents.length > 0 &&
+      (!input.isSubRecipe ||
+        !input.subRecipeYield ||
+        !existing.subRecipeYield ||
+        unitDimension(input.subRecipeYield.unit) !==
+          unitDimension(existing.subRecipeYield.unit))
+    ) {
+      throw new RecipeRepositoryError(
+        'IN_USE',
+        `Sub-resep ini dipakai di ${parents.length} resep. Hapus dari resep tersebut sebelum mengubah jenis atau satuan hasilnya.`,
+      );
+    }
     saved = {
       ...existing,
       ...input,
@@ -81,6 +99,12 @@ export async function deleteRecipe(id: string): Promise<void> {
     db.quoteOptions,
     db.settings,
     async () => {
+      const parents = await recipesUsing(id);
+      if (parents.length > 0)
+        throw new RecipeRepositoryError(
+          'IN_USE',
+          `Sub-resep ini dipakai di ${parents.length} resep. Hapus dari resep tersebut dulu.`,
+        );
       await db.recipes.delete(id);
       await db.quoteOptions.where('recipeId').equals(id).delete();
       const lastRecipe = await db.settings.get('lastRecipeId');
@@ -99,30 +123,44 @@ export async function recipeInputFromForm(
       ingredient,
     ]),
   );
+  const recipes = new Map(
+    (await db.recipes.toArray()).map((recipe) => [recipe.id, recipe]),
+  );
   const items = parsed.items.map((item) => {
-    const ingredient = ingredients.get(item.refId);
-    if (!ingredient)
-      throw new RecipeRepositoryError(
-        'MISSING_REF',
-        'Bahan ini sudah dihapus.',
-      );
-    const expected = toBaseUnits(
-      1,
-      ingredient.buyUnit,
-      ingredient.customUnits,
-    ).unit;
-    const actual = toBaseUnits(1, item.unit, ingredient.customUnits).unit;
-    if (expected !== actual)
-      throw new RecipeRepositoryError(
-        'INVALID',
-        `Satuan ${item.unit} tidak cocok dengan ${ingredient.name}.`,
-      );
-    return {
-      refType: 'ingredient' as const,
-      refId: item.refId,
-      quantity: item.quantity,
-      unit: item.unit,
-    };
+    if (item.refType === 'ingredient') {
+      const ingredient = ingredients.get(item.refId);
+      if (!ingredient)
+        throw new RecipeRepositoryError(
+          'MISSING_REF',
+          'Bahan ini sudah dihapus.',
+        );
+      const expected = toBaseUnits(
+        1,
+        ingredient.buyUnit,
+        ingredient.customUnits,
+      ).unit;
+      const actual = toBaseUnits(1, item.unit, ingredient.customUnits).unit;
+      if (expected !== actual)
+        throw new RecipeRepositoryError(
+          'INVALID',
+          `Satuan ${item.unit} tidak cocok dengan ${ingredient.name}.`,
+        );
+    } else {
+      const recipe = recipes.get(item.refId);
+      if (!recipe?.isSubRecipe || !recipe.subRecipeYield)
+        throw new RecipeRepositoryError(
+          'MISSING_REF',
+          'Sub-resep ini sudah dihapus atau tidak tersedia.',
+        );
+      if (
+        unitDimension(item.unit) !== unitDimension(recipe.subRecipeYield.unit)
+      )
+        throw new RecipeRepositoryError(
+          'INVALID',
+          `Satuan ${item.unit} tidak cocok dengan ${recipe.name}.`,
+        );
+    }
+    return { ...item };
   });
   return {
     name: parsed.name,
@@ -136,12 +174,14 @@ export async function recipeInputFromForm(
       .get('defaultMarginBp')
       .then((row) => (typeof row?.value === 'number' ? row.value : 4000)),
     currentPrice: null,
-    isSubRecipe: false,
-    subRecipeYield: null,
+    isSubRecipe: parsed.isSubRecipe,
+    subRecipeYield: parsed.isSubRecipe
+      ? { qty: parsed.subRecipeYieldQty, unit: parsed.subRecipeYieldUnit }
+      : null,
   };
 }
 
-async function validateRecipe(input: RecipeInput): Promise<void> {
+async function validateRecipe(input: RecipeInput, id: string): Promise<void> {
   if (
     !input.name.trim() ||
     input.name.trim().length > 60 ||
@@ -169,40 +209,114 @@ async function validateRecipe(input: RecipeInput): Promise<void> {
       'Biaya dan waktu harus berupa bilangan bulat nol atau lebih.',
     );
   }
-  const refs = input.items.map((item) => item.refId);
+  const refs = input.items.map((item) => `${item.refType}:${item.refId}`);
   if (new Set(refs).size !== refs.length)
     throw new RecipeRepositoryError(
       'INVALID',
-      'Bahan yang sama cukup ditambahkan sekali.',
+      'Bahan yang sama atau sub-resep yang sama cukup ditambahkan sekali.',
     );
+  if (
+    input.isSubRecipe !== Boolean(input.subRecipeYield) ||
+    (input.subRecipeYield &&
+      (!Number.isFinite(input.subRecipeYield.qty) ||
+        input.subRecipeYield.qty <= 0 ||
+        !isKnownUnit(input.subRecipeYield.unit)))
+  )
+    throw new RecipeRepositoryError('INVALID', 'Hasil sub-resep tidak valid.');
   const ingredients = new Map(
     (await db.ingredients.toArray()).map((ingredient) => [
       ingredient.id,
       ingredient,
     ]),
   );
+  const recipes = new Map(
+    (await db.recipes.toArray()).map((recipe) => [recipe.id, recipe]),
+  );
   for (const item of input.items) {
     if (!Number.isFinite(item.quantity) || item.quantity <= 0)
       throw new RecipeRepositoryError('INVALID', 'Takaran harus lebih dari 0.');
-    const ingredient = ingredients.get(item.refId);
-    if (!ingredient)
-      throw new RecipeRepositoryError(
-        'MISSING_REF',
-        'Bahan ini sudah dihapus.',
-      );
     try {
-      if (
-        toBaseUnits(1, ingredient.buyUnit, ingredient.customUnits).unit !==
-        toBaseUnits(1, item.unit, ingredient.customUnits).unit
-      )
-        throw new Error();
-    } catch {
+      if (item.refType === 'ingredient') {
+        const ingredient = ingredients.get(item.refId);
+        if (!ingredient)
+          throw new RecipeRepositoryError(
+            'MISSING_REF',
+            'Bahan ini sudah dihapus.',
+          );
+        if (
+          toBaseUnits(1, ingredient.buyUnit, ingredient.customUnits).unit !==
+          toBaseUnits(1, item.unit, ingredient.customUnits).unit
+        )
+          throw new Error();
+      } else {
+        const subRecipe = recipes.get(item.refId);
+        if (!subRecipe?.isSubRecipe || !subRecipe.subRecipeYield)
+          throw new RecipeRepositoryError(
+            'MISSING_REF',
+            'Sub-resep ini sudah dihapus atau tidak tersedia.',
+          );
+        if (
+          unitDimension(item.unit) !==
+          unitDimension(subRecipe.subRecipeYield.unit)
+        )
+          throw new Error();
+      }
+    } catch (error) {
+      if (error instanceof RecipeRepositoryError) throw error;
       throw new RecipeRepositoryError(
         'INVALID',
         'Satuan takaran tidak cocok dengan bahan.',
       );
     }
   }
+  const candidate: Recipe = { ...input, id };
+  const graph: Recipe[] = [...recipes.values()].filter(
+    (recipe) => recipe.id !== id,
+  );
+  graph.push(candidate);
+  if (findCycles(graph).some((cycle) => cycle.includes(id)))
+    throw new RecipeRepositoryError(
+      'INVALID',
+      'Adonan dasar tidak bisa memakai dirinya sendiri.',
+    );
+}
+
+function hasRecipeRefs(input: RecipeInput): boolean {
+  return input.items.some((item) => item.refType === 'recipe');
+}
+
+function isKnownUnit(unit: string): boolean {
+  try {
+    toBaseUnits(1, unit);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function unitDimension(unit: string): string {
+  return toBaseUnits(1, unit).unit;
+}
+
+async function recipesUsing(id: string): Promise<RecipeRow[]> {
+  const recipes = await db.recipes.toArray();
+  const uses = (
+    recipe: RecipeRow,
+    target: string,
+    visited: Set<string>,
+  ): boolean => {
+    if (visited.has(recipe.id)) return false;
+    visited.add(recipe.id);
+    return recipe.items.some((item) => {
+      if (item.refType !== 'recipe') return false;
+      if (item.refId === target) return true;
+      const child = recipes.find((entry) => entry.id === item.refId);
+      return child ? uses(child, target, visited) : false;
+    });
+  };
+  return recipes.filter(
+    (recipe) => recipe.id !== id && uses(recipe, id, new Set()),
+  );
 }
 
 export async function claimFirstHppEvent(): Promise<{

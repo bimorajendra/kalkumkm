@@ -35,8 +35,12 @@ export const recipeFormSchema = z
     laborRatePerHour: z
       .union([z.literal(''), rupiah])
       .transform((value) => (value === '' ? null : value)),
+    isSubRecipe: z.boolean(),
+    subRecipeYieldQty: positiveDecimal,
+    subRecipeYieldUnit: z.string().min(1, 'Pilih satuan hasil.'),
     items: z.array(
       z.object({
+        refType: z.enum(['ingredient', 'recipe']),
         refId: z.string().min(1),
         quantity: positiveDecimal,
         unit: z.string().min(1, 'Pilih satuan.'),
@@ -46,14 +50,15 @@ export const recipeFormSchema = z
   .superRefine((value, context) => {
     const seen = new Set<string>();
     value.items.forEach((item, index) => {
-      if (seen.has(item.refId)) {
+      const key = `${item.refType}:${item.refId}`;
+      if (seen.has(key)) {
         context.addIssue({
           code: 'custom',
           path: ['items', index, 'refId'],
-          message: 'Bahan yang sama cukup ditambahkan sekali.',
+          message: 'Bahan atau sub-resep yang sama cukup ditambahkan sekali.',
         });
       }
-      seen.add(item.refId);
+      seen.add(key);
     });
   });
 

@@ -11,6 +11,7 @@
     "test:calc:coverage": "vitest run --coverage",
     "test:calc:bench": "vitest bench packages/calc/bench/recalc.bench.ts",
     "test:e2e": "playwright test",
+    "test:lighthouse": "lhci autorun --config=lighthouserc.json",
     "typecheck": "pnpm --recursive --if-present typecheck",
     "lint": "biome check .",
     "build": "pnpm --recursive --if-present build",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@biomejs/biome": "2.3.8",
+    "@lhci/cli": "0.15.1",
     "@playwright/test": "1.56.1",
     "@size-limit/file": "11.2.0",
     "@types/node": "22.19.1",

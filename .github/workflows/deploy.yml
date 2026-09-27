@@ -1,0 +1,82 @@
+name: Release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: read
+concurrency:
+  group: production-release
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.6.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm test:calc:bench
+      - run: pnpm build
+      - run: pnpm size
+      - run: pnpm test:e2e
+      - run: pnpm test:lighthouse
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-build
+          path: |
+            apps/app/dist
+            apps/web/dist
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-release-reports
+          path: .lighthouseci
+          if-no-files-found: ignore
+  deploy:
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      PAGES_APP_PROJECT: ${{ vars.PAGES_APP_PROJECT }}
+      PAGES_WEB_PROJECT: ${{ vars.PAGES_WEB_PROJECT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.6.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-build
+          path: .
+      - name: Validate deployment settings
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$PAGES_APP_PROJECT"
+          test -n "$PAGES_WEB_PROJECT"
+      - name: Apply D1 migrations
+        run: pnpm --filter @takaran/api exec wrangler d1 migrations apply takaran-orders --remote
+      - name: Deploy Worker
+        run: pnpm --filter @takaran/api exec wrangler deploy
+      - name: Deploy app and landing
+        shell: bash
+        run: |
+          pnpm --filter @takaran/api exec wrangler pages deploy ../../apps/app/dist --project-name "$PAGES_APP_PROJECT" --branch main
+          pnpm --filter @takaran/api exec wrangler pages deploy ../../apps/web/dist --project-name "$PAGES_WEB_PROJECT" --branch main

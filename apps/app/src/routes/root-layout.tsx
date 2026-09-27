@@ -8,6 +8,7 @@ const links = [
   { to: '/bahan', label: 'Bahan' },
   { to: '/resep', label: 'Resep' },
 ];
+const desktopLinks = [...links, { to: '/penawaran', label: 'Penawaran' }];
 const tabInitials: Record<string, string> = {
   Hitung: 'H',
   Bahan: 'B',
@@ -27,7 +28,7 @@ export function RootLayout() {
         </NavLink>
         <InstallButton />
         <nav aria-label="Navigasi utama" className="desktop-nav">
-          {links.map((link) => (
+          {desktopLinks.map((link) => (
             <NavLink end={link.to === '/'} key={link.to} to={link.to}>
               {link.label === 'Hitung' ? 'Kalkulator' : link.label}
             </NavLink>

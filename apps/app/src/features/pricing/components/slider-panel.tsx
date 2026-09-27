@@ -1,7 +1,11 @@
 import { SegmentedSlider } from '@takaran/ui';
+import type { ChannelRow } from '../../../db/schema';
 
 interface SliderPanelProps {
   targetMarginBp: number;
+  channels: ChannelRow[];
+  selectedChannelId: string;
+  onChannelChange: (id: string) => void;
   laborMinutesPerBatch: number;
   onTargetMarginChange: (value: number) => void;
   onLaborMinutesChange: (value: number) => void;
@@ -21,12 +25,36 @@ export function SliderPanel({
   onLaborMinutesChange,
   onTargetMarginChange,
   targetMarginBp,
+  channels,
+  selectedChannelId,
+  onChannelChange,
 }: SliderPanelProps) {
+  const selectedIndex = Math.max(
+    0,
+    channels.findIndex((channel) => channel.id === selectedChannelId),
+  );
   return (
     <section
       aria-label="Atur target untung dan waktu kerja"
       className="calculator-sliders"
     >
+      {channels.length > 1 ? (
+        <SegmentedSlider
+          label="Saluran jual"
+          stops={channels.map((channel, index) => ({
+            value: index,
+            label: channel.name,
+          }))}
+          value={selectedIndex}
+          onChange={(index) => {
+            const channel = channels[Math.round(index)];
+            if (channel) onChannelChange(channel.id);
+          }}
+          formatValueText={(index) =>
+            channels[Math.round(index)]?.name ?? 'Saluran jual'
+          }
+        />
+      ) : null}
       <SegmentedSlider
         allowCustom
         customRange={[100, 9000]}
