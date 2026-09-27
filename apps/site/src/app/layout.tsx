@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
-import { headers } from 'next/headers';
 import './globals.css';
 
 const jakarta = localFont({
@@ -37,19 +36,15 @@ export const metadata: Metadata = {
   icons: { icon: '/icon.svg' },
 };
 
-export const viewport: Viewport = { themeColor: '#fbf6f1' };
+export const viewport: Viewport = { themeColor: '#fcf8f5' };
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
-    <html lang="id" suppressHydrationWarning className={jakarta.variable}>
-      <head>
-        <script nonce={nonce} src="/theme-init.js" />
-      </head>
+    <html lang="id" data-theme="light" className={jakarta.variable}>
       <body>{children}</body>
     </html>
   );

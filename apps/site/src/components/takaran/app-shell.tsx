@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { useSnapshot } from './data-provider';
-import { ThemeToggle } from './theme-toggle';
 
 const tabs = [
   { href: '/hitung', label: 'Hitung', icon: Calculator },
@@ -100,9 +99,6 @@ export function AppShell({
                 <Link href="/beli">Lihat Pro</Link>
               </Button>
             )}
-            <span className="hidden lg:inline-flex">
-              <ThemeToggle />
-            </span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="rounded-full">

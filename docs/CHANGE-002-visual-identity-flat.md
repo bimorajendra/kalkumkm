@@ -35,6 +35,15 @@ Ditemukan lewat tangkapan layar Playwright sungguhan terhadap `pnpm dev`, bukan 
 3. **Baris bahan di HP tidak konsisten**: harga kadang sejajar nama, kadang jatuh ke kiri bawah, tergantung panjang teks nama bahan (`flex-wrap` otomatis). Diganti pola tegas: selalu tersusun vertikal di HP (`flex-col`), selalu sejajar di `sm:` ke atas.
 4. **Tombol mengambang "Tambah bahan" menutupi baris bahan terakhir di HP** karena `<Page>` tidak diberi jarak bawah yang cukup untuk tempat tombol itu. Ditambahkan `pb-36` pada halaman Bahan.
 
+## Susulan: warna segmen batang biaya (27 September 2026)
+
+Setelah CHANGE-002 pertama, pemilik menilai warna belum sesuai referensi. Ditemukan lewat tangkapan layar: token `--tan-100..400` (dipakai untuk segmen Bahan/Energi/Kemasan pada batang biaya) adalah cokelat-krem pudar, sedangkan referensi memakai satu keluarga oranye yang senada untuk seluruh elemen data (persis seperti gauge oranye di referensi *Fleet insights*). Warna pudar itu terlihat "putus" dari gradasi oranye kartu hasil di sekitarnya.
+
+- `--tan-100..400` diubah dari cokelat-krem (`#f3e6d8`…`#c49a74`) menjadi anak tangga oranye muda ke sedang (`#ffe9d2`, `#ffd3a8`, `#ffb977`, `#f5984a`) yang menyambung ke `--caramel-500` (oranye Untung) sebagai anak tangga paling gelap/jenuh.
+- Segmen batang biaya (`packages/ui/src/isometric-stack.tsx`) diberi garis pemisah tipis 1 px (`color-mix` dengan `--ink`) supaya batas antar segmen tetap jelas walau warnanya senada.
+- Garis pemisah antar baris menu pada gambar daftar harga yang dibagikan (`price-list-image.tsx`) sebelumnya salah memakai `--tan-200` (kini jadi oranye terang, bukan garis tipis lagi); diperbaiki memakai `--line`, token yang memang untuk garis pemisah dekoratif.
+- `--tan-*` tidak dipakai di tempat lain selain batang biaya dan (yang baru diperbaiki) garis daftar harga, jadi tidak ada regresi lain.
+
 ## Sudah diverifikasi
 
 - `pnpm lint`, `pnpm typecheck`, `pnpm test` (65 test) lulus.

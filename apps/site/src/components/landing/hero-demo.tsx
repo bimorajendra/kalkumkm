@@ -20,7 +20,7 @@ export function HeroDemo() {
 
   return (
     <div className="grid gap-4">
-      <div className="grid gap-4 rounded-xl bg-secondary p-5">
+      <div className="grid gap-4 rounded-[var(--radius-card)] bg-secondary p-5">
         <div className="grid gap-1.5">
           <label
             htmlFor="egg-price"

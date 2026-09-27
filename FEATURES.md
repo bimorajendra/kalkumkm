@@ -44,7 +44,7 @@ Persona: **Rina** (penjual kue dan hampers, pembeli pertama) dan **Dimas** (froz
 | F1 | Mesin hitung HPP (`packages/calc`) | CR-01 s.d. CR-10, NFR-04 | High | Semua rumus CR tersedia sebagai fungsi murni; contoh brownies PRD bagian 7 menghasilkan angka persis (bahan Rp 27.800, HPP Rp 2.925, harga Rp 5.000, margin 4150 bp, markup 7094 bp, ojol Rp 7.500, untung/jam Rp 22.133, margin 3850 bp setelah telur Rp 2.600); property test margin lulus; siklus sub-resep terdeteksi; cakupan baris ≥ 95% |
 | F2 | Penyimpanan lokal di perangkat | FR-23, NFR-05 | Medium | Data usaha tersimpan di IndexedDB lewat Dexie dengan skema TECH 7.1; `navigator.storage.persist()` dipanggil saat pertama buka; tidak ada data resep, bahan, atau harga yang dikirim ke jaringan |
 | F3 | PWA offline dan pembaruan | FR-23, NFR-03 | Medium | Setelah kunjungan pertama, kalkulasi, data lokal, dan aktivasi lisensi bekerja offline; checkout dan klaim kode membutuhkan koneksi; aplikasi bisa dipasang dan pembaruan tidak memuat ulang saat pengguna mengetik |
-| F4 | Token desain dan tema terang/gelap | NFR-06, DESIGN 4 dan 5 | Low | Semua warna dan tipografi berasal dari token DESIGN.md; toggle tema tersedia, default mengikuti sistem, pilihan tersimpan; kedua tema lolos kontras WCAG AA |
+| F4 | Token desain dan tema terang | NFR-06, DESIGN 4 dan 5 | Low | Semua warna dan tipografi berasal dari token DESIGN.md; semua halaman memakai palet hangat yang sama dan tetap terang pada preferensi perangkat apa pun; kontras WCAG AA |
 
 ### Bahan
 

@@ -83,7 +83,7 @@ export const PriceListImage = forwardRef<SVGSVGElement, PriceListImageProps>(
             <g key={menu.id}>
               <path
                 d={`M88 ${y + Math.floor(rowHeight * 0.34)}h904`}
-                stroke="var(--tan-200)"
+                stroke="var(--line)"
                 strokeWidth="2"
               />
               <text

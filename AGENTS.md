@@ -73,7 +73,7 @@ Tanpa abstraksi, fitur, atau scaffolding yang tidak diminta. Menghapus lebih bai
 - Hapus hanya kode yang menjadi usang karena perubahanmu. Kode mati lama cukup dilaporkan.
 
 ### 4. Selesai berarti terverifikasi
-- Jalankan `pnpm typecheck`, `pnpm lint`, dan test yang relevan sampai lulus. Untuk UI, jalankan aplikasinya dan cek di lebar 320 px dan 1280 px, kedua tema, dan hanya keyboard.
+- Jalankan `pnpm typecheck`, `pnpm lint`, dan test yang relevan sampai lulus. Untuk UI, jalankan aplikasinya dan cek di lebar 320 px dan 1280 px, pastikan tetap terang saat perangkat memakai mode gelap, dan gunakan hanya keyboard.
 - Jangan menyatakan selesai hanya dari membaca kode.
 - Laporkan hasil apa adanya. Jika ada cek yang gagal atau dilewati, katakan beserta buktinya.
 

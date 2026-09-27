@@ -101,7 +101,7 @@ Pro adalah satu baris `entitlements` per akun. Hanya dua jalur yang menulisnya: 
 | Domain dan penyimpanan | Vitest + PGlite (Postgres sungguhan di dalam proses) | Isolasi antar akun, batas gratis, dua permintaan bersamaan, sub-resep, alarm margin |
 | Pembayaran | Vitest + Mayar palsu | Belum bayar, sukses, kedaluwarsa, nominal/email salah, webhook ganda, gagal lalu ulang, refund |
 | Skema auth | Vitest | Skema Drizzle mencakup semua field yang dibutuhkan Better Auth |
-| UI dan alur | Playwright + axe, lebar 320 dan 1280, tema terang dan gelap | J-1 sampai J-4, isolasi, admin, batas gratis, hapus akun, tanpa scroll horizontal |
+| UI dan alur | Playwright + axe, lebar 320 dan 1280, tema tetap terang saat preferensi sistem gelap | J-1 sampai J-4, isolasi, admin, batas gratis, hapus akun, tanpa scroll horizontal |
 
 `E2E_DATABASE_URL=postgres://...` menjalankan E2E terhadap Postgres sungguhan (bawaannya PGlite).
 

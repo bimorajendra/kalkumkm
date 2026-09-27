@@ -29,7 +29,7 @@ pnpm dev          # http://localhost:3000
 pnpm lint         # Biome
 pnpm typecheck    # tsc --noEmit
 pnpm test         # Vitest (rumus, aturan bisnis, penyimpanan, pembayaran)
-pnpm test:e2e     # Playwright + axe (lebar 320 dan 1280, tema terang dan gelap)
+pnpm test:e2e     # Playwright + axe (lebar 320 dan 1280, termasuk preferensi sistem gelap)
 pnpm build && pnpm size   # build + cek anggaran ukuran
 ```
 

@@ -16,7 +16,7 @@ Jangan buat tag `v1.0.0` sebelum semua item wajib dicentang. Tidak ada nilai rah
 ## Pemeriksaan kode
 
 - [ ] `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm size` lulus
-- [ ] `pnpm test:e2e` lulus (lebar 320 dan 1280, tema terang dan gelap); idealnya juga dengan `E2E_DATABASE_URL` ke Postgres sungguhan
+- [ ] `pnpm test:e2e` lulus (lebar 320 dan 1280, tema tetap terang saat preferensi sistem terang maupun gelap); idealnya juga dengan `E2E_DATABASE_URL` ke Postgres sungguhan
 - [ ] `docker build` berhasil dan `docker compose up` menyalakan semua layanan
 - [ ] Contoh brownies PRD bagian 7 menghasilkan angka yang sama di kartu hasil
 - [ ] Delivery Gate antislop punya bukti untuk semua blok tanpa FAIL

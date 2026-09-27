@@ -36,7 +36,7 @@ export function SliderPanel({
   return (
     <section
       aria-label="Atur target untung dan waktu kerja"
-      className="grid gap-6 rounded-xl bg-secondary p-5 sm:p-6"
+      className="grid gap-6 rounded-[var(--radius-card)] bg-secondary p-5 sm:p-6"
     >
       {channels.length > 1 ? (
         <SegmentedSlider

@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { deleteAccount } from '@/app/(app)/lainnya/actions';
 import { useSnapshot } from '@/components/takaran/data-provider';
 import { Page, PageTitle } from '@/components/takaran/page';
-import { ThemeToggle } from '@/components/takaran/theme-toggle';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -87,10 +86,6 @@ export function SettingsScreen({
               {plan === 'pro' ? 'Lihat detail' : 'Lihat paket Pro'}
             </Link>
           </Button>
-        </Card>
-        <Card title="Tampilan">
-          <p>Pilih tema yang nyaman untuk dipakai.</p>
-          <ThemeToggle withLabel />
         </Card>
         <Card title="Datamu">
           <p>Unduh semua bahan, resep, dan pengaturanmu sebagai satu berkas.</p>

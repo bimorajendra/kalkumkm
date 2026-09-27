@@ -269,7 +269,7 @@ function CalculatorScreen({
   );
 
   return (
-    <Page className="grid gap-6 pb-56 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-12 lg:pb-12">
+    <Page className="grid gap-6 pb-56 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:gap-12 lg:pb-12">
       <div className="grid content-start gap-5">
         <MarginAlarm />
         <section aria-labelledby="calculator-title" className="grid gap-5">

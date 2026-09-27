@@ -1,7 +1,6 @@
 # DESIGN.md: Takaran (nama kerja)
 
-> **Diubah oleh `docs/CHANGE-002-visual-identity-flat.md` (27 September 2026):** judul dan angka besar pindah dari serif ke sans-serif tebal, motif tumpukan isometrik diganti batang flat + legenda, ikon dekoratif isometrik diganti ikon lucide, dan kartu konten memakai bayangan lembut. Bagian tipografi (§5), motif isometrik (§9.6, §9.10), dan aturan elevasi "kartu lain datar dengan garis" (§6, §14) di dokumen ini **tidak berlaku lagi**; lihat dokumen itu untuk rinciannya. Warna, layout, dan bahasa tetap seperti di bawah.
-
+> **Arah pemilik (27 September 2026):** palet hangat dari referensi Kindly dipakai di seluruh halaman dan tema dikunci terang. Landing memakai bingkai putih membulat di atas latar aprikot, bidang peach lembut untuk menghubungkan section, dan judul serif sistem. Layout mengikuti konten Takaran tanpa menyalin elemen finance yang tidak relevan. Perubahan ini menggantikan pengecualian tipografi di `docs/CHANGE-002-visual-identity-flat.md`; ilustrasi data tetap memakai grafik yang sudah berfungsi.
 > Arah visual untuk aplikasi kalkulator HPP dan landing page-nya. File ini adalah **data arah desain** yang dibaca bersama `antislop.md` (filter). `antislop.md` menyaring slop; file ini memberi karakter.
 > Kebutuhan fungsional ada di `PRD.md`. Jika keduanya bertentangan, `PRD.md` yang menang untuk fungsi, file ini yang menang untuk tampilan.
 > Status: Draf v0.2, 25 September 2026.
@@ -18,6 +17,8 @@ Dua referensi visual dari pemilik produk. Keduanya dipakai sebagai inspirasi, bu
 | **B. Landing page keuangan bernuansa oranye** | Latar krem hangat. Judul serif ramping yang terasa "buku resep". Gradasi oranye-peach hanya di satu area fokus. Tombol utama kapsul gelap. Kartu produk yang memperlihatkan UI nyata. | Lencana "#1 AI Finance platform" (R-09, R-16, R-36). "4.9/5 Reviews" dan avatar (R-17, R-18). Deretan logo perusahaan (R-05). Testimoni tanpa orang nyata (R-18, R-38). Proses "Step 01/02/03" (R-05). Footer 4 kolom (R-05). Glow oranye di banyak elemen sekaligus (R-13). Tombol oranye bertulisan putih (kontras 2,8:1, gagal R-25). |
 
 **Keputusan palet:** kedua referensi punya warna berbeda (biru vs oranye). Produk ini memakai **satu palet hangat** (krem, cokelat kakao, karamel oranye) untuk aplikasi dan landing page. Alasan: produk ini untuk dapur kue rumahan, dan warna karamel langsung terbaca "kue", sedangkan biru terbaca "keuangan/kripto". Tata letak tetap mengikuti referensi A.
+
+**Penyempurnaan tampilan (27 September 2026):** warna krem dibuat lebih terang dan panel form lebih peach seperti referensi Kindly; kartu hasil memakai gradasi peach-oranye dan bayangan lembut sebagai fokus. Kalkulator desktop menyeimbangkan kolom input dan hasil (6:5); pada HP, alur dan ringkasan hasil tetap seperti semula. Penyesuaian ini hanya menyentuh presentasi, tidak mengubah input, copy, atau perhitungan.
 
 ---
 
@@ -88,43 +89,30 @@ Semua ilustrasi memakai palet bagian 4 saja.
 
 | Token | Hex | Peran |
 |---|---|---|
-| `--bg` | `#FBF6F1` | Latar halaman (krem) |
+| `--bg` | `#FCF8F5` | Latar halaman (krem terang) |
 | `--surface` | `#FFFFFF` | Kartu, input |
-| `--surface-soft` | `#F5ECE3` | Panel slider, baris tabel selang-seling, kotak catatan |
-| `--line` | `#E7D9CB` | Garis pemisah dekoratif (bukan batas kontrol) |
+| `--surface-soft` | `#F7EEE9` | Panel form peach lembut, baris tabel selang-seling, kotak catatan |
+| `--line` | `#EADBD2` | Garis pemisah dekoratif (bukan batas kontrol) |
 | `--ink` | `#2B1D14` | Teks utama (cokelat kakao, bukan hitam murni) |
 | `--ink-muted` | `#6E5A4B` | Teks sekunder, label satuan |
-| `--caramel-300` | `#FFC08A` | Ujung terang gradasi kartu hasil |
-| `--caramel-400` | `#FF9A4D` | Isi slider aktif, tengah gradasi |
+| `--caramel-300` | `#FFC4A8` | Ujung terang peach pada gradasi kartu hasil |
+| `--caramel-400` | `#FF9C6D` | Isi slider aktif, tengah gradasi |
 | `--caramel-500` | `#F07A1F` | Aksen utama: lempeng Untung, ujung gelap gradasi |
 | `--caramel-600` | `#C85A0C` | Batas kontrol aktif, thumb slider, teks besar (≥ 24 px) |
 | `--caramel-700` | `#9E4308` | Teks tautan dan teks oranye ukuran normal |
-| `--peach-100` | `#FFE3CC` | Latar chip dan latar alarm margin |
-| `--tan-100` … `--tan-400` | `#F3E6D8`, `#E8D2BC`, `#D9B99A`, `#C49A74` | Lempeng isometrik non-untung saja |
+| `--peach-100` | `#FFE5D9` | Latar chip dan latar alarm margin |
+| `--tan-100` … `--tan-400` | `#FFE9D2`, `#FFD3A8`, `#FFB977`, `#F5984A` | Segmen batang biaya selain untung |
 | `--danger` | `#B42318` | Rugi, error |
 | `--success` | `#1E7A4C` | Margin di atas target |
 
-### 4.2 Token (mode gelap)
+### 4.2 Palet yang dipakai
 
-| Token | Hex |
-|---|---|
-| `--bg` | `#17110D` |
-| `--surface` | `#221913` |
-| `--surface-soft` | `#2C211A` |
-| `--line` | `#3A2C22` |
-| `--ink` | `#F6EDE4` |
-| `--ink-muted` | `#C4B2A3` |
-| `--caramel-400` | `#FF9A4D` (teks dan aksen) |
-| `--caramel-300` | `#FFC08A` (tautan) |
-| `--danger` | `#F97066` |
-| `--success` | `#4ADE8A` |
-
-Kartu hasil di mode gelap tetap bergradasi karamel dengan teks `#2B1D14`, karena itu titik fokusnya.
+Token di bagian 4.1 adalah satu-satunya palet produk. Nilai latar, panel, teks, dan aksen dipakai sama pada landing maupun halaman aplikasi.
 
 ### 4.3 Aturan pakai
 
 1. **Palet inti:** kakao (ink), karamel, krem. **Satu aksen:** karamel-500, dan artinya selalu "untung". Jangan pakai karamel untuk hal yang bukan uang atau aksi utama.
-2. **Gradasi hanya satu tempat:** kartu hasil kalkulator dan kartu demo di hero landing page, arah 160°, `--caramel-300` ke `--caramel-500`. Alasan (R-01): menandai satu titik fokus per layar. Tidak ada gradasi di latar halaman, tombol, atau ikon.
+2. **Gradasi fokus:** kartu hasil kalkulator dan kartu demo memakai arah 160° dari `--caramel-300` ke `--caramel-500` untuk menandai hasil. Landing boleh memakai satu gradasi vertikal tipis pada bidang tengah agar perpindahan antarbagian terasa halus seperti referensi. Tombol dan ikon tidak memakai gradasi.
 3. **Teks di atas oranye selalu `--ink`,** tidak pernah putih. Putih di atas `#F07A1F` hanya 2,80:1.
 4. **Tombol utama:** kapsul `--ink` dengan teks putih (16,3:1), mengikuti referensi B.
 5. Hijau dan merah hanya untuk status margin, tidak untuk dekorasi.
@@ -147,34 +135,31 @@ Kartu hasil di mode gelap tetap bergradasi karamel dengan teks `#2B1D14`, karena
 | putih di caramel-500 | 2,80 | **Dilarang** untuk teks |
 | danger di surface | 6,57 | Semua teks |
 | success di surface | 5,33 | Semua teks |
-| Gelap: ink di surface | 14,92 | Semua teks |
-| Gelap: ink-muted di surface | 8,42 | Semua teks |
-| Gelap: caramel-400 di surface | 8,21 | Teks dan aksen |
-| Gelap: danger di surface | 6,20 | Semua teks |
-| Gelap: success di surface | 9,95 | Semua teks |
 
 `--line` (1,38:1) hanya untuk pemisah dekoratif. Batas input dan kontrol wajib memakai `--ink-muted` atau `--caramel-600` agar mencapai 3:1.
 
 ### 4.5 Tema
 
-Tidak ada alasan kuat untuk memaksa satu tema, jadi **toggle terang/gelap dibangun sejak MVP** dan default mengikuti pengaturan sistem (R-21, R-34). Kedua mode wajib diuji.
+Tema terang dikunci untuk semua halaman agar latar krem, panel putih-peach, dan aksen karamel tetap konsisten dengan referensi visual. Tidak ada toggle tema atau dukungan mode gelap. Uji juga saat perangkat memilih mode gelap untuk memastikan halaman tetap terang.
 
 ---
 
 ## 5. Tipografi
 
+Judul dan angka besar memakai serif sistem yang tersedia; teks UI memakai Plus Jakarta Sans lokal. Ini mengikuti referensi visual tanpa mengunduh font baru.
+
 | Peran | Font | Alasan |
 |---|---|---|
-| Display: judul, angka hasil besar | **Instrument Serif** (Google Fonts) | Serif ramping seperti referensi B; terasa seperti buku resep, bukan dasbor bank. Membuat angka hasil terasa "istimewa" |
-| UI: teks, label, tabel, tombol | **Plus Jakarta Sans** (Google Fonts), 400/500/600/700 | Dirancang untuk Jakarta, terasa lokal, jelas di ukuran kecil di layar HP. Wajib cek dukungan `tnum`; jika tidak tersedia, kolom angka di tabel memakai `Inter` dengan `tabular-nums` |
+| Display: judul, angka hasil besar | **Georgia**, dengan fallback serif sistem | Memberi karakter buku resep pada judul sesuai referensi, tanpa menambah font eksternal |
+| UI: teks, label, tabel, tombol | **Plus Jakarta Sans** (font lokal), 400/500/600/700 | Dirancang untuk Jakarta, terasa lokal, jelas di ukuran kecil di layar HP. Wajib cek dukungan `tnum`; jika tidak tersedia, kolom angka di tabel memakai `Inter` dengan `tabular-nums` |
 
 ### Skala
 
 | Token | Ukuran / tinggi baris | Font | Dipakai untuk |
 |---|---|---|---|
-| `display-xl` | 64/64 (desktop), 44/46 (HP) | Instrument Serif | Judul hero landing |
-| `display-num` | 72/72 (desktop), 52/54 (HP) | Instrument Serif | Harga jual disarankan di kartu hasil |
-| `display-l` | 44/48, HP 34/38 | Instrument Serif | Judul layar ("Hitung untung brownies") |
+| `display-xl` | 64/64 (desktop), 44/46 (HP) | Georgia atau serif sistem | Judul hero landing |
+| `display-num` | 72/72 (desktop), 52/54 (HP) | Georgia atau serif sistem | Harga jual disarankan di kartu hasil |
+| `display-l` | 44/48, HP 34/38 | Georgia atau serif sistem | Judul layar ("Hitung untung brownies") |
 | `title` | 20/28, 600 | Plus Jakarta Sans | Judul panel ("Target untung", "Saluran jual") |
 | `body` | 16/24, 400 | Plus Jakarta Sans | Teks umum. Minimum 16 px di input agar HP tidak zoom |
 | `label` | 14/20, 500 | Plus Jakarta Sans | Label slider, satuan |
@@ -228,8 +213,9 @@ Aturan:
 ## 9. Komponen
 
 ### 9.1 Navbar kapsul (desktop dan landing)
-- Kapsul putih melayang, radius penuh, bayangan tingkat 1, lebar menyesuaikan isi, di tengah.
-- Isi aplikasi: wordmark `[LOGO]` teks "Takaran", lalu Kalkulator, Bahan, Resep, Penawaran, lalu tombol ikon tema. Item aktif memakai latar `--surface-soft` dan teks `--ink` tebal.
+- Landing diletakkan di dalam bingkai putih membulat di atas latar aprikot. Bingkai memberi batas visual halaman penuh dan tetap menyisakan gutter yang cukup pada HP.
+- Kapsul navbar putih melayang, radius penuh, bayangan tingkat 1, lebar menyesuaikan isi, di tengah.
+- Isi aplikasi: wordmark `[LOGO]` teks "Takaran", lalu Kalkulator, Bahan, Resep, dan Penawaran. Item aktif memakai latar `--surface-soft` dan teks `--ink` tebal.
 - Semua item wajib menuju layar yang ada (R-24). Penawaran tampil hanya jika fitur FR-19 sudah dibangun; sebelum itu disembunyikan.
 
 ### 9.2 Tab bar (HP, < 640 px)
@@ -302,7 +288,7 @@ Diadaptasi dari kartu biru referensi A dan kartu oranye referensi B.
 | Di kartu hasil | Kotak radius 12 px `--surface`, teks `--ink` | "Buat gambar daftar harga" |
 | Tautan | Teks `--caramel-700`, garis bawah 1 px | "Lihat cara hitungnya" |
 
-Fokus keyboard semua tombol: cincin 2 px `--caramel-600` dengan jarak 2 px (mode gelap `--caramel-300`). `outline: none` tanpa pengganti dilarang (R-32).
+Fokus keyboard semua tombol: cincin 2 px `--caramel-600` dengan jarak 2 px. `outline: none` tanpa pengganti dilarang (R-32).
 
 ### 9.10 Gambar daftar harga (untuk dibagikan)
 - Ukuran 1080×1920 dan 1080×1080. Latar `--bg`, judul serif nama usaha pengguna, daftar menu dengan harga, satu tumpukan isometrik kecil sebagai motif sudut.
@@ -408,7 +394,7 @@ Yang sengaja tidak ada: deretan logo, rating bintang, testimoni, statistik jumla
 | Aset | Placeholder sementara | Perlu keputusan dari |
 |---|---|---|
 | Nama produk | "Takaran" (nama kerja) | Pemilik produk |
-| Logo | Wordmark teks "Takaran" dalam Instrument Serif, ditandai `[LOGO]` di kode | Pemilik produk |
+| Logo | Wordmark teks "Takaran" dalam serif sistem, ditandai `[LOGO]` di kode | Pemilik produk |
 | Ilustrasi isometrik (hero, empty state) | Kotak garis putus-putus berlabel konsep ilustrasi | Pemilik produk / ilustrator |
 | Email kontak, nomor WA pembayaran | `[REAL DATA]` | Pemilik produk |
 | Sisa kuota harga pendiri | Tidak ditampilkan | Data pre-order nyata |
@@ -425,18 +411,18 @@ Yang sengaja tidak ada: deretan logo, rating bintang, testimoni, statistik jumla
 | Gradasi hanya di kartu hasil | Menandai satu titik fokus per layar, tempat jawaban berada |
 | Tata letak dua kolom input/hasil | Sebab (slider) dan akibat (harga) terlihat bersamaan |
 | Slider bertitik, bukan input angka | Penjual rumahan lebih cepat memilih "40%" daripada mengetik; tetap ada opsi ketik |
-| Instrument Serif untuk judul dan angka | Nuansa buku resep dan membuat angka jawaban terasa penting |
+| Georgia atau serif sistem untuk judul dan angka | Nuansa buku resep dan membuat angka jawaban terasa penting |
 | Plus Jakarta Sans untuk UI | Terbaca jelas di HP dan terasa lokal |
 | Tumpukan isometrik sebagai motif | Mengubah rumus HPP menjadi gambar yang bisa dipahami dalam sekali lihat, dan menjadi ciri khas saat dibagikan |
 | Sudut tajam di isometrik, membulat di UI | Memisahkan "data" dari "kontrol" secara visual |
 | Bayangan hanya di navbar dan kartu hasil | Hanya dua elemen yang benar-benar melayang di atas konten |
 | Tombol utama kapsul kakao | Kontras 16:1 dan tidak bersaing dengan oranye yang berarti untung |
 | Tab bar di HP | Pengguna utama memakai HP dengan satu tangan |
-| Toggle tema terang/gelap | Tidak ada alasan kuat memaksa satu tema; banyak penjual bekerja malam hari |
+| Satu tema terang | Konsisten dengan referensi visual dan mudah dikenali di semua halaman |
 | Landing tanpa testimoni, logo, rating | Belum ada data nyata; bagian kosong lebih baik daripada palsu |
 
 ---
 
 ## 15. Sebelum Dikirim
 
-Setiap layar yang dibangun dari file ini wajib lolos **Delivery Gate** di `antislop.md` (4 blok, laporan PASS/FAIL dengan bukti), termasuk: diuji di lebar 320, 390, 768, dan 1280 px; kedua tema; navigasi keyboard penuh; dan contoh hitungan PRD bagian 7 menghasilkan angka yang sama persis di kartu hasil.
+Setiap layar yang dibangun dari file ini wajib lolos **Delivery Gate** di `antislop.md` (4 blok, laporan PASS/FAIL dengan bukti), termasuk: diuji di lebar 320, 390, 768, dan 1280 px; tetap terang saat preferensi sistem gelap; navigasi keyboard penuh; dan contoh hitungan PRD bagian 7 menghasilkan angka yang sama persis di kartu hasil.

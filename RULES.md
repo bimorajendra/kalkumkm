@@ -87,9 +87,9 @@ Aplikasi web online per akun (Next.js + Postgres), lihat `docs/CHANGE-001-online
 
 ## Aksesibilitas
 
-- **RU-39** WCAG 2.2 AA untuk semua layar dan kedua tema.
+- **RU-39** WCAG 2.2 AA untuk semua layar pada tema terang.
 - **RU-40** Semua kontrol bisa dipakai dengan keyboard; urutan `Tab` mengikuti urutan visual; dialog dan sheet tertutup dengan `Escape`.
-- **RU-41** Fokus terlihat: cincin 2 px `--caramel-600` (gelap: `--caramel-300`) dengan jarak 2 px. `outline: none` tanpa pengganti dilarang.
+- **RU-41** Fokus terlihat: cincin 2 px `--caramel-600` dengan jarak 2 px. `outline: none` tanpa pengganti dilarang.
 - **RU-42** Target sentuh minimal 44×44 px. Input minimal 16 px agar HP tidak zoom.
 - **RU-43** Warna tidak pernah menjadi satu-satunya pembawa makna (status margin selalu disertai teks).
 - **RU-44** `prefers-reduced-motion: reduce` mematikan semua tween angka dan animasi lempeng.
