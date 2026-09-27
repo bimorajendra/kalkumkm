@@ -1,5 +1,7 @@
 ﻿# RFC-005: Data Lokal dan Kerangka PWA
 
+> **Diubah oleh `docs/CHANGE-001-online-nextjs.md` (27 September 2026):** produk pindah ke Next.js, Postgres, akun, dan model online. Bagian di dokumen ini yang bertentangan dengan CHANGE-001 tidak berlaku.
+
 ## Ringkasan
 Menyiapkan database IndexedDB, repository pengaturan, kerangka navigasi aplikasi, dan kemampuan offline serta pembaruan PWA. Setelah RFC ini, aplikasi bisa dipasang dan dibuka offline dengan layar kosong yang siap diisi RFC berikutnya.
 

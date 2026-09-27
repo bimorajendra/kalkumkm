@@ -1,16 +1,16 @@
-process.env.PUBLIC_API_BASE_URL ??= 'http://127.0.0.1:8787';
-process.env.PUBLIC_TURNSTILE_SITEKEY ??= '1x00000000000000000000AA';
-
 import { defineConfig } from '@playwright/test';
 
-const widths = [320, 390, 768, 1280];
+const port = 3100;
+const widths = [320, 1280];
 const themes = ['light', 'dark'] as const;
 
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
+  workers: process.env.CI ? 2 : 4,
   reporter: 'list',
   use: {
+    baseURL: `http://localhost:${port}`,
     browserName: 'chromium',
     headless: true,
   },
@@ -24,16 +24,23 @@ export default defineConfig({
       },
     })),
   ),
-  webServer: [
-    {
-      command: 'pnpm --filter @takaran/app dev',
-      url: 'http://127.0.0.1:5173',
-      reuseExistingServer: !process.env.CI,
+  webServer: {
+    command: `pnpm --filter @takaran/site exec next dev -p ${port}`,
+    url: `http://localhost:${port}`,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+    env: {
+      // Bawaan: Postgres di dalam proses yang dibuat baru tiap server uji menyala.
+      // Isi E2E_DATABASE_URL untuk menguji terhadap Postgres sungguhan.
+      DATABASE_URL:
+        process.env.E2E_DATABASE_URL ?? `pglite:./.data/e2e-${Date.now()}`,
+      APP_URL: `http://localhost:${port}`,
+      BETTER_AUTH_SECRET: 'e2e-only-secret-e2e-only-secret-e2e',
+      IP_SALT: 'e2e-only-salt-e2e-only',
+      GOOGLE_CLIENT_ID: 'e2e',
+      GOOGLE_CLIENT_SECRET: 'e2e',
+      ADMIN_EMAILS: 'admin@contoh.id',
+      E2E_TEST_AUTH: '1',
     },
-    {
-      command: 'pnpm --filter @takaran/web dev',
-      url: 'http://127.0.0.1:4321',
-      reuseExistingServer: !process.env.CI,
-    },
-  ],
+  },
 });

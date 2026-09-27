@@ -11,3 +11,10 @@ test-results/
 !.env.example
 .dev.vars
 .DS_Store
+
+# Next.js dan data lokal
+.next/
+.data/
+next-env.d.ts
+.env.local
+*.tsbuildinfo

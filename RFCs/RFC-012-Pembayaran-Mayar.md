@@ -1,5 +1,7 @@
 # RFC-012: Pembayaran Mayar
 
+> **Diubah oleh `docs/CHANGE-001-online-nextjs.md` (27 September 2026):** produk pindah ke Next.js, Postgres, akun, dan model online. Bagian di dokumen ini yang bertentangan dengan CHANGE-001 tidak berlaku.
+
 ## Ringkasan
 Checkout Pro melalui Mayar Invoice API v2 saat aplikasi dirilis. Daftar tunggu saat validasi tetap gratis. Transfer/QRIS statis tetap jadi jalur cadangan manual. Pembayaran terkonfirmasi hanya di server; lisensi yang diterbitkan tetap kode Ed25519 dan diverifikasi offline.
 

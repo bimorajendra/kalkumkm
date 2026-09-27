@@ -1,0 +1,74 @@
+# Takaran di satu server: Caddy (HTTPS) -> app Next.js -> Postgres.
+# Hanya Caddy yang membuka port ke internet. Postgres dan app hanya bisa
+# dijangkau lewat jaringan internal Docker.
+#
+# Pakai: salin deploy/env.example menjadi .env, isi, lalu
+#   docker compose up -d --build
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?isi DOMAIN di .env}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://takaran:${POSTGRES_PASSWORD:?isi POSTGRES_PASSWORD di .env}@db:5432/takaran
+      APP_URL: https://${DOMAIN}
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "3000"
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: takaran
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: takaran
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U takaran -d takaran"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Cadangan harian ke ./backups. Salin folder itu ke tempat lain (lihat docs/deploy.md).
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      PGHOST: db
+      PGUSER: takaran
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: takaran
+      BACKUP_PASSPHRASE: ${BACKUP_PASSPHRASE:-}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+    volumes:
+      - ./deploy/backup.sh:/backup.sh:ro
+      - ./backups:/backups
+    entrypoint: ["/bin/sh", "/backup.sh"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

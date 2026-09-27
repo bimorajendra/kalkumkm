@@ -3,30 +3,23 @@
   "private": true,
   "packageManager": "pnpm@12.6.0",
   "scripts": {
-    "dev": "pnpm --parallel --filter @takaran/app --filter @takaran/web --filter @takaran/api dev",
-    "dev:app": "pnpm --filter @takaran/app dev",
-    "license:keys": "node scripts/gen-keys.mjs",
-    "license:issue": "node scripts/issue-license.mjs",
+    "dev": "pnpm --filter @takaran/site dev",
     "test": "vitest run",
     "test:calc:coverage": "vitest run --coverage",
     "test:calc:bench": "vitest bench packages/calc/bench/recalc.bench.ts",
     "test:e2e": "playwright test",
-    "test:lighthouse": "lhci autorun --config=lighthouserc.json",
     "typecheck": "pnpm --recursive --if-present typecheck",
     "lint": "biome check .",
     "build": "pnpm --recursive --if-present build",
-    "size": "size-limit"
+    "size": "node scripts/size.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@biomejs/biome": "2.3.8",
-    "@lhci/cli": "0.15.1",
     "@playwright/test": "1.56.1",
-    "@size-limit/file": "11.2.0",
     "@types/node": "22.19.1",
     "@vitest/coverage-v8": "5.0.1",
     "fast-check": "^4.10.2",
-    "size-limit": "11.2.0",
     "typescript": "5.9.3",
     "vitest": "^5.0.1"
   }

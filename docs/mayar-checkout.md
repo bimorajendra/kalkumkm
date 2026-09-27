@@ -1,51 +1,46 @@
 # Operasional Checkout Mayar
 
+Arsitektur dan aturan verifikasinya ada di `TECH.md` bagian 6. Dokumen ini hanya konfigurasi dan pengujiannya. Langkah pemasangan di server ada di `docs/deploy.md`.
+
 ## Lingkungan
 
 - Sandbox: `https://api.mayar.io/hl/v2`
 - Produksi: `https://api.mayar.id/hl/v2`
-- Development, preview, dan pengujian memakai sandbox atau mock. Jangan masukkan kredensial produksi di lingkungan tersebut.
+- Pengembangan dan pengujian memakai sandbox atau Mayar palsu (`billing.test.ts`). Jangan taruh kredensial produksi di lingkungan itu.
 
-## Konfigurasi Worker
+## Konfigurasi (file `.env` di server)
 
-| Nama | Jenis | Nilai |
-|---|---|---|
-| `MAYAR_BASE_URL` | Worker var | Base URL sandbox atau produksi sesuai lingkungan |
-| `MAYAR_API_KEY` | Worker secret | API key dari Mayar |
-| `MAYAR_WEBHOOK_TOKEN` | Worker secret | Token acak panjang untuk URL webhook |
+| Nama | Nilai |
+|---|---|
+| `MAYAR_API_KEY` | API key dari Mayar. Kosong berarti tombol beli menampilkan "Pembayaran belum dibuka" |
+| `MAYAR_BASE_URL` | Sandbox atau produksi. Hanya dua nilai itu yang diterima |
+| `MAYAR_WEBHOOK_TOKEN` | Token acak panjang (`openssl rand -hex 24`) untuk URL webhook |
 
-Sebelum menguji checkout lokal, terapkan migrasi D1:
+Jangan menulis nilai rahasia ke repo, log, atau contoh konfigurasi. `MAYAR_API_KEY` hanya dipakai server.
 
-```sh
-pnpm --filter @takaran/api exec wrangler d1 migrations apply takaran-orders --local
-```
+## Webhook
 
-Sebelum rilis, pemilik proyek mengganti `database_id` contoh di `wrangler.toml`, meninjau migrasi, lalu menerapkannya ke database produksi. Jangan jalankan migrasi produksi dari lingkungan preview.
+Daftarkan `https://<domain>/api/webhooks/mayar?token=<MAYAR_WEBHOOK_TOKEN>` di dashboard Mayar untuk event pembayaran diterima. Dokumentasi Mayar yang diperiksa belum menetapkan tanda tangan atau header resmi, jadi keamanan bertumpu pada dua hal: token di URL, dan **konfirmasi ulang invoice ke API Mayar** sebelum Pro dibuka. Tambahkan validasi tanda tangan bila Mayar menerbitkan kontrak resminya.
 
-## Cadangan pembayaran manual
+Perilaku server:
 
-Jalur ini opsional. Atur semua nilai berikut pada build `apps/app` agar transfer/QRIS statis dan tombol WhatsApp tampil:
+- Event dicatat di `mayar_events` dengan kunci unik; pengiriman ulang tidak membuka Pro dua kali.
+- Konfirmasi gagal (Mayar tidak bisa dihubungi): balas 503 agar Mayar mengirim ulang.
+- Pro dibuka hanya bila status invoice `paid`, nominal sama dengan pesanan, id invoice cocok, dan email pelanggan sama dengan email akun.
 
-- `VITE_PAYMENT_BANK_NAME`
-- `VITE_PAYMENT_ACCOUNT_NAME`
-- `VITE_PAYMENT_ACCOUNT_NUMBER`
-- `VITE_PAYMENT_QRIS_IMAGE` (path aset QRIS lokal)
-- `VITE_SELLER_WA`
+## Skenario yang harus diuji di sandbox sebelum produksi
 
-Jika salah satu kosong, sembunyikan seluruh jalur manual. Jangan menyimpan nomor rekening atau gambar QRIS contoh di aplikasi.
+1. Invoice dibuat, belum dibayar: akun tetap gratis, halaman beli menawarkan "Lanjutkan pembayaran".
+2. Dibayar: akun menjadi Pro otomatis dalam beberapa detik.
+3. Invoice kedaluwarsa: pesanan menjadi `cancelled`.
+4. Webhook dikirim dua kali: hanya satu pesanan `paid`, tidak ada galat.
+5. Webhook terlambat atau hilang: `/beli` atau tombol *Cek Mayar* di `/admin` tetap membuka Pro.
+6. Refund manual di dashboard Mayar, lalu *Tandai refund* di `/admin`: Pro tercabut.
 
-Jangan menulis nilai secret ke repo, contoh konfigurasi, log, atau browser. `MAYAR_API_KEY` hanya dipakai Worker.
+Skenario 1 sampai 6 sudah diuji di `apps/site/src/server/billing.test.ts` dengan Mayar palsu; uji sandbox memastikan bentuk respons Mayar yang nyata cocok.
 
-## Checkout dan webhook
+## Biaya
 
-1. Buat dan uji invoice di sandbox lebih dulu. Aplikasi memakai `POST /v1/checkout` dan menyimpan token klaim hanya di perangkat.
-2. Daftarkan `https://<domain-api>/v1/webhooks/mayar?token=<MAYAR_WEBHOOK_TOKEN>` di Mayar dengan event pembayaran diterima. Dokumentasi API yang diperiksa belum menetapkan kontrak signature/header; gunakan token webhook dan konfirmasi invoice lewat API. Tambahkan validasi signature jika Mayar menerbitkan kontrak resmi yang dapat diuji.
-3. Pastikan domain redirect, URL webhook, dan kanal pembayaran sudah terverifikasi sebelum membuka pembayaran produksi.
-4. Uji invoice belum dibayar, dibayar, kedaluwarsa, nominal tidak cocok, webhook berulang, serta pengecekan ulang admin.
-5. Harga pelanggan tetap mengikuti `PRICING`. Biaya platform dan kanal ditanggung proyek dan perlu diperiksa terhadap paket/kanal aktif.
+Pada halaman harga resmi Mayar yang dicek 25 September 2026: biaya platform invoicing 1,5% (Starter), 1% (Business), atau 0% (Enterprise); contoh biaya kanal QRIS 0,7%, VA Rp 4.000, e-wallet 1,5%, sebelum pajak kanal. Pengaturan pembebanan biaya ke pelanggan tidak berlaku untuk Invoice, jadi harga pelanggan tetap (`PRICING`) dan biaya ditanggung proyek. Periksa ulang paket dan biaya aktual sebelum penjualan dibuka. [Harga Mayar](https://mayar.id/pricing) · [Create Invoice v2](https://docs.mayar.id/api-reference-v2/invoice/create)
 
-## Biaya yang dicatat
-
-Pada halaman harga resmi yang dicek 25 September 2026, biaya platform invoicing tercantum 1,5% untuk Starter, 1% untuk Business, dan 0% untuk Enterprise. Contoh biaya kanal: QRIS 0,7%, VA Rp 4.000, dan e-wallet 1,5%, sebelum pajak kanal. Dokumentasi Create Invoice menyatakan pengaturan agar biaya dibayar pelanggan tidak berlaku untuk Invoice. Maka harga Pro yang tampil tetap Rp 79.000/Rp 49.000 dan biaya ditanggung proyek. Periksa ulang paket, kanal, dan biaya aktual sebelum membuka pembayaran. [Harga Mayar](https://mayar.id/pricing) · [Create Invoice v2](https://docs.mayar.id/api-reference-v2/invoice/create)
-
-Pembayaran/refund produksi, pendaftaran webhook, domain, DNS, dan pengaturan akun dilakukan pemilik proyek. Dokumen ini tidak menyimpan kredensial atau mengubah akun layanan.
+Pembayaran dan refund produksi, pendaftaran webhook, domain, dan pengaturan akun dilakukan pemilik proyek.

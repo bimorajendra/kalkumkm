@@ -1,112 +1,71 @@
-import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { expectNoA11yViolations, randomIp } from './helpers';
 
-test('landing dan demo brownies bekerja di semua ukuran dan tema', async ({
+test('landing: demo memakai mesin hitung, tanpa scroll horizontal', async ({
   page,
 }) => {
-  await page.addInitScript(() => {
-    const w = window as typeof window & {
-      umami: { track: (event: string, props?: Record<string, string>) => void };
-      __umamiEvents: Array<{ event: string; props?: Record<string, string> }>;
-    };
-    w.__umamiEvents = [];
-    w.umami = {
-      track: (event, props) => w.__umamiEvents.push({ event, props }),
-    };
-  });
-  await page.route(
-    'https://challenges.cloudflare.com/turnstile/v0/api.js*',
-    (route) =>
-      route.fulfill({
-        contentType: 'application/javascript',
-        body: `window.turnstile={render:function(_element,options){window.__turnstileCallback=options.callback;options.callback('test-turnstile-token');return 'test-widget';},reset:function(){window.__turnstileCallback('test-turnstile-token-new');},remove:function(){}};`,
-      }),
-  );
-  let submissions = 0;
-  await page.route('**/v1/preorders', (route) => {
-    submissions += 1;
-    if (submissions === 1) {
-      return route.fulfill({
-        status: 429,
-        json: {
-          error: {
-            code: 'RATE_LIMITED',
-            message: 'Batas daftar tunggu tercapai.',
-          },
-        },
-      });
-    }
-    return route.fulfill({ status: 201, json: { data: { id: 'test-order' } } });
-  });
-  await page.goto('http://127.0.0.1:4321/?ref=share');
+  await page.goto('/');
   await expect(
     page.getByRole('heading', { name: 'Laris, tapi uangnya nggak kelihatan?' }),
   ).toBeVisible();
+  const demo = page.locator('#demo');
+  await expect(demo.getByText('Rp 5.000', { exact: true })).toBeVisible();
+  await demo.getByLabel('Harga telur per butir').first().fill('2600');
+  // HPP naik Rp 150 per potong, saran harga naik ke kelipatan Rp 500 berikutnya.
+  await expect(demo.getByText('Rp 5.500', { exact: true })).toBeVisible();
+  const overflow = await page.evaluate(
+    () =>
+      document.documentElement.scrollWidth >
+      document.documentElement.clientWidth,
+  );
+  expect(overflow).toBe(false);
+});
 
-  const brokenAnchors = await page
-    .locator('nav a[href^="#"]')
-    .evaluateAll((links) =>
-      links
-        .map((link) => link.getAttribute('href'))
-        .filter((href) => !href || !document.querySelector(href)),
-    );
-  expect(brokenAnchors).toEqual([]);
-  await expect(
-    page.getByRole('columnheader', { name: 'HPP per potong' }),
-  ).toBeVisible();
-  await expect(page.getByText('Rp 3.075')).toBeVisible();
-  const axe = await new AxeBuilder({ page }).analyze();
-  expect(
-    axe.violations.filter((item) =>
-      ['critical', 'serious'].includes(item.impact ?? ''),
-    ),
-  ).toEqual([]);
+test('landing: tabel harga telur naik memuat angka contoh PRD', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const table = page.getByRole('table');
+  await expect(table.getByText('Rp 2.925')).toBeVisible();
+  await expect(table.getByText('41,5%')).toBeVisible();
+});
 
-  const slider = page.getByRole('slider', { name: 'Target untung' });
-  await slider.focus();
-  await page.keyboard.press('ArrowRight');
-  await expect(slider).toHaveAttribute('aria-valuetext', '50% target untung');
-  await page
-    .getByRole('spinbutton', { name: 'Harga telur per butir' })
-    .fill('2600');
-  await expect(
-    page.locator('.hero-demo .takaran-result-card__value'),
-  ).toHaveText('Rp 6.500');
-  await expect(page.getByText('38,5% · di bawah target 40%')).toBeVisible();
+test('landing: formulir daftar tunggu memvalidasi dan mengirim', async ({
+  page,
+}) => {
+  await page.setExtraHTTPHeaders({ 'x-forwarded-for': randomIp() });
+  await page.goto('/#daftar-tunggu');
+  const form = page.locator('form').filter({ hasText: 'Daftar gratis' });
+  await form.getByRole('button', { name: 'Daftar gratis' }).click();
+  await expect(form.getByText('Nama usaha wajib diisi.')).toBeVisible();
 
-  const businessName = page.getByRole('textbox', { name: 'Nama usaha' });
-  await businessName.fill('Dapur Sari');
-  await page
+  await form.getByLabel('Nama usaha').fill('Kue Bu Rina');
+  await form
     .getByRole('textbox', { name: 'Nomor WhatsApp' })
     .fill('081234567890');
-  await page.getByLabel('Jenis jualan').selectOption('kue');
-  await page.getByRole('checkbox').check();
-  await page.getByRole('button', { name: 'Daftar gratis' }).click();
-  await expect(page.getByRole('status')).toContainText(
-    'Batas daftar tunggu tercapai.',
-  );
-  await expect(businessName).toHaveValue('Dapur Sari');
+  await form.getByRole('combobox', { name: 'Jenis jualan' }).click();
+  await page.getByRole('option', { name: 'Kue', exact: true }).click();
+  await form.getByRole('checkbox').click();
+  await form.getByRole('button', { name: 'Daftar gratis' }).click();
+  await expect(
+    page.getByText('Terima kasih. Kami akan mengabari'),
+  ).toBeVisible();
+});
 
-  await page.getByRole('button', { name: 'Daftar gratis' }).click();
-  await expect(page.getByRole('status')).toContainText('Terima kasih.');
-  const events = await page.evaluate(
-    () =>
-      (
-        window as typeof window & {
-          __umamiEvents: Array<{
-            event: string;
-            props?: Record<string, string>;
-          }>;
-        }
-      ).__umamiEvents,
-  );
-  expect(events).toContainEqual({
-    event: 'preorder_submitted',
-    props: { source: 'share' },
-  });
+test('landing: tautan masuk mengarah ke halaman masuk', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Coba hitung resepmu' }).click();
+  await expect(page).toHaveURL(/\/masuk$/);
+  await expect(
+    page.getByRole('button', { name: 'Masuk dengan Google' }),
+  ).toBeVisible();
+});
 
-  await page.context().setOffline(true);
-  await page.getByRole('button', { name: 'Daftar gratis' }).click();
-  await expect(page.getByRole('status')).toContainText('Kamu sedang offline.');
-  await page.context().setOffline(false);
+test('landing dan halaman masuk lolos axe', async ({ page }) => {
+  await page.goto('/');
+  await expectNoA11yViolations(page);
+  await page.goto('/masuk');
+  await expectNoA11yViolations(page);
+  await page.goto('/kebijakan-privasi');
+  await expectNoA11yViolations(page);
 });

@@ -1,5 +1,7 @@
 # Features: Takaran (nama kerja)
 
+> **Diubah oleh `docs/CHANGE-001-online-nextjs.md` (27 September 2026):** produk pindah ke Next.js, Postgres, akun, dan model online. Bagian di dokumen ini yang bertentangan dengan CHANGE-001 tidak berlaku.
+
 > Diekstrak dari `PRD.md` v0.2 dengan dukungan `TECH.md` dan `DESIGN.md`, 25 September 2026.
 > **ID fitur bersifat permanen.** Fitur baru memakai nomor berikutnya yang belum terpakai; fitur yang dibatalkan ditandai `[REMOVED]`, tidak dihapus atau dipakai ulang. RFC mengutip ID ini.
 > Kolom "Ref" menunjuk ID di PRD (FR, NFR, CR, BG) atau bagian TECH/DESIGN.

@@ -1,5 +1,7 @@
 # RFC-011: Monetisasi dan Lisensi
 
+> **Diubah oleh `docs/CHANGE-001-online-nextjs.md` (27 September 2026):** produk pindah ke Next.js, Postgres, akun, dan model online. Bagian di dokumen ini yang bertentangan dengan CHANGE-001 tidak berlaku.
+
 ## Ringkasan
 Batas versi gratis, layar paywall, halaman beli, aktivasi Pro offline, dan penerbitan kode lisensi manual dari admin. Halaman beli disiapkan untuk CTA Mayar yang akan dihubungkan RFC-012; transfer/QRIS manual tetap tersedia sebagai cadangan bila dikonfigurasi.
 

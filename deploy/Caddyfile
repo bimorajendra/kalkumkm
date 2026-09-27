@@ -1,0 +1,15 @@
+# Caddy mengurus sertifikat HTTPS (Let's Encrypt) otomatis untuk {$DOMAIN}.
+# Syaratnya: DNS domain sudah mengarah ke IP server dan port 80/443 terbuka.
+{$DOMAIN} {
+	encode zstd gzip
+
+	# Caddy menimpa X-Forwarded-For dengan alamat klien asli, dipakai untuk
+	# pembatasan percobaan (rate limit) di aplikasi.
+	reverse_proxy app:3000 {
+		header_up X-Forwarded-For {remote_host}
+	}
+
+	header {
+		-Server
+	}
+}

@@ -5,40 +5,39 @@ Claude Code: buat `CLAUDE.md` berisi satu baris `@AGENTS.md` agar file ini ikut 
 
 ## Proyek
 
-PWA kalkulator HPP untuk penjual kue dan makanan rumahan. Pengguna memasukkan harga bahan, menyusun resep, lalu melihat HPP per porsi, harga jual yang disarankan, dan untung per jam. Data resep dan harga ada di HP; kalkulasi serta aktivasi lisensi tetap bekerja offline.
+PWA kalkulator HPP untuk penjual kue dan makanan rumahan. Pengguna memasukkan harga bahan, menyusun resep, lalu melihat HPP per porsi, harga jual yang disarankan, dan untung per jam. Data resep dan harga disimpan di server per akun (Next.js + Postgres); lihat `docs/CHANGE-001-online-nextjs.md`.
 
 ## Dokumen (baca sebelum mengerjakan)
 
 | File | Isi | Baca saat |
 |---|---|---|
 | `PRD.md` | Kebutuhan, ID fitur (FR/NFR/CR), rumus, contoh hitungan | Selalu, untuk fitur apa pun |
-| `TECH.md` | Arsitektur, stack, skema data, API, lisensi, testing | Kode apa pun |
+| `TECH.md` | Arsitektur, stack, data, pembayaran, keamanan, testing | Kode apa pun |
 | `DESIGN.md` | Arah visual, token, komponen, state | Kerja UI |
 | `antislop.md` + `skills/antislop-*` | Filter anti-slop dan Delivery Gate | Kerja UI, copy, komentar kode |
 | `FEATURES.md`, `RULES.md`, `RFCs/` | Hasil pipeline ai-prd-workflow | Jika sudah ada |
+| `docs/CHANGE-001-online-nextjs.md` | Keputusan pindah ke Next.js, Postgres, model online; menang atas dokumen lain yang bertentangan | Selalu |
 
 Urutan otoritas jika bertentangan: `PRD.md` > `FEATURES.md` > `TECH.md` > `RULES.md` > `RFCs/` > `DESIGN.md` (untuk tampilan, `DESIGN.md` yang menang). Jika dokumen bertentangan dengan permintaan di chat, tanyakan dulu.
 
 ## Peta repo
 
 ```
-apps/app        PWA kalkulator (Vite, React, Dexie)
-apps/web        Landing page (Astro + satu React island)
-apps/api        Cloudflare Worker (Hono, D1): pre-order, admin, lisensi
+apps/site       Satu aplikasi Next.js: landing, kalkulator, API, admin (Tailwind, shadcn/ui, Drizzle)
 packages/calc   Semua rumus HPP. Satu-satunya tempat rumus boleh ditulis
-packages/ui     Token warna, tumpukan isometrik, slider
-packages/schema Skema Zod bersama
-scripts/        gen-keys, issue-license
-docs/           Konfigurasi dan panduan operasional, termasuk Mayar sandbox
+packages/ui     Token warna, tumpukan isometrik, slider, kartu hasil
+packages/schema Harga dan batas paket
+deploy/         Caddyfile, backup.sh, env.example
+scripts/        size.mjs (cek anggaran ukuran)
+docs/           Panduan deploy, catatan operasional, dan CHANGE-001
 ```
 
 ## Perintah
 
 ```bash
 pnpm install
-pnpm dev            # semua app
-pnpm dev:app        # PWA saja
-pnpm test           # Vitest semua paket
+pnpm dev            # aplikasi (DATABASE_URL=pglite:./.data/dev untuk lokal tanpa Postgres)
+pnpm test           # Vitest semua paket (Postgres di dalam proses)
 pnpm test:e2e       # Playwright + axe
 pnpm typecheck      # tsc --noEmit
 pnpm lint           # Biome
@@ -79,17 +78,17 @@ Tanpa abstraksi, fitur, atau scaffolding yang tidak diminta. Menghapus lebih bai
 - Laporkan hasil apa adanya. Jika ada cek yang gagal atau dilewati, katakan beserta buktinya.
 
 ### Tidak pernah disederhanakan
-Validasi input di batas kepercayaan (form, file cadangan, body API, kode lisensi), penanganan error yang mencegah data hilang, keamanan, aksesibilitas, dan apa pun yang diminta secara eksplisit.
+Validasi input di batas kepercayaan (form, body API, webhook, perintah data), penanganan error yang mencegah data hilang, keamanan, aksesibilitas, dan apa pun yang diminta secara eksplisit.
 
 ## Aturan proyek (keras)
 
-1. **Data resep dan harga tidak pernah dikirim ke server.** Tidak boleh ada endpoint, analitik, atau log yang membawa nama bahan, resep, atau harga.
-2. **Offline dulu.** Kalkulasi, data usaha, dan verifikasi lisensi tetap bekerja offline. Panggilan jaringan terbatas pada Umami, Turnstile untuk checkout, cek daftar lisensi dicabut (opsional), checkout, dan klaim lisensi. Jangan kirim data resep atau harga.
+1. **Data resep dan harga hanya milik pemilik akun.** Setiap kueri difilter `user_id` dari sesi, tidak ada endpoint yang menerima `user_id` dari klien, dan tidak ada analitik atau log yang membawa nama bahan, resep, atau harga.
+2. **Keamanan dulu.** Ikuti aturan keamanan di `docs/CHANGE-001-online-nextjs.md` (autentikasi lewat library, validasi Zod, webhook Mayar diverifikasi ke API Mayar, rahasia hanya di env server).
 3. **Rumus hanya di `packages/calc`.** UI, landing, dan API tidak boleh menghitung HPP sendiri.
 4. **Angka:** uang input dalam rupiah bulat, persen dalam basis poin (40% = `4000`), hasil antara pakai big.js, pembulatan hanya saat ditampilkan. Tidak ada `parseFloat` pada uang.
 5. **Contoh brownies di PRD bagian 7 adalah test tetap.** Jika test itu gagal, perubahanmu yang salah, bukan test-nya.
-6. **Anggaran ukuran:** JS awal aplikasi ≤ 170 KB gzip, total muatan awal ≤ 250 KB. `pnpm size` harus lulus.
-7. **Rahasia:** kunci privat lisensi dan secret Turnstile tidak pernah di-commit, dicetak ke log, atau ditulis ke file contoh.
+6. **Anggaran ukuran:** JS awal per halaman ≤ 220 KB gzip, total muatan awal ≤ 300 KB (diubah dari 170/250 KB oleh CHANGE-001 karena runtime Next.js). `pnpm size` harus lulus.
+7. **Rahasia:** `.env`, secret Google, API key dan token webhook Mayar tidak pernah di-commit, dicetak ke log, atau ditulis ke file contoh.
 8. **Teks UI** berbahasa Indonesia sehari-hari, tanpa tanda pisah panjang, dengan CTA spesifik sesuai `DESIGN.md` bagian 12.
 9. **Aksesibilitas:** WCAG 2.2 AA, target sentuh 44 px, fokus terlihat, bisa dipakai penuh dengan keyboard.
 10. **Tanpa data palsu:** tidak ada testimoni, statistik, rating, atau logo klien karangan. Pakai `[REAL DATA]` atau jangan tampilkan.
@@ -98,9 +97,9 @@ Validasi input di batas kepercayaan (form, file cadangan, body API, kode lisensi
 
 - Menambah dependensi baru (sebutkan ukuran gzip dan alasannya).
 - Mengubah rumus atau hasil di `packages/calc`.
-- Mengubah skema Dexie atau D1 (butuh migrasi).
-- Menyentuh kunci atau format lisensi.
-- Menghapus data pengguna atau mengubah format file cadangan.
+- Mengubah skema Postgres (butuh migrasi di `apps/site/drizzle`).
+- Menyentuh alur login atau penerbitan status Pro.
+- Menghapus data pengguna atau mengubah format unduhan data.
 - Menambah layanan pihak ketiga atau panggilan jaringan baru.
 - Mengubah alur pembayaran atau harga.
 - Mengerjakan fitur di luar scope v1.0 PRD bagian 4.

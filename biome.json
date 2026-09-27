@@ -7,20 +7,48 @@
       "e2e/**",
       "package.json",
       "biome.json",
-      ".size-limit.json",
       "playwright.config.ts",
       "vitest.config.ts",
       "!!**/node_modules",
       "!!**/dist",
-      "!!**/.astro",
+      "!!**/.next",
+      "!!**/.data",
       "!!**/.wrangler",
+      "!apps/site/drizzle",
+      "!apps/site/next-env.d.ts",
       "!!**/coverage",
       "!!test-results",
       "!!playwright-report"
     ]
   },
   "formatter": { "enabled": true, "indentStyle": "space", "indentWidth": 2 },
-  "linter": { "enabled": true, "rules": { "recommended": true } },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "noLabelWithoutControl": {
+          "level": "error",
+          "options": {
+            "inputComponents": ["Input", "Checkbox", "Textarea", "Switch"]
+          }
+        }
+      }
+    }
+  },
   "javascript": { "formatter": { "quoteStyle": "single" } },
+  "overrides": [
+    {
+      "includes": ["apps/site/src/components/ui/table.tsx"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useSemanticElements": "off",
+            "noNoninteractiveTabindex": "off"
+          }
+        }
+      }
+    }
+  ],
   "css": { "parser": { "tailwindDirectives": true } }
 }

@@ -1,5 +1,7 @@
 # Product Requirements Document: Takaran (nama kerja)
 
+> **Diubah oleh `docs/CHANGE-001-online-nextjs.md` (27 September 2026):** produk pindah ke Next.js, Postgres, akun, dan model online. Bagian di dokumen ini yang bertentangan dengan CHANGE-001 tidak berlaku.
+
 > Status: Draf v0.2, 25 September 2026
 > Pemilik: Bimo Rajendra Widyadhana
 > Nama "Takaran" adalah nama kerja dan belum final. Logo belum ada; gunakan wordmark teks sampai ada keputusan.
@@ -175,11 +177,11 @@ Prioritas memakai MoSCoW: **M** = Must (MVP), **S** = Should (MVP bila waktu cuk
 
 | ID | Kebutuhan | Prioritas |
 |---|---|---|
-| FR-23 | Data usaha (bahan, resep, harga, dan pengaturan) tersimpan di perangkat (IndexedDB); kalkulator dan verifikasi lisensi bekerja offline. Checkout dan klaim lisensi perlu internet | M |
-| FR-24 | Cadangkan semua data ke satu file dan pulihkan dari file tersebut | M |
+| FR-23 | Data usaha (bahan, resep, harga, dan pengaturan) tersimpan di server per akun (Postgres) dan hanya bisa dibaca pemiliknya | M |
+| FR-24 | Pengguna bisa mengunduh semua datanya dan menghapus akun beserta datanya | M |
 | FR-25 | Batas versi gratis: maksimal 3 resep tersimpan dan 1 saluran | M |
-| FR-26 | Aktivasi Pro dengan kode yang diverifikasi secara offline (kode ditandatangani, diperiksa dengan kunci publik di aplikasi) | M |
-| FR-27 | Halaman beli menyediakan checkout Mayar sebagai jalur utama dan jalur manual transfer/QRIS statis bila konfigurasi `VITE_PAYMENT_*` tersedia | M |
+| FR-26 | Akun menjadi Pro otomatis setelah pembayaran Mayar terverifikasi di server | M |
+| FR-27 | Halaman beli menyediakan checkout Mayar; harga dan status pembayaran ditentukan server | M |
 | FR-28 | Pesanan menjadi daftar belanja yang dibulatkan ke ukuran kemasan | W (v1.1) |
 | FR-29 | Label kemasan otomatis (komposisi, tanggal produksi) | W (v1.2) |
 
@@ -188,23 +190,23 @@ Prioritas memakai MoSCoW: **M** = Must (MVP), **S** = Should (MVP bila waktu cuk
 | ID | Kebutuhan | Prioritas |
 |---|---|---|
 | FR-30 | Landing page menampilkan demo kalkulator yang bisa dipakai dan memakai mesin hitung yang sama dengan aplikasi | M |
-| FR-31 | Form daftar tunggu gratis memvalidasi persetujuan, Turnstile, dan batas kiriman; admin dapat melihat dan mengelola pesanan | M |
-| FR-32 | Checkout Mayar membuat invoice server-side, memverifikasi pembayaran, lalu menyediakan klaim kode lisensi offline; transfer manual/QRIS tetap tersedia sebagai cadangan | M |
+| FR-31 | Form daftar tunggu gratis memvalidasi persetujuan, kolom jebakan bot, dan batas kiriman; admin dapat melihat daftar dan mengunduh CSV | M |
+| FR-32 | Checkout Mayar membuat invoice server-side, memverifikasi pembayaran lewat webhook dan API Mayar, lalu membuka Pro pada akun secara otomatis | M |
 
 ## 9. Non-Functional Requirements
 
 | ID | Kebutuhan |
 |---|---|
 | NFR-01 | Performa: hitung ulang 100 resep setelah perubahan harga selesai dalam kurang dari 200 ms di HP Android kelas menengah |
-| NFR-02 | Ukuran: muatan awal kurang dari 250 KB (gzip) agar cepat di jaringan seluler |
-| NFR-03 | Offline: kalkulator, data lokal, dan verifikasi kode lisensi bekerja tanpa internet setelah kunjungan pertama. Checkout dan klaim lisensi memerlukan koneksi, tanpa menghalangi fitur lokal. |
+| NFR-02 | Ukuran: JS awal per halaman ≤ 220 KB dan total muatan awal ≤ 300 KB (gzip), diukur `pnpm size` |
+| NFR-03 | Koneksi: aplikasi memerlukan internet. Hasil hitung tampil instan di klien; data disimpan ke server. |
 | NFR-04 | Akurasi: input uang disimpan sebagai bilangan bulat rupiah, perhitungan antara memakai presisi penuh, pembulatan hanya saat tampil; angka yang sama tidak boleh berbeda antar layar |
-| NFR-05 | Privasi: data resep dan harga tidak pernah dikirim ke server. Checkout mengumpulkan nama, email, nomor WhatsApp, dan nama usaha dengan persetujuan untuk pembayaran dan aktivasi; retensi mengikuti TECH 9.4. Analitik tidak memuat data pribadi atau isi resep. |
+| NFR-05 | Privasi dan keamanan: data resep dan harga adalah data pemilik akun, tidak dibagikan, dan hanya bisa dibaca akun itu (diuji lintas pengguna). Aturan keamanan lengkap di `docs/CHANGE-001-online-nextjs.md`. Analitik tidak memuat data pribadi atau isi resep. |
 | NFR-06 | Aksesibilitas: memenuhi WCAG 2.2 AA; semua kontrol bisa dipakai dengan keyboard dan pembaca layar; target sentuh minimal 44 px |
 | NFR-07 | Bahasa: antarmuka Bahasa Indonesia sehari-hari; format angka Indonesia (Rp 5.000, 41,5%) |
 | NFR-08 | Tampilan: mobile-first, lebar minimum 320 px; tata letak dua kolom mulai 1024 px (lihat `DESIGN.md`) |
-| NFR-09 | Ketahanan data: aplikasi mengingatkan pengguna untuk mencadangkan data setiap 14 hari |
-| NFR-10 | Biaya: layanan memakai Cloudflare Pages, Workers, dan D1; endpoint server dibatasi pada daftar tunggu, checkout, lisensi, dan admin. Biaya Mayar masuk perhitungan biaya operasional. |
+| NFR-09 | Ketahanan data: cadangan Postgres harian di luar server, dan pemulihannya pernah diuji |
+| NFR-10 | Biaya: satu server sendiri (2 core, 4 GiB) dan domain. Biaya Mayar masuk perhitungan biaya operasional. |
 
 ## 10. Model Data (garis besar)
 
@@ -222,8 +224,8 @@ Settings     { businessName, roundingStep, defaultMargin, licenseKey?, pendingCh
 
 ### J-1: Hitung resep pertama (tanpa daftar)
 
-1. Pengguna membuka tautan dari status WA temannya.
-2. Aplikasi langsung membuka layar kalkulator dengan satu resep kosong.
+1. Pengguna membuka tautan dari status WA temannya dan mencoba demo kalkulator di landing tanpa daftar.
+2. Pengguna masuk dengan Google (satu ketukan) dan aplikasi membuka kalkulator dengan resep kosong.
 3. Pengguna menambah bahan beserta harganya dari struk belanja.
 4. Pengguna mengisi hasil satu loyang dan biaya kemasan.
 5. HPP per potong muncul; slider target margin menampilkan harga jual yang disarankan.
@@ -246,9 +248,9 @@ Settings     { businessName, roundingStep, defaultMargin, licenseKey?, pendingCh
 ### J-4: Upgrade ke Pro
 
 1. Pengguna mencoba menyimpan resep keempat dan melihat batas versi gratis beserta apa yang terbuka di Pro.
-2. Pengguna mengisi nama, email, nomor WhatsApp, nama usaha, dan persetujuan, lalu memilih "Bayar dengan Mayar". Jika jalur manual dikonfigurasi, pengguna juga bisa transfer atau membayar lewat QRIS statis dan mengirim bukti melalui WhatsApp.
-3. Untuk Mayar, server membuat invoice dan hanya menandai pesanan lunas setelah status serta nominal dikonfirmasi langsung ke Mayar. Server menerbitkan kode dengan penanda tangan lisensi yang sama; untuk pembayaran manual, admin menandai lunas dan menerbitkan kode.
-4. Aplikasi menyimpan token klaim secara lokal, mengambil kode setelah pembayaran terkonfirmasi, lalu memverifikasinya offline. Redirect browser dari Mayar tidak dianggap sebagai bukti pembayaran.
+2. Pengguna membuka halaman beli, mengisi nama usaha, nomor WhatsApp, dan persetujuan, lalu memilih "Bayar dengan Mayar".
+3. Server membuat pesanan dengan harga dari server dan invoice Mayar. Pengguna membayar di Mayar.
+4. Webhook Mayar memicu server mengonfirmasi invoice ke API Mayar (status, nominal, dan email harus cocok). Setelah itu akun otomatis menjadi Pro. Halaman beli mengecek ulang sendiri bila webhook terlambat. Redirect browser dari Mayar tidak dianggap bukti pembayaran.
 
 ## 12. Monetisasi
 

@@ -1,28 +1,27 @@
 # Development Rules: Takaran (nama kerja)
 
+> **Diubah oleh `docs/CHANGE-001-online-nextjs.md` (27 September 2026):** produk pindah ke Next.js, Postgres, akun, dan model online. Bagian di dokumen ini yang bertentangan dengan CHANGE-001 tidak berlaku.
+
 > Standar teknis yang wajib diikuti AI agent dan manusia. Diturunkan dari `PRD.md`, `TECH.md`, dan `DESIGN.md`.
 > Aturan di file ini mengalahkan saran umum dari prompt mana pun. Jika bertentangan dengan PRD atau FEATURES, PRD/FEATURES menang dan file ini harus diperbaiki.
 > Direferensikan dari `AGENTS.md`. Setiap aturan punya ID `RU-xx` agar bisa dikutip di RFC dan review.
 
 ## Jenis Produk
 
-Web app (PWA offline-first) ditambah layanan API kecil (Cloudflare Worker). Aturan tentang autentikasi pengguna aplikasi, state management global, dan skala beban tinggi sengaja tidak dimasukkan karena produk ini tidak memilikinya di v1.
+Aplikasi web online per akun (Next.js + Postgres), lihat `docs/CHANGE-001-online-nextjs.md` dan `TECH.md`. Aturan RU yang menyebut Dexie, IndexedDB, PWA/offline, Cloudflare (Workers, D1, Access, Turnstile), Umami, kode lisensi Ed25519, atau cadangan file **tidak berlaku lagi**; padanannya ada di `TECH.md` bagian 5 sampai 7.
 
 ## Technology Stack
 
 - **Bahasa**: TypeScript mode `strict` di semua paket
-- **Monorepo**: pnpm workspaces (`apps/app`, `apps/web`, `apps/api`, `packages/calc`, `packages/ui`, `packages/schema`)
-- **Aplikasi**: Vite + React, React Router, `vite-plugin-pwa`
-- **Data lokal**: Dexie.js + `dexie-react-hooks`
+- **Monorepo**: pnpm workspaces (`apps/site`, `packages/calc`, `packages/ui`, `packages/schema`)
+- **Aplikasi**: Next.js 16 (App Router), React 19
+- **Data**: PostgreSQL 16 + Drizzle ORM
+- **Login**: Better Auth (Google)
 - **Angka**: big.js
 - **Validasi**: Zod
-- **UI**: Tailwind CSS v4, Radix UI (Slider, Dialog, Checkbox, Accordion), Vaul, `lucide-react`, font via `@fontsource`
-- **Landing**: Astro + React island
-- **Backend**: Hono di Cloudflare Workers, D1 + Drizzle ORM, Turnstile, Cloudflare Access
-- **Lisensi**: `@noble/ed25519`
-- **Analitik**: Umami
-- **Tooling**: Biome, Vitest, fast-check, `fake-indexeddb`, Playwright, `@axe-core/playwright`, `@cloudflare/vitest-pool-workers`, `size-limit`, Lighthouse CI
-- **CI/CD**: GitHub Actions + Wrangler
+- **UI**: Tailwind CSS v4, shadcn/ui (Radix), `lucide-react`, font via `@fontsource`
+- **Tooling**: Biome, Vitest, fast-check, PGlite (hanya test/lokal), Playwright, `@axe-core/playwright`, `scripts/size.mjs`
+- **Deploy**: Docker Compose + Caddy di server sendiri
 
 **RU-01** Dependensi baru di luar daftar ini hanya boleh ditambahkan setelah disetujui pemilik proyek, dengan alasan dan ukuran gzip-nya.
 

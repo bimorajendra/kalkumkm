@@ -1,5 +1,7 @@
 # RFCS: Takaran (nama kerja)
 
+> **Diubah oleh `docs/CHANGE-001-online-nextjs.md` (27 September 2026):** produk pindah ke Next.js, Postgres, akun, dan model online. Bagian di dokumen ini yang bertentangan dengan CHANGE-001 tidak berlaku.
+
 > Daftar induk RFC v1.0, diturunkan dari `PRD.md`, `FEATURES.md`, `RULES.md`, `TECH.md`, dan `DESIGN.md` (25 September 2026).
 > Urutan otoritas: `PRD.md` > `FEATURES.md` > `RULES.md` > RFC > rencana yang dihasilkan.
 

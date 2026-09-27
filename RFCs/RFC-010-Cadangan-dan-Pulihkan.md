@@ -1,5 +1,7 @@
 # RFC-010: Cadangan dan Pulihkan
 
+> **Diubah oleh `docs/CHANGE-001-online-nextjs.md` (27 September 2026):** produk pindah ke Next.js, Postgres, akun, dan model online. Bagian di dokumen ini yang bertentangan dengan CHANGE-001 tidak berlaku.
+
 ## Ringkasan
 Ekspor seluruh data ke satu file dan memulihkannya, dengan validasi, ringkasan sebelum menimpa, dan pengingat berkala.
 
