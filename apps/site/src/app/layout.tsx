@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   title: { default: 'Takaran', template: '%s | Takaran' },
   description:
     'Hitung HPP, harga jual, dan untung per jam untuk usaha makanan rumahan.',
-  icons: { icon: '/icon.svg' },
+  icons: { icon: '/icon.png', apple: '/apple-icon.png' },
 };
 
 export const viewport: Viewport = { themeColor: '#fcf8f5' };
