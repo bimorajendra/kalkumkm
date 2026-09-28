@@ -5,10 +5,15 @@ import { formatRupiah } from '@takaran/ui/format';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useRecipeResults } from '@/components/takaran/data-provider';
+import {
+  errorMessage,
+  useRecipeResults,
+  useRun,
+} from '@/components/takaran/data-provider';
 import { EmptyState, Page, PageTitle } from '@/components/takaran/page';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { BusinessNameDialog } from './business-name-dialog';
@@ -32,6 +37,7 @@ const directFallback = {
 export function PriceListBuilder() {
   const requestedRecipeId = useSearchParams().get('recipe');
   const { snapshot, results, error } = useRecipeResults();
+  const run = useRun();
   const { businessName, roundingStep } = snapshot.settings;
   const isPro = snapshot.plan === 'pro';
   const [format, setFormat] = useState<PriceListFormat>('story');
@@ -41,7 +47,24 @@ export function PriceListBuilder() {
   const [showCopyLink, setShowCopyLink] = useState(false);
   const [copyMessage, setCopyMessage] = useState('');
   const [message, setMessage] = useState('');
+  const [nameInput, setNameInput] = useState(businessName);
+  const [nameError, setNameError] = useState('');
   const svgRef = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    setNameInput(businessName);
+  }, [businessName]);
+
+  async function saveBusinessName() {
+    const name = nameInput.trim();
+    if (!name || name === businessName) return;
+    try {
+      await run({ type: 'settings.update', values: { businessName: name } });
+      setNameError('');
+    } catch (cause) {
+      setNameError(errorMessage(cause, 'Nama usaha belum tersimpan.'));
+    }
+  }
 
   const priced = useMemo(
     () =>
@@ -193,6 +216,26 @@ export function PriceListBuilder() {
           aria-label="Atur daftar harga"
           className="grid content-start gap-5 rounded-[20px] border border-line bg-surface p-4 sm:p-6"
         >
+          <div className="grid gap-1.5">
+            <Label htmlFor="price-list-business-name">Nama usaha</Label>
+            <Input
+              id="price-list-business-name"
+              maxLength={60}
+              placeholder="Nama usahamu"
+              value={nameInput}
+              aria-invalid={nameError ? true : undefined}
+              onChange={(event) => {
+                setNameInput(event.target.value);
+                setNameError('');
+              }}
+              onBlur={() => void saveBusinessName()}
+            />
+            {nameError ? (
+              <p role="alert" className="text-sm text-destructive">
+                {nameError}
+              </p>
+            ) : null}
+          </div>
           <fieldset className="grid gap-1">
             <legend className="mb-1 text-sm font-medium">Pilih menu</legend>
             {priced.map(({ recipe, price }) => (

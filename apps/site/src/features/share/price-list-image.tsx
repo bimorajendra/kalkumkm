@@ -1,5 +1,4 @@
 import { formatRupiah } from '@takaran/ui/format';
-import { Cookie } from 'lucide-react';
 import { forwardRef } from 'react';
 
 export type PriceListFormat = 'story' | 'square';
@@ -63,10 +62,26 @@ export const PriceListImage = forwardRef<SVGSVGElement, PriceListImageProps>(
         style={{ fontFamily }}
       >
         <rect width={width} height={height} fill="var(--bg)" />
-        <path d={`M0 0h${width}v26H0z`} fill="var(--caramel-500)" />
+        <g transform={`translate(${width - 130} -18)`}>
+          <polygon points="66,71 118,97 66,123 14,97" fill="var(--tan-400)" />
+          <polygon points="66,45 118,71 66,97 14,71" fill="var(--tan-200)" />
+          <polygon
+            points="66,14 118,40 66,66 14,40"
+            fill="var(--caramel-500)"
+          />
+        </g>
         <text
           x="88"
-          y={format === 'story' ? 210 : 150}
+          y={listTop - 130}
+          fill="var(--caramel-700)"
+          fontSize="28"
+          fontWeight="600"
+        >
+          Daftar harga
+        </text>
+        <text
+          x="88"
+          y={listTop - 50}
           fill="var(--ink)"
           fontFamily="Plus Jakarta Sans, Arial, sans-serif"
           fontSize={format === 'story' ? 76 : 64}
@@ -74,17 +89,16 @@ export const PriceListImage = forwardRef<SVGSVGElement, PriceListImageProps>(
         >
           {ellipsize(businessName, 30)}
         </text>
-        <text x="88" y={listTop - 68} fill="var(--ink-muted)" fontSize="28">
-          Daftar harga
-        </text>
         {menus.map((menu, index) => {
           const y = listTop + index * rowHeight;
           return (
             <g key={menu.id}>
               <path
-                d={`M88 ${y + Math.floor(rowHeight * 0.34)}h904`}
-                stroke="var(--line)"
+                d={`M88 ${y + Math.floor(rowHeight * 0.78) - 4}h904`}
+                stroke="var(--ink-muted)"
                 strokeWidth="2"
+                strokeDasharray="2 10"
+                strokeLinecap="round"
               />
               <text
                 x="88"
@@ -107,9 +121,6 @@ export const PriceListImage = forwardRef<SVGSVGElement, PriceListImageProps>(
             </g>
           );
         })}
-        <g transform={`translate(900 ${height - bottom + 10})`}>
-          <Cookie color="var(--caramel-500)" size={64} strokeWidth={1.5} />
-        </g>
         {!isPro ? (
           <text x="88" y={height - 70} fill="var(--ink-muted)" fontSize="26">
             dihitung dengan Takaran · {domain}
