@@ -74,6 +74,21 @@ function valuesFor(recipe?: RecipeRow): RecipeFormValues {
 }
 
 const commonUnits = ['g', 'kg', 'ml', 'l', 'butir', 'pcs'];
+const recipeSteps = [
+  {
+    title: 'Detail resep',
+    description: 'Beri nama resep dan isi hasil per adonan.',
+  },
+  {
+    title: 'Bahan',
+    description: 'Tambahkan bahan yang dipakai dan takarannya.',
+  },
+  {
+    title: 'Biaya tambahan',
+    description:
+      'Isi kemasan dan energi. Tenaga kerja bisa ditambahkan bila diperlukan.',
+  },
+];
 
 /** Satuan yang boleh dipakai satu baris: harus satu dimensi dengan bahannya. */
 function unitsFor(
@@ -126,6 +141,9 @@ export function RecipeEditor({
   const { ingredients, recipes, plan, settings } = useSnapshot();
   const [values, setValues] = useState(() => valuesFor(recipe));
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [step, setStep] = useState(0);
+  const [laborOpen, setLaborOpen] = useState(false);
+  const [subRecipeOpen, setSubRecipeOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [showPaywallLink, setShowPaywallLink] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -135,6 +153,15 @@ export function RecipeEditor({
     if (open) {
       setValues(valuesFor(recipe));
       setErrors({});
+      setStep(0);
+      setLaborOpen(
+        Boolean(
+          recipe &&
+            (recipe.laborMinutesPerBatch > 0 ||
+              recipe.laborRatePerHour !== null),
+        ),
+      );
+      setSubRecipeOpen(Boolean(recipe?.isSubRecipe));
       setMessage('');
       setShowPaywallLink(false);
     }
@@ -231,6 +258,36 @@ export function RecipeEditor({
     }
   }
 
+  function continueStep() {
+    const fields = step === 0 ? ['name', 'yieldPortions'] : ['items'];
+    const parsed = recipeFormSchema.safeParse(values);
+    const nextErrors: Record<string, string> = {};
+    if (!parsed.success) {
+      for (const issue of parsed.error.issues) {
+        if (fields.includes(String(issue.path[0])))
+          nextErrors[issue.path.join('.')] = issue.message;
+      }
+    }
+    setErrors((current) => {
+      const next = { ...current };
+      for (const field of fields) {
+        for (const key of Object.keys(next))
+          if (key === field || key.startsWith(`${field}.`)) delete next[key];
+      }
+      return { ...next, ...nextErrors };
+    });
+    if (Object.keys(nextErrors).length === 0) setStep((current) => current + 1);
+  }
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    if (step < 2) {
+      event.preventDefault();
+      continueStep();
+      return;
+    }
+    void save(event);
+  }
+
   async function remove() {
     if (!recipe || !window.confirm(`Hapus resep “${recipe.name}”?`)) return;
     try {
@@ -264,289 +321,393 @@ export function RecipeEditor({
           <DialogTitle className="font-display text-3xl font-semibold">
             {recipe ? 'Ubah resep' : 'Buat resep'}
           </DialogTitle>
-          <DialogDescription className="sr-only">
-            Isi nama resep, bahan dan takarannya, lalu biaya per adonan.
+          <DialogDescription>
+            {recipeSteps[step]?.description} Nilai tetap tersimpan saat kamu
+            kembali ke langkah sebelumnya.
           </DialogDescription>
         </DialogHeader>
-        <form className="grid gap-5" onSubmit={save} noValidate>
-          <Field id="recipe-name" label="Nama resep" error={errors.name}>
-            <Input
-              {...fieldProps('recipe-name', errors.name)}
-              maxLength={60}
-              value={values.name}
-              onChange={(event) => update('name', event.target.value)}
-            />
-          </Field>
+        <form className="grid gap-5" onSubmit={submit} noValidate>
+          <div className="grid gap-2">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-medium">
+                Langkah {step + 1} dari {recipeSteps.length}:{' '}
+                {recipeSteps[step]?.title}
+              </p>
+              <span className="text-sm text-muted-foreground">
+                {Math.round(((step + 1) / recipeSteps.length) * 100)}%
+              </span>
+            </div>
+            <div
+              role="progressbar"
+              aria-label="Progres pembuatan resep"
+              aria-valuemin={1}
+              aria-valuemax={recipeSteps.length}
+              aria-valuenow={step + 1}
+              className="h-1.5 overflow-hidden rounded-full bg-secondary"
+            >
+              <div
+                className="h-full rounded-full bg-primary transition-[width]"
+                style={{ width: `${((step + 1) / recipeSteps.length) * 100}%` }}
+              />
+            </div>
+          </div>
 
-          <fieldset className="grid gap-3">
-            <legend className="mb-1 text-sm font-medium">
-              Bahan dan takaran
-            </legend>
-            {values.items.length > 0 ? (
-              <ul className="grid gap-3">
-                {values.items.map((item, index) => {
-                  const ingredient =
-                    item.refType === 'ingredient'
-                      ? ingredients.find(({ id }) => id === item.refId)
-                      : undefined;
-                  const sub =
-                    item.refType === 'recipe'
-                      ? recipes.find(({ id }) => id === item.refId)
-                      : undefined;
-                  const name = (ingredient ?? sub)?.name;
-                  const error =
-                    errors[`items.${index}.quantity`] ??
-                    errors[`items.${index}.refId`];
-                  return (
-                    <li
-                      key={`${item.refType}-${item.refId}`}
-                      className="grid grid-cols-[1fr_5.5rem_5.5rem_auto] items-center gap-2"
-                    >
-                      <span className="min-w-0 font-medium">
-                        {name ?? 'Bahan ini sudah dihapus'}
-                      </span>
-                      {name ? (
-                        <>
-                          <Input
-                            aria-label={`Takaran ${name}`}
-                            aria-invalid={error ? true : undefined}
-                            inputMode="decimal"
-                            value={item.quantity}
-                            onChange={(event) =>
-                              updateItem(index, 'quantity', event.target.value)
-                            }
-                          />
-                          <Select
-                            value={item.unit}
-                            onValueChange={(value) =>
-                              updateItem(index, 'unit', value)
-                            }
-                          >
-                            <SelectTrigger
-                              aria-label={`Satuan ${name}`}
-                              className="w-full px-2"
-                            >
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {unitsFor(item, ingredients, recipes).map(
-                                (option) => (
-                                  <SelectItem key={option} value={option}>
-                                    {option}
-                                  </SelectItem>
-                                ),
-                              )}
-                            </SelectContent>
-                          </Select>
-                        </>
-                      ) : (
-                        <span className="col-span-2 text-sm text-destructive">
-                          Hapus baris ini atau pilih bahan lain.
-                        </span>
-                      )}
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          setValues((current) => ({
-                            ...current,
-                            items: current.items.filter((_, i) => i !== index),
-                          }))
-                        }
+          {step === 0 ? (
+            <section
+              aria-labelledby="recipe-details-title"
+              className="grid gap-4"
+            >
+              <div>
+                <h2 id="recipe-details-title" className="font-semibold">
+                  Detail resep
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Mulai dari nama dan jumlah hasil satu adonan.
+                </p>
+              </div>
+              <Field id="recipe-name" label="Nama resep" error={errors.name}>
+                <Input
+                  {...fieldProps('recipe-name', errors.name)}
+                  maxLength={60}
+                  value={values.name}
+                  onChange={(event) => update('name', event.target.value)}
+                />
+              </Field>
+              <Field
+                id="recipe-yield"
+                label="Hasil per adonan (porsi)"
+                error={errors.yieldPortions}
+              >
+                <Input
+                  {...fieldProps('recipe-yield', errors.yieldPortions)}
+                  inputMode="numeric"
+                  value={values.yieldPortions}
+                  onChange={(event) =>
+                    update('yieldPortions', event.target.value)
+                  }
+                />
+              </Field>
+            </section>
+          ) : null}
+
+          {step === 1 ? (
+            <fieldset className="grid gap-3">
+              <legend className="mb-1 text-sm font-medium">
+                Bahan dan takaran
+              </legend>
+              <p className="text-sm text-muted-foreground">
+                Pilih bahan yang sudah kamu simpan. Takaran awal mengikuti
+                satuan beli dan masih bisa diubah.
+              </p>
+              {errors.items ? (
+                <p role="alert" className="text-sm text-destructive">
+                  {errors.items}
+                </p>
+              ) : null}
+              {values.items.length > 0 ? (
+                <ul className="grid gap-3">
+                  {values.items.map((item, index) => {
+                    const ingredient =
+                      item.refType === 'ingredient'
+                        ? ingredients.find(({ id }) => id === item.refId)
+                        : undefined;
+                    const sub =
+                      item.refType === 'recipe'
+                        ? recipes.find(({ id }) => id === item.refId)
+                        : undefined;
+                    const name = (ingredient ?? sub)?.name;
+                    const error =
+                      errors[`items.${index}.quantity`] ??
+                      errors[`items.${index}.refId`];
+                    return (
+                      <li
+                        key={`${item.refType}-${item.refId}`}
+                        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_6rem_6rem_auto]"
                       >
-                        Hapus
-                      </Button>
-                      {error && name ? (
-                        <p
-                          role="alert"
-                          className="col-span-full text-sm text-destructive"
+                        <span className="min-w-0 font-medium">
+                          {name ?? 'Bahan ini sudah dihapus'}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="col-start-2 row-start-1 sm:col-start-4"
+                          onClick={() =>
+                            setValues((current) => ({
+                              ...current,
+                              items: current.items.filter(
+                                (_, i) => i !== index,
+                              ),
+                            }))
+                          }
                         >
-                          {error}
-                        </p>
-                      ) : null}
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : null}
-            {ingredients.length > 0 || subRecipes.length > 0 ? (
-              <Field id="recipe-add-item" label="Tambah bahan atau sub-resep">
-                <Select
-                  key={values.items.length}
-                  value=""
-                  onValueChange={addItem}
-                >
-                  <SelectTrigger id="recipe-add-item" className="w-full">
-                    <SelectValue placeholder="Pilih bahan atau sub-resep" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Bahan</SelectLabel>
-                      {freeIngredients.map((item) => (
-                        <SelectItem
-                          key={item.id}
-                          value={`ingredient:${item.id}`}
-                        >
-                          {item.name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                    {subRecipes.length > 0 ? (
+                          Hapus
+                        </Button>
+                        {name ? (
+                          <div className="col-span-2 grid grid-cols-[minmax(0,1fr)_minmax(5.5rem,auto)] gap-2 sm:col-span-2 sm:col-start-2 sm:row-start-1">
+                            <Input
+                              aria-label={`Takaran ${name}`}
+                              aria-invalid={error ? true : undefined}
+                              inputMode="decimal"
+                              value={item.quantity}
+                              onChange={(event) =>
+                                updateItem(
+                                  index,
+                                  'quantity',
+                                  event.target.value,
+                                )
+                              }
+                            />
+                            <Select
+                              value={item.unit}
+                              onValueChange={(value) =>
+                                updateItem(index, 'unit', value)
+                              }
+                            >
+                              <SelectTrigger
+                                aria-label={`Satuan ${name}`}
+                                className="w-full px-2"
+                              >
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {unitsFor(item, ingredients, recipes).map(
+                                  (option) => (
+                                    <SelectItem key={option} value={option}>
+                                      {option}
+                                    </SelectItem>
+                                  ),
+                                )}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        ) : (
+                          <span className="col-span-2 text-sm text-destructive sm:col-start-2 sm:row-start-1">
+                            Hapus baris ini atau pilih bahan lain.
+                          </span>
+                        )}
+                        {error && name ? (
+                          <p
+                            role="alert"
+                            className="col-span-full text-sm text-destructive"
+                          >
+                            {error}
+                          </p>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : null}
+              {ingredients.length > 0 || subRecipes.length > 0 ? (
+                <Field id="recipe-add-item" label="Tambah bahan atau sub-resep">
+                  <Select
+                    key={values.items.length}
+                    value=""
+                    onValueChange={addItem}
+                  >
+                    <SelectTrigger id="recipe-add-item" className="w-full">
+                      <SelectValue placeholder="Pilih bahan atau sub-resep" />
+                    </SelectTrigger>
+                    <SelectContent>
                       <SelectGroup>
-                        <SelectLabel>Sub-resep</SelectLabel>
-                        {subRecipes.map((item) => (
-                          <SelectItem key={item.id} value={`recipe:${item.id}`}>
+                        <SelectLabel>Bahan</SelectLabel>
+                        {freeIngredients.map((item) => (
+                          <SelectItem
+                            key={item.id}
+                            value={`ingredient:${item.id}`}
+                          >
                             {item.name}
                           </SelectItem>
                         ))}
                       </SelectGroup>
-                    ) : null}
-                  </SelectContent>
-                </Select>
-              </Field>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                {recipeCopy.noIngredients}
-              </p>
-            )}
-          </fieldset>
-
-          <fieldset className="grid gap-3 rounded-lg bg-secondary p-4">
-            <legend className="px-1 text-sm font-medium">Sub-resep</legend>
-            <label className="flex min-h-11 items-center gap-3">
-              <Checkbox
-                checked={values.isSubRecipe}
-                onCheckedChange={(checked) => {
-                  if (checked === true && plan !== 'pro')
-                    setPaywall('sub_recipe');
-                  else update('isSubRecipe', checked === true);
-                }}
-              />
-              Pakai sebagai bahan di resep lain
-            </label>
-            {values.isSubRecipe ? (
-              <div className="grid grid-cols-2 gap-3">
-                <Field id="sub-recipe-yield" label="Hasil sub-resep">
-                  <Input
-                    id="sub-recipe-yield"
-                    inputMode="decimal"
-                    value={values.subRecipeYieldQty}
-                    onChange={(event) =>
-                      update('subRecipeYieldQty', event.target.value)
-                    }
-                  />
-                </Field>
-                <Field id="sub-recipe-unit" label="Satuan hasil">
-                  <Select
-                    value={values.subRecipeYieldUnit}
-                    onValueChange={(value) =>
-                      update('subRecipeYieldUnit', value)
-                    }
-                  >
-                    <SelectTrigger id="sub-recipe-unit" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {commonUnits.map((unit) => (
-                        <SelectItem key={unit} value={unit}>
-                          {unit}
-                        </SelectItem>
-                      ))}
+                      {subRecipes.length > 0 ? (
+                        <SelectGroup>
+                          <SelectLabel>Sub-resep</SelectLabel>
+                          {subRecipes.map((item) => (
+                            <SelectItem
+                              key={item.id}
+                              value={`recipe:${item.id}`}
+                            >
+                              {item.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      ) : null}
                     </SelectContent>
                   </Select>
                 </Field>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  {recipeCopy.noIngredients}
+                </p>
+              )}
+            </fieldset>
+          ) : null}
+
+          {step === 2 ? (
+            <section
+              aria-labelledby="recipe-costs-title"
+              className="grid gap-4"
+            >
+              <div>
+                <h2 id="recipe-costs-title" className="font-semibold">
+                  Biaya per adonan
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Kosongkan biaya yang belum ingin dihitung. Nilai awalnya nol.
+                </p>
               </div>
-            ) : null}
-          </fieldset>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field
+                  id="recipe-packaging"
+                  label="Kemasan per porsi (Rp)"
+                  error={errors.packagingPerPortion}
+                >
+                  <Input
+                    {...fieldProps(
+                      'recipe-packaging',
+                      errors.packagingPerPortion,
+                    )}
+                    inputMode="numeric"
+                    value={values.packagingPerPortion}
+                    onChange={(event) =>
+                      update('packagingPerPortion', event.target.value)
+                    }
+                  />
+                </Field>
+                <Field
+                  id="recipe-energy"
+                  label="Energi per adonan (Rp)"
+                  error={errors.energyPerBatch}
+                >
+                  <Input
+                    {...fieldProps('recipe-energy', errors.energyPerBatch)}
+                    inputMode="numeric"
+                    value={values.energyPerBatch}
+                    onChange={(event) =>
+                      update('energyPerBatch', event.target.value)
+                    }
+                  />
+                </Field>
+              </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Field
-              id="recipe-yield"
-              label="Hasil per adonan (porsi)"
-              error={errors.yieldPortions}
-            >
-              <Input
-                {...fieldProps('recipe-yield', errors.yieldPortions)}
-                inputMode="numeric"
-                value={values.yieldPortions}
-                onChange={(event) =>
-                  update('yieldPortions', event.target.value)
-                }
-              />
-            </Field>
-            <Field
-              id="recipe-packaging"
-              label="Kemasan per porsi (Rp)"
-              error={errors.packagingPerPortion}
-            >
-              <Input
-                {...fieldProps('recipe-packaging', errors.packagingPerPortion)}
-                inputMode="numeric"
-                value={values.packagingPerPortion}
-                onChange={(event) =>
-                  update('packagingPerPortion', event.target.value)
-                }
-              />
-            </Field>
-            <Field
-              id="recipe-energy"
-              label="Energi per adonan (Rp)"
-              error={errors.energyPerBatch}
-            >
-              <Input
-                {...fieldProps('recipe-energy', errors.energyPerBatch)}
-                inputMode="numeric"
-                value={values.energyPerBatch}
-                onChange={(event) =>
-                  update('energyPerBatch', event.target.value)
-                }
-              />
-            </Field>
-          </div>
+              <details
+                open={laborOpen}
+                onToggle={(event) => setLaborOpen(event.currentTarget.open)}
+                className="rounded-lg border bg-card p-4"
+              >
+                <summary className="min-h-11 cursor-pointer content-center font-medium">
+                  Tambahkan biaya tenaga kerja (opsional)
+                </summary>
+                <div className="grid gap-3 pt-3">
+                  <p className="text-sm text-muted-foreground">
+                    Kalau diisi, biaya tenaga masuk ke HPP. Kalau tidak, hasil
+                    untung per jam menunjukkan upah yang kamu terima.
+                  </p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field
+                      id="recipe-labor-rate"
+                      label="Upah per jam (Rp)"
+                      error={errors.laborRatePerHour}
+                    >
+                      <Input
+                        {...fieldProps(
+                          'recipe-labor-rate',
+                          errors.laborRatePerHour,
+                        )}
+                        inputMode="numeric"
+                        value={values.laborRatePerHour}
+                        onChange={(event) =>
+                          update('laborRatePerHour', event.target.value)
+                        }
+                      />
+                    </Field>
+                    <Field
+                      id="recipe-labor-minutes"
+                      label="Waktu kerja per adonan (menit)"
+                      error={errors.laborMinutesPerBatch}
+                    >
+                      <Input
+                        {...fieldProps(
+                          'recipe-labor-minutes',
+                          errors.laborMinutesPerBatch,
+                        )}
+                        inputMode="numeric"
+                        value={values.laborMinutesPerBatch}
+                        onChange={(event) =>
+                          update('laborMinutesPerBatch', event.target.value)
+                        }
+                      />
+                    </Field>
+                  </div>
+                </div>
+              </details>
 
-          <fieldset className="grid gap-3">
-            <legend className="mb-1 text-sm font-medium">
-              Tenaga, kalau mau dihitung
-            </legend>
-            <p className="text-sm text-muted-foreground">
-              Kalau dikosongkan, hasil untung per jam nanti menunjukkan upah
-              yang kamu terima.
-            </p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field
-                id="recipe-labor-rate"
-                label="Upah per jam (Rp)"
-                error={errors.laborRatePerHour}
+              <details
+                open={subRecipeOpen}
+                onToggle={(event) => setSubRecipeOpen(event.currentTarget.open)}
+                className="rounded-lg border bg-card p-4"
               >
-                <Input
-                  {...fieldProps('recipe-labor-rate', errors.laborRatePerHour)}
-                  inputMode="numeric"
-                  value={values.laborRatePerHour}
-                  onChange={(event) =>
-                    update('laborRatePerHour', event.target.value)
-                  }
-                />
-              </Field>
-              <Field
-                id="recipe-labor-minutes"
-                label="Waktu kerja per adonan (menit)"
-                error={errors.laborMinutesPerBatch}
-              >
-                <Input
-                  {...fieldProps(
-                    'recipe-labor-minutes',
-                    errors.laborMinutesPerBatch,
-                  )}
-                  inputMode="numeric"
-                  value={values.laborMinutesPerBatch}
-                  onChange={(event) =>
-                    update('laborMinutesPerBatch', event.target.value)
-                  }
-                />
-              </Field>
-            </div>
-          </fieldset>
+                <summary className="min-h-11 cursor-pointer content-center font-medium">
+                  Jadikan sub-resep (fitur Pro)
+                </summary>
+                <div className="grid gap-3 pt-3">
+                  <p className="text-sm text-muted-foreground">
+                    Gunakan resep ini sebagai bahan, misalnya untuk isian atau
+                    adonan dasar.
+                  </p>
+                  <label className="flex min-h-11 items-center gap-3">
+                    <Checkbox
+                      checked={values.isSubRecipe}
+                      onCheckedChange={(checked) => {
+                        if (checked === true && plan !== 'pro')
+                          setPaywall('sub_recipe');
+                        else update('isSubRecipe', checked === true);
+                      }}
+                    />
+                    Pakai sebagai bahan di resep lain
+                  </label>
+                  {values.isSubRecipe ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      <Field id="sub-recipe-yield" label="Hasil sub-resep">
+                        <Input
+                          id="sub-recipe-yield"
+                          inputMode="decimal"
+                          value={values.subRecipeYieldQty}
+                          onChange={(event) =>
+                            update('subRecipeYieldQty', event.target.value)
+                          }
+                        />
+                      </Field>
+                      <Field id="sub-recipe-unit" label="Satuan hasil">
+                        <Select
+                          value={values.subRecipeYieldUnit}
+                          onValueChange={(value) =>
+                            update('subRecipeYieldUnit', value)
+                          }
+                        >
+                          <SelectTrigger
+                            id="sub-recipe-unit"
+                            className="w-full"
+                          >
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {commonUnits.map((unit) => (
+                              <SelectItem key={unit} value={unit}>
+                                {unit}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </Field>
+                    </div>
+                  ) : null}
+                </div>
+              </details>
+            </section>
+          ) : null}
 
           {message ? (
             <p role="alert" className="text-sm text-destructive">
@@ -577,7 +738,16 @@ export function RecipeEditor({
             ) : (
               <span />
             )}
-            <div className="flex gap-2">
+            <div className="flex flex-wrap justify-end gap-2">
+              {step > 0 ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setStep((current) => current - 1)}
+                >
+                  Kembali
+                </Button>
+              ) : null}
               <Button
                 type="button"
                 variant="outline"
@@ -585,9 +755,15 @@ export function RecipeEditor({
               >
                 Batal
               </Button>
-              <Button type="submit" disabled={saving}>
-                {saving ? 'Menyimpan…' : 'Simpan resep'}
-              </Button>
+              {step < recipeSteps.length - 1 ? (
+                <Button type="button" onClick={continueStep}>
+                  Lanjutkan
+                </Button>
+              ) : (
+                <Button type="submit" disabled={saving}>
+                  {saving ? 'Menyimpan…' : 'Simpan resep'}
+                </Button>
+              )}
             </div>
           </DialogFooter>
         </form>

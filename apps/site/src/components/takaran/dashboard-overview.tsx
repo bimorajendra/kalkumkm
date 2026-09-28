@@ -87,140 +87,184 @@ export function DashboardOverview() {
 
   return (
     <Page className="grid gap-7">
-      <header className="flex flex-wrap items-end justify-between gap-4">
+      <header className="grid gap-2 sm:flex sm:items-end sm:justify-between sm:gap-4">
         <div className="grid gap-2">
-          <PageTitle>Ringkasan usahamu</PageTitle>
+          <p className="text-sm font-semibold text-link">Ruang kerjamu</p>
+          <PageTitle>Ringkasan usaha</PageTitle>
           <p className="max-w-prose text-muted-foreground">
-            Lihat bahan dan resep yang sudah kamu simpan, lalu lanjutkan
-            hitungan terakhir.
+            Pantau data usaha dan lanjutkan pekerjaan yang terakhir kamu buka.
           </p>
         </div>
-        <Button asChild size="lg">
-          <Link href="/dashboard/hitung">Hitung HPP</Link>
+        <Button asChild size="lg" className="w-full sm:w-auto">
+          <Link href="/dashboard/hitung">Mulai hitung HPP</Link>
         </Button>
       </header>
 
       <section
         aria-label="Jumlah data tersimpan"
-        className="grid grid-cols-2 gap-3 sm:grid-cols-3"
+        className="grid grid-cols-2 gap-3 lg:grid-cols-3"
       >
-        <SummaryValue label="Resep tersimpan" value={recipes.length} />
-        <SummaryValue label="Bahan tersimpan" value={ingredients.length} />
-        <SummaryValue label="Saluran jual" value={channels.length} />
+        <SummaryValue
+          href="/dashboard/resep"
+          label="Resep tersimpan"
+          value={recipes.length}
+        />
+        <SummaryValue
+          href="/dashboard/bahan"
+          label="Bahan tersimpan"
+          value={ingredients.length}
+        />
+        <SummaryValue
+          href="/dashboard/hitung"
+          label="Saluran jual"
+          value={channels.length}
+        />
       </section>
 
-      {/* Panel tunggal menempatkan hasil terakhir dan langkah lanjut dalam satu alur. */}
-      {activeRecipe ? (
-        <section
-          aria-labelledby="last-recipe-title"
-          className="grid gap-5 rounded-2xl bg-secondary p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(220px,auto)] lg:items-center"
-        >
-          <div className="grid gap-3">
-            <p className="text-sm font-semibold text-link">
-              Resep terakhir dibuka
+      <section className="grid gap-4" aria-label="Pekerjaan usaha">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="text-xl font-semibold">Lanjutkan pekerjaanmu</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Buka data terakhir atau pilih langkah yang ingin dikerjakan.
             </p>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Paket: {plan === 'pro' ? 'Takaran Pro' : 'Gratis'}
+          </p>
+        </div>
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(260px,0.8fr)]">
+          {activeRecipe ? (
+            <section
+              aria-labelledby="last-recipe-title"
+              className="grid gap-5 rounded-2xl border bg-card p-5 shadow-sm sm:p-6"
+            >
+              <div className="grid gap-3">
+                <p className="text-sm font-semibold text-link">
+                  Resep terakhir dibuka
+                </p>
+                <div>
+                  <h3
+                    id="last-recipe-title"
+                    className="font-display text-2xl font-semibold leading-tight sm:text-3xl"
+                  >
+                    {activeRecipe.name}
+                  </h3>
+                  <p className="mt-1 text-muted-foreground">
+                    {activeRecipe.yieldPortions} porsi per adonan
+                  </p>
+                </div>
+                <dl className="flex flex-wrap gap-x-8 gap-y-3">
+                  <div>
+                    <dt className="text-sm text-muted-foreground">
+                      HPP per porsi
+                    </dt>
+                    <dd className="font-display text-2xl font-semibold">
+                      {activeResult === undefined
+                        ? 'Memuat'
+                        : activeResult instanceof CalcError
+                          ? 'Belum tersedia'
+                          : formatRupiah(activeResult.hpp)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-sm text-muted-foreground">
+                      Harga jual tersimpan
+                    </dt>
+                    <dd className="font-display text-2xl font-semibold">
+                      {activeRecipe.currentPrice === null
+                        ? 'Belum diatur'
+                        : formatRupiah(activeRecipe.currentPrice)}
+                    </dd>
+                  </div>
+                </dl>
+                {activeResult instanceof CalcError ? (
+                  <p role="alert" className="text-sm text-destructive">
+                    Resep ini perlu diperiksa sebelum HPP bisa ditampilkan.
+                  </p>
+                ) : null}
+              </div>
+              {/* Tumpukan biaya membantu pengguna membaca hasil tanpa mengubah hitungan. */}
+              {stack ? (
+                <IsometricStack layers={stack.layers} profit={stack.profit} />
+              ) : null}
+              <div className="flex flex-wrap gap-2">
+                <Button asChild>
+                  <Link href={`/dashboard/resep/${activeRecipe.id}`}>
+                    Buka resep
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href="/dashboard/hitung">Hitung harga jual</Link>
+                </Button>
+              </div>
+            </section>
+          ) : (
+            <EmptyState
+              title="Mulai dari bahan yang kamu punya."
+              description="Simpan harga bahan lebih dulu, lalu susun resep untuk melihat HPP per porsi."
+            >
+              <Button asChild>
+                <Link href="/dashboard/bahan">Tambah bahan pertama</Link>
+              </Button>
+            </EmptyState>
+          )}
+          <section
+            aria-labelledby="quick-actions-title"
+            className="grid gap-3 rounded-2xl bg-secondary p-5 sm:p-6"
+          >
             <div>
-              <h2
-                id="last-recipe-title"
-                className="font-display text-3xl font-semibold leading-tight"
-              >
-                {activeRecipe.name}
-              </h2>
-              <p className="mt-1 text-muted-foreground">
-                {activeRecipe.yieldPortions} porsi per adonan
+              <h3 id="quick-actions-title" className="font-semibold">
+                Akses cepat
+              </h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Pilih bagian usaha yang ingin kamu kelola.
               </p>
             </div>
-            <dl className="flex flex-wrap gap-x-8 gap-y-3">
-              <div>
-                <dt className="text-sm text-muted-foreground">HPP per porsi</dt>
-                <dd className="font-display text-2xl font-semibold">
-                  {activeResult === undefined
-                    ? 'Memuat'
-                    : activeResult instanceof CalcError
-                      ? 'Belum tersedia'
-                      : formatRupiah(activeResult.hpp)}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-sm text-muted-foreground">
-                  Harga jual saat ini
-                </dt>
-                <dd className="font-display text-2xl font-semibold">
-                  {activeRecipe.currentPrice === null
-                    ? 'Belum diatur'
-                    : formatRupiah(activeRecipe.currentPrice)}
-                </dd>
-              </div>
-            </dl>
-            {activeResult instanceof CalcError ? (
-              <p role="alert" className="text-sm text-destructive">
-                Resep ini perlu diperiksa sebelum HPP bisa ditampilkan.
-              </p>
-            ) : null}
-          </div>
-          {/* Tumpukan biaya membantu pengguna membaca hasil tanpa mengubah hitungan. */}
-          {stack ? (
-            <IsometricStack layers={stack.layers} profit={stack.profit} />
-          ) : null}
-          <div className="flex flex-wrap gap-2 lg:col-span-2">
-            <Button asChild>
-              <Link href={`/dashboard/resep/${activeRecipe.id}`}>
-                Buka resep
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/dashboard/hitung">Lanjut menghitung</Link>
-            </Button>
-          </div>
-        </section>
-      ) : (
-        <EmptyState
-          title="Mulai dari resep pertamamu."
-          description="Tambahkan bahan dan susun resep. HPP akan muncul setelah biaya dan hasil per adonan diisi."
-        >
-          <Button asChild>
-            <Link href="/dashboard/resep">Buat resep</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/dashboard/bahan">Tambah bahan</Link>
-          </Button>
-        </EmptyState>
-      )}
-
-      <section aria-labelledby="next-step-title" className="grid gap-3">
-        <h2 id="next-step-title" className="text-xl font-semibold">
-          Langkah berikutnya
-        </h2>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <NextStep
-            title="Perbarui harga bahan"
-            description="Sesuaikan angka dengan struk belanja terbaru."
-            href="/dashboard/bahan"
-            action="Buka daftar bahan"
-          />
-          <NextStep
-            title="Lihat daftar resepmu"
-            description="Periksa HPP, harga jual, atau ubah resep."
-            href="/dashboard/resep"
-            action="Buka daftar resep"
-          />
+            <NextStep
+              title="Bahan dan harga belanja"
+              description="Catat bahan dari struk agar biaya tetap sesuai."
+              href="/dashboard/bahan"
+              action="Kelola bahan"
+            />
+            <NextStep
+              title="Resep dan hasil hitung"
+              description="Susun resep, lihat HPP, lalu atur harga jual."
+              href="/dashboard/resep"
+              action="Kelola resep"
+            />
+            <NextStep
+              title="Penawaran pesanan"
+              description="Buat rincian harga untuk pesanan khusus."
+              href="/dashboard/penawaran"
+              action="Buat penawaran"
+            />
+          </section>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Paket saat ini: {plan === 'pro' ? 'Takaran Pro' : 'Gratis'}.
-        </p>
       </section>
     </Page>
   );
 }
 
-function SummaryValue({ label, value }: { label: string; value: number }) {
+function SummaryValue({
+  href,
+  label,
+  value,
+}: {
+  href: string;
+  label: string;
+  value: number;
+}) {
   return (
-    <dl className="grid gap-1 rounded-xl border bg-card p-4">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="font-display text-3xl font-semibold tabular-nums">
+    <Link
+      href={href}
+      className="grid min-h-24 gap-1 rounded-xl border bg-card p-4 transition-colors hover:bg-secondary/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+    >
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="font-display text-3xl font-semibold tabular-nums">
         {value}
-      </dd>
-    </dl>
+      </span>
+    </Link>
   );
 }
 
