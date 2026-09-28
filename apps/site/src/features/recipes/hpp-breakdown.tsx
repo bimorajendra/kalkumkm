@@ -41,7 +41,7 @@ export function HppBreakdown({
   return (
     <section
       aria-labelledby="hpp-breakdown-title"
-      className="grid gap-3 rounded-xl bg-card p-5 shadow-sm"
+      className="grid gap-3 rounded-[20px] border border-line bg-surface p-4 sm:p-5"
     >
       <h2 id="hpp-breakdown-title" className="text-xl font-semibold">
         Rincian HPP per porsi

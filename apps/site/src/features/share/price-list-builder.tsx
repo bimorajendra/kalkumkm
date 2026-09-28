@@ -188,10 +188,10 @@ export function PriceListBuilder() {
           {priceListCopy.description}
         </p>
       </header>
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-12">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-8">
         <section
           aria-label="Atur daftar harga"
-          className="grid content-start gap-5"
+          className="grid content-start gap-5 rounded-[20px] border border-line bg-surface p-4 sm:p-6"
         >
           <fieldset className="grid gap-1">
             <legend className="mb-1 text-sm font-medium">Pilih menu</legend>
@@ -239,6 +239,7 @@ export function PriceListBuilder() {
           <Button
             type="button"
             size="lg"
+            className="min-h-12 rounded-full"
             disabled={exporting || !menus.length || !fits}
             onClick={() => void createImage()}
           >
@@ -268,13 +269,13 @@ export function PriceListBuilder() {
         </section>
         <section
           aria-labelledby="price-list-preview-title"
-          className="grid content-start gap-3"
+          className="grid content-start gap-3 rounded-[20px] bg-surface-soft p-4 sm:p-5"
         >
           <h2 id="price-list-preview-title" className="text-xl font-semibold">
             Pratinjau gambar
           </h2>
           <div
-            className={`mx-auto w-full overflow-hidden rounded-xl border bg-card shadow-sm [&>svg]:h-auto [&>svg]:w-full ${
+            className={`mx-auto w-full overflow-hidden rounded-[20px] border border-line bg-surface [&>svg]:h-auto [&>svg]:w-full ${
               format === 'story' ? 'max-w-xs' : 'max-w-md'
             }`}
           >

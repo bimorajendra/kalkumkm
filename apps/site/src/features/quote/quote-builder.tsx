@@ -10,6 +10,7 @@ import {
   useRun,
 } from '@/components/takaran/data-provider';
 import { EmptyState, Page, PageTitle } from '@/components/takaran/page';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -179,17 +180,21 @@ export function QuoteBuilder() {
 
   return (
     <Page className="grid gap-6">
-      <header>
-        <p className="text-sm text-muted-foreground">Pesanan custom</p>
-        <PageTitle>{quoteCopy.title}</PageTitle>
-        <p className="mt-1 max-w-prose text-muted-foreground">
+      <header className="grid gap-2">
+        <div className="flex items-center gap-3">
+          <PageTitle>{quoteCopy.title}</PageTitle>
+          <Badge className="rounded-full bg-peach-100 text-caramel-700">
+            Pro
+          </Badge>
+        </div>
+        <p className="max-w-prose text-muted-foreground">
           {quoteCopy.description}
         </p>
       </header>
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-12">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-8">
         <section
           aria-label="Rincian penawaran"
-          className="grid content-start gap-5"
+          className="grid content-start gap-5 rounded-[20px] border border-line bg-surface p-4 sm:p-6"
         >
           <div className="grid gap-1.5">
             <label htmlFor="quote-recipe" className="text-sm font-medium">
@@ -235,6 +240,7 @@ export function QuoteBuilder() {
             <Button
               type="button"
               variant="outline"
+              className="min-h-11 rounded-full"
               onClick={() => {
                 setEditingOption(undefined);
                 setOptionFormOpen(true);
@@ -248,7 +254,7 @@ export function QuoteBuilder() {
               {options.map((option) => (
                 <li
                   key={option.id}
-                  className="flex min-h-14 items-center justify-between gap-3 py-2"
+                  className="flex min-h-16 items-center justify-between gap-3 py-2"
                 >
                   <label className="flex min-h-11 flex-1 items-center gap-3">
                     <Checkbox
@@ -274,6 +280,7 @@ export function QuoteBuilder() {
                       type="button"
                       size="sm"
                       variant="outline"
+                      className="min-h-11 rounded-full"
                       onClick={() => {
                         setEditingOption(option);
                         setOptionFormOpen(true);
@@ -285,7 +292,7 @@ export function QuoteBuilder() {
                       type="button"
                       size="sm"
                       variant="ghost"
-                      className="text-destructive"
+                      className="min-h-11 rounded-full text-destructive"
                       onClick={() => void removeOption(option)}
                     >
                       Hapus
@@ -315,7 +322,7 @@ export function QuoteBuilder() {
             </p>
           ) : null}
           {calculation ? (
-            <dl className="grid grid-cols-2 gap-4 rounded-xl bg-secondary p-5">
+            <dl className="grid grid-cols-2 gap-4 rounded-[20px] bg-surface-soft p-5">
               <div>
                 <dt className="text-sm text-muted-foreground">
                   Harga per porsi
@@ -351,12 +358,12 @@ export function QuoteBuilder() {
         </section>
         <section
           aria-labelledby="quote-preview-title"
-          className="grid content-start gap-3"
+          className="grid content-start gap-3 rounded-[20px] bg-surface-soft p-4 sm:p-5"
         >
           <h2 id="quote-preview-title" className="text-xl font-semibold">
             Pratinjau untuk pelanggan
           </h2>
-          <div className="overflow-hidden rounded-xl border bg-card shadow-sm [&>svg]:h-auto [&>svg]:w-full">
+          <div className="overflow-hidden rounded-[20px] border border-line bg-surface [&>svg]:h-auto [&>svg]:w-full">
             <QuoteImage
               ref={svgRef}
               businessName={businessName || 'Nama usaha'}
@@ -373,6 +380,7 @@ export function QuoteBuilder() {
           <Button
             type="button"
             size="lg"
+            className="min-h-12 rounded-full"
             disabled={exporting}
             onClick={() => void download()}
           >

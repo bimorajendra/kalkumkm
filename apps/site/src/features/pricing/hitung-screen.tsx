@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  actualMarginBp,
   CalcError,
   markupBp,
   priceForChannel,
@@ -173,6 +172,8 @@ function CalculatorScreen({
   const commissionBp =
     selectedChannel.kind === 'commission' ? selectedChannel.rateBp : 0;
   try {
+    // Harga saran selalu dari target untung di slider, terpisah dari harga
+    // yang sudah kamu simpan (lihat CurrentPriceInput di bawah).
     const directSuggested = priceForChannel(
       result.hpp,
       calculator.targetMarginBp,
@@ -180,24 +181,15 @@ function CalculatorScreen({
       directChannel,
       roundingStep,
     ).price;
-    const retailPrice = recipe.currentPrice ?? directSuggested;
     const channelResult = priceForChannel(
       result.hpp,
       calculator.targetMarginBp,
-      retailPrice,
+      directSuggested,
       selectedChannel,
       roundingStep,
     );
-    price =
-      selectedChannel.id === directChannel.id && recipe.currentPrice !== null
-        ? recipe.currentPrice
-        : channelResult.price;
-    actualMargin =
-      price > 0
-        ? price === channelResult.price
-          ? channelResult.marginBp
-          : actualMarginBp(price, result.hpp, commissionBp)
-        : 0;
+    price = channelResult.price;
+    actualMargin = channelResult.marginBp;
     markup = result.hpp.gt(0) ? markupBp(price, result.hpp) : 0;
     hourlyProfit =
       calculator.laborMinutesPerBatch > 0
@@ -237,10 +229,7 @@ function CalculatorScreen({
       <CalculatorResult
         compact={compact}
         onDetails={onDetails}
-        canSavePrice={
-          selectedChannel.id === directChannel.id &&
-          recipe.currentPrice === null
-        }
+        canSavePrice={selectedChannel.id === directChannel.id}
         channelName={selectedChannel.name}
         commissionBp={commissionBp}
         hpp={result.hpp}
@@ -269,7 +258,7 @@ function CalculatorScreen({
   );
 
   return (
-    <Page className="grid gap-6 pb-56 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:gap-12 lg:pb-12">
+    <Page className="grid gap-6 pb-56 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:gap-8 lg:pb-12">
       <div className="grid content-start gap-5">
         <MarginAlarm />
         <section aria-labelledby="calculator-title" className="grid gap-5">
@@ -284,22 +273,20 @@ function CalculatorScreen({
             id="calculator-title"
             className="font-display text-[34px] font-bold leading-[38px] lg:text-[44px] lg:leading-[48px]"
           >
-            Hitung untung {recipe.name.toLocaleLowerCase('id-ID')}
+            Hitung harga {recipe.name.toLocaleLowerCase('id-ID')}
           </h1>
-          <section aria-labelledby="cost-title" className="grid gap-1">
-            <h2 id="cost-title" className="text-xl font-semibold">
-              Rincian biaya
-            </h2>
-            <p>
-              Bahan {formatRupiah(ingredientsCost)} + energi{' '}
-              {formatRupiah(result.breakdown.energy)} + kemasan{' '}
-              {formatRupiah(result.breakdown.packaging)}
-            </p>
-            <p>
-              HPP (modal per potong) <strong>{formatRupiah(result.hpp)}</strong>{' '}
-              · {recipe.yieldPortions} potong per adonan
-            </p>
-          </section>
+          <div className="flex flex-wrap items-baseline gap-3">
+            <span className="text-muted-foreground">Modal per potong</span>
+            <strong className="text-lg tabular-nums">
+              {formatRupiah(result.hpp)}
+            </strong>
+            <Link
+              href={`/dashboard/resep/${recipe.id}`}
+              className="text-sm font-semibold text-link underline-offset-4 hover:underline"
+            >
+              Ubah resep
+            </Link>
+          </div>
           <SliderPanel
             channels={channels}
             selectedChannelId={selectedChannel.id}
@@ -320,6 +307,7 @@ function CalculatorScreen({
             hpp={result.hpp}
             targetMarginBp={calculator.targetMarginBp}
             onSave={savePrice}
+            yieldPortions={recipe.yieldPortions}
           />
           {!channelError && result.hpp.gt(0) && price > 0 ? (
             <p className="rounded-xl border border-input/40 bg-card p-4 text-sm">

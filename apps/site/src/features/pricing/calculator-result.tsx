@@ -57,7 +57,6 @@ export function CalculatorResult({
       {canSavePrice ? (
         <Button
           type="button"
-          className="bg-[#2b1d14] text-white hover:bg-[#2b1d14]/90"
           onClick={async () => {
             try {
               await onSavePrice();
@@ -73,11 +72,7 @@ export function CalculatorResult({
         </Button>
       ) : null}
       {recipeId ? (
-        <Button
-          asChild
-          variant="outline"
-          className="rounded-lg border-transparent bg-white text-[#2b1d14] hover:bg-white/90 hover:text-[#2b1d14]"
-        >
+        <Button asChild variant="outline">
           <Link
             href={`/dashboard/bagikan?recipe=${encodeURIComponent(recipeId)}`}
           >

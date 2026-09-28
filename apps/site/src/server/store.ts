@@ -1,7 +1,8 @@
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { DEFAULT_CHANNEL, defaultChannelRow } from '@/domain/channels';
 import { applyCommand, type Command, commandSchema } from '@/domain/commands';
 import { createUlid } from '@/domain/id';
+import { computeMarginSnapshots } from '@/domain/margin-history';
 import {
   type Changes,
   type ChannelRow,
@@ -9,6 +10,7 @@ import {
   DomainError,
   type IngredientRow,
   type MarginAlarm,
+  type MarginSnapshotRow,
   type QuoteOptionRow,
   type RecipeRow,
   type Settings,
@@ -20,6 +22,8 @@ import * as t from './db/schema';
 
 /** Batas baris per koleksi. Mencegah satu akun membengkakkan database. */
 const ROW_CAP = 1000;
+/** Batas titik riwayat margin yang dikirim ke klien. */
+const MARGIN_HISTORY_CAP = 1000;
 
 async function lock(db: Db, userId: string) {
   await db.execute(sql`select pg_advisory_xact_lock(hashtext(${userId}))`);
@@ -45,30 +49,47 @@ async function ensureDefaultChannel(
 }
 
 export async function loadSnapshot(db: Db, userId: string): Promise<Snapshot> {
-  const [entitlement, ingredients, recipes, channels, quoteOptions, settings] =
-    await Promise.all([
-      db
-        .select({ plan: t.entitlements.plan })
-        .from(t.entitlements)
-        .where(eq(t.entitlements.userId, userId)),
-      db
-        .select({ data: t.ingredients.data })
-        .from(t.ingredients)
-        .where(eq(t.ingredients.userId, userId)),
-      db
-        .select({ data: t.recipes.data })
-        .from(t.recipes)
-        .where(eq(t.recipes.userId, userId)),
-      db
-        .select({ data: t.channels.data })
-        .from(t.channels)
-        .where(eq(t.channels.userId, userId)),
-      db
-        .select({ data: t.quoteOptions.data })
-        .from(t.quoteOptions)
-        .where(eq(t.quoteOptions.userId, userId)),
-      db.select().from(t.userSettings).where(eq(t.userSettings.userId, userId)),
-    ]);
+  const [
+    entitlement,
+    ingredients,
+    recipes,
+    channels,
+    quoteOptions,
+    settings,
+    marginHistory,
+  ] = await Promise.all([
+    db
+      .select({ plan: t.entitlements.plan })
+      .from(t.entitlements)
+      .where(eq(t.entitlements.userId, userId)),
+    db
+      .select({ data: t.ingredients.data })
+      .from(t.ingredients)
+      .where(eq(t.ingredients.userId, userId)),
+    db
+      .select({ data: t.recipes.data })
+      .from(t.recipes)
+      .where(eq(t.recipes.userId, userId)),
+    db
+      .select({ data: t.channels.data })
+      .from(t.channels)
+      .where(eq(t.channels.userId, userId)),
+    db
+      .select({ data: t.quoteOptions.data })
+      .from(t.quoteOptions)
+      .where(eq(t.quoteOptions.userId, userId)),
+    db.select().from(t.userSettings).where(eq(t.userSettings.userId, userId)),
+    db
+      .select({
+        recipeId: t.marginSnapshots.recipeId,
+        marginBp: t.marginSnapshots.marginBp,
+        recordedAt: t.marginSnapshots.recordedAt,
+      })
+      .from(t.marginSnapshots)
+      .where(eq(t.marginSnapshots.userId, userId))
+      .orderBy(desc(t.marginSnapshots.recordedAt))
+      .limit(MARGIN_HISTORY_CAP),
+  ]);
   const values: Record<string, unknown> = {};
   for (const row of settings) values[row.key] = row.value;
   return {
@@ -95,6 +116,13 @@ export async function loadSnapshot(db: Db, userId: string): Promise<Snapshot> {
       marginAlarm:
         (values.marginAlarm as MarginAlarm | null | undefined) ?? null,
     },
+    marginHistory: marginHistory
+      .map((row) => ({
+        recipeId: row.recipeId,
+        marginBp: row.marginBp,
+        recordedAt: row.recordedAt.toISOString(),
+      }))
+      .reverse(),
   };
 }
 
@@ -193,8 +221,41 @@ export async function runCommand(
     const changes = applyCommand(snapshot, command, ctx);
     assertRowCaps(snapshot, changes);
     await persist(tx, userId, changes);
-    return loadSnapshot(tx, userId);
+    const after = await loadSnapshot(tx, userId);
+    return recordMarginSnapshots(tx, userId, after, ctx.now);
   });
+}
+
+/**
+ * Menulis satu titik margin per resep yang marginBp-nya berubah dibanding
+ * titik tersimpan terakhir. Dipanggil sekali di akhir tiap perintah, bukan
+ * per jenis perintah, supaya semua jalur yang bisa mengubah margin (harga
+ * bahan, harga jual, susunan resep) otomatis tercatat.
+ */
+async function recordMarginSnapshots(
+  db: Db,
+  userId: string,
+  snapshot: Snapshot,
+  now: string,
+): Promise<Snapshot> {
+  const lastByRecipe = new Map<string, number>();
+  for (const row of snapshot.marginHistory)
+    lastByRecipe.set(row.recipeId, row.marginBp);
+  const newRows = computeMarginSnapshots(snapshot, lastByRecipe, now);
+  if (newRows.length === 0) return snapshot;
+  await db.insert(t.marginSnapshots).values(
+    newRows.map((row) => ({
+      userId,
+      recipeId: row.recipeId,
+      marginBp: row.marginBp,
+      recordedAt: new Date(row.recordedAt),
+    })),
+  );
+  const marginHistory: MarginSnapshotRow[] = [
+    ...snapshot.marginHistory,
+    ...newRows,
+  ].slice(-MARGIN_HISTORY_CAP);
+  return { ...snapshot, marginHistory };
 }
 
 /** Unduh seluruh data akun (hak pengguna atas datanya). */
@@ -204,9 +265,18 @@ export async function exportUserData(db: Db, userId: string) {
     .select()
     .from(t.priceHistory)
     .where(eq(t.priceHistory.userId, userId));
+  const marginHistory = await db
+    .select()
+    .from(t.marginSnapshots)
+    .where(eq(t.marginSnapshots.userId, userId));
   return {
     exportedAt: new Date().toISOString(),
     ...snapshot,
+    marginHistory: marginHistory.map(({ recipeId, marginBp, recordedAt }) => ({
+      recipeId,
+      marginBp,
+      recordedAt: recordedAt.toISOString(),
+    })),
     priceHistory: history.map(
       ({ ingredientId, changedAt, oldPrice, newPrice }) => ({
         ingredientId,

@@ -22,6 +22,13 @@ export interface PriceHistoryRow {
   newPrice: number;
 }
 
+/** Satu titik margin resep dari waktu ke waktu. Ditulis hanya saat marginBp berubah. */
+export interface MarginSnapshotRow {
+  recipeId: string;
+  marginBp: number;
+  recordedAt: string;
+}
+
 export interface MarginAlarm {
   recipeIds: string[];
   triggeredBy: string;
@@ -55,6 +62,8 @@ export interface Snapshot {
   channels: ChannelRow[];
   quoteOptions: QuoteOptionRow[];
   settings: Settings;
+  /** Riwayat margin, dibatasi ke beberapa ratus titik terakhir per akun. */
+  marginHistory: MarginSnapshotRow[];
 }
 
 export interface Delta<T> {

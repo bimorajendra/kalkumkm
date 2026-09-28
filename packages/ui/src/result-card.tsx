@@ -55,6 +55,9 @@ export function ResultCard({
           {marginBp !== undefined ? (
             <p className="takaran-result-card__compact-margin">
               Margin {formatPercent(marginBp)}
+              {markupBp !== undefined
+                ? ` · markup ${formatPercent(markupBp)}`
+                : null}
             </p>
           ) : null}
           {actions ? (
@@ -63,25 +66,25 @@ export function ResultCard({
         </>
       ) : (
         <>
-          {secondaryValue !== undefined && secondaryValue !== null ? (
-            <div className="takaran-result-card__secondary">
-              <p>{formatRupiah(tweenedSecondary)}</p>
-              {secondaryLabel ? <span>{secondaryLabel}</span> : null}
-            </div>
-          ) : null}
-          {marginBp !== undefined || markupBp !== undefined ? (
-            <p className="takaran-result-card__metrics">
-              {marginBp !== undefined
-                ? `Margin ${formatPercent(marginBp)}`
-                : null}
-              {marginBp !== undefined && markupBp !== undefined ? ' · ' : null}
-              {markupBp !== undefined
-                ? `markup ${formatPercent(markupBp)}`
-                : null}
-            </p>
-          ) : null}
           {visual ? (
             <div className="takaran-result-card__visual">{visual}</div>
+          ) : null}
+          {marginBp !== undefined ||
+          (secondaryValue !== undefined && secondaryValue !== null) ? (
+            <div className="takaran-result-card__stats">
+              {marginBp !== undefined ? (
+                <div className="takaran-result-card__stat">
+                  <span>Margin</span>
+                  <strong>{formatPercent(marginBp)}</strong>
+                </div>
+              ) : null}
+              {secondaryValue !== undefined && secondaryValue !== null ? (
+                <div className="takaran-result-card__stat">
+                  <span>{secondaryLabel}</span>
+                  <strong>{formatRupiah(tweenedSecondary)}</strong>
+                </div>
+              ) : null}
+            </div>
           ) : null}
           {actions ? (
             <div className="takaran-result-card__actions">{actions}</div>

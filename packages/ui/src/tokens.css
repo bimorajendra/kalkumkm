@@ -18,6 +18,8 @@
   --tan-400: #f5984a;
   --danger: #b42318;
   --success: #1e7a4c;
+  --danger-tint: #fbeae8;
+  --success-tint: #e7f3ec;
   --radius-control: 10px;
   --radius-card: 20px;
   --radius-result: 28px;
@@ -43,6 +45,8 @@
   --color-tan-400: var(--tan-400);
   --color-danger: var(--danger);
   --color-success: var(--success);
+  --color-danger-tint: var(--danger-tint);
+  --color-success-tint: var(--success-tint);
   --font-display: "Plus Jakarta Sans", sans-serif;
   --font-ui: "Plus Jakarta Sans", sans-serif;
   --text-display-xl: 64px;

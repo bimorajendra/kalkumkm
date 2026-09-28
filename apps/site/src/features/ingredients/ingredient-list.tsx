@@ -83,7 +83,7 @@ function IngredientRowView({
   }
 
   return (
-    <li className="flex min-h-14 flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+    <li className="grid gap-3 py-4 sm:grid-cols-[minmax(0,1.5fr)_minmax(132px,1fr)_minmax(130px,1fr)_minmax(95px,0.7fr)] sm:items-center sm:gap-4 sm:px-4">
       <div className="min-w-0">
         <button
           type="button"
@@ -93,52 +93,55 @@ function IngredientRowView({
           {ingredient.name}
         </button>
         <span className="block text-sm text-muted-foreground">
-          {packageFormat.format(ingredient.packSize)} {ingredient.buyUnit} ·{' '}
-          {formatRupiah(unitPrice(ingredient))}/{unitNames[base] ?? base}
+          Isi kemasan {packageFormat.format(ingredient.packSize)}{' '}
+          {ingredient.buyUnit}
         </span>
-        {showUsage && used > 0 ? (
-          <Link
-            href="/dashboard/resep"
-            className="text-sm text-link underline underline-offset-4"
-          >
-            {ingredientCopy.usedBy(used)}
-          </Link>
-        ) : null}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="grid grid-cols-[auto_1fr] items-center gap-2 sm:flex sm:justify-end">
+        <span className="text-sm text-muted-foreground sm:hidden">
+          Harga beli
+        </span>
         {editing ? (
           <>
             <label className="sr-only" htmlFor={`price-${ingredient.id}`}>
               {ingredient.name}, {ingredientCopy.priceLabel}
             </label>
-            <Input
-              id={`price-${ingredient.id}`}
-              className="w-32"
-              inputMode="numeric"
-              autoFocus
-              value={price}
-              aria-invalid={error ? true : undefined}
-              aria-describedby={
-                error ? `price-error-${ingredient.id}` : undefined
-              }
-              onChange={(event) => {
-                setPrice(event.target.value);
-                setError('');
-              }}
-              onBlur={() => {
-                if (!saving.current) void savePrice();
-              }}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  event.preventDefault();
-                  void savePrice();
+            <div className="relative w-32">
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
+              >
+                Rp
+              </span>
+              <Input
+                id={`price-${ingredient.id}`}
+                className="pl-9 text-right font-semibold tabular-nums"
+                inputMode="numeric"
+                autoFocus
+                value={price}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={
+                  error ? `price-error-${ingredient.id}` : undefined
                 }
-                if (event.key === 'Escape') {
-                  event.preventDefault();
-                  cancelPrice();
-                }
-              }}
-            />
+                onChange={(event) => {
+                  setPrice(event.target.value);
+                  setError('');
+                }}
+                onBlur={() => {
+                  if (!saving.current) void savePrice();
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    void savePrice();
+                  }
+                  if (event.key === 'Escape') {
+                    event.preventDefault();
+                    cancelPrice();
+                  }
+                }}
+              />
+            </div>
             <Button
               type="button"
               size="sm"
@@ -176,11 +179,36 @@ function IngredientRowView({
           </>
         )}
       </div>
+      <div className="flex items-center justify-between gap-3 sm:block">
+        <span className="text-sm text-muted-foreground sm:hidden">
+          Per satuan
+        </span>
+        <strong className="tabular-nums">
+          {formatRupiah(unitPrice(ingredient))}/{unitNames[base] ?? base}
+        </strong>
+      </div>
+      <div className="flex items-center justify-between gap-3 sm:block">
+        <span className="text-sm text-muted-foreground sm:hidden">
+          Dipakai di
+        </span>
+        {showUsage && used > 0 ? (
+          <Link
+            href="/dashboard/resep"
+            className="text-sm font-medium text-link underline underline-offset-4"
+          >
+            {ingredientCopy.usedBy(used)}
+          </Link>
+        ) : (
+          <span className="text-sm text-muted-foreground">
+            {used ? `${used} resep` : 'Belum dipakai'}
+          </span>
+        )}
+      </div>
       {error ? (
         <p
           id={`price-error-${ingredient.id}`}
           role="alert"
-          className="text-sm text-destructive"
+          className="text-sm text-destructive sm:col-span-full"
         >
           {error}
         </p>
@@ -218,15 +246,32 @@ export function IngredientList({
       </p>
     );
   return (
-    <ul aria-label="Daftar bahan" className="divide-y divide-border">
-      {rows.map(({ ingredient, used }) => (
-        <IngredientRowView
-          key={ingredient.id}
-          ingredient={ingredient}
-          used={used}
-          onEdit={onEdit}
-        />
-      ))}
-    </ul>
+    <section
+      aria-label="Daftar bahan"
+      className="overflow-hidden rounded-[20px] border border-line bg-surface"
+    >
+      <div
+        aria-hidden="true"
+        className="hidden grid-cols-[minmax(0,1.5fr)_minmax(132px,1fr)_minmax(130px,1fr)_minmax(95px,0.7fr)] gap-4 border-b border-line bg-surface-soft px-4 py-3 text-sm font-medium text-ink-muted sm:grid"
+      >
+        <span>Bahan</span>
+        <span className="text-right">Harga beli</span>
+        <span>Per satuan</span>
+        <span>Dipakai di</span>
+      </div>
+      <ul
+        aria-label="Baris bahan"
+        className="divide-y divide-line px-4 sm:px-0"
+      >
+        {rows.map(({ ingredient, used }) => (
+          <IngredientRowView
+            key={ingredient.id}
+            ingredient={ingredient}
+            used={used}
+            onEdit={onEdit}
+          />
+        ))}
+      </ul>
+    </section>
   );
 }

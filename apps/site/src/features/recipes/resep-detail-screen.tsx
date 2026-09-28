@@ -139,10 +139,10 @@ export function ResepDetailScreen({ id }: { id: string }) {
   }
 
   return (
-    <Page className="grid gap-5">
+    <Page className="grid gap-5 pb-32">
       <div>
         {back}
-        <div className="flex flex-wrap items-end justify-between gap-3">
+        <header className="grid gap-4 rounded-[20px] border border-line bg-surface p-4 sm:flex sm:items-end sm:justify-between sm:p-6">
           <div>
             <p className="text-sm text-muted-foreground">
               HPP (modal per porsi)
@@ -152,10 +152,14 @@ export function ResepDetailScreen({ id }: { id: string }) {
               {recipe.yieldPortions} porsi per adonan
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button asChild size="lg" className="rounded-full">
+              <Link href="/dashboard/hitung">Hitung harga</Link>
+            </Button>
             <Button
               type="button"
               variant="outline"
+              className="min-h-11 rounded-full"
               onClick={() => setEditing(true)}
             >
               Ubah resep
@@ -163,12 +167,13 @@ export function ResepDetailScreen({ id }: { id: string }) {
             <Button
               type="button"
               variant="outline"
+              className="min-h-11 rounded-full"
               onClick={() => void duplicate()}
             >
               Duplikat
             </Button>
           </div>
-        </div>
+        </header>
       </div>
       {message ? (
         <p role="alert" className="text-sm text-destructive">
@@ -177,21 +182,21 @@ export function ResepDetailScreen({ id }: { id: string }) {
       ) : null}
       <section
         aria-label="Hasil hitung resep"
-        className="grid gap-4 rounded-xl bg-card p-5 shadow-sm sm:grid-cols-3"
+        className="grid gap-4 rounded-[20px] border border-line bg-surface p-5 sm:grid-cols-3"
       >
         <div>
           <span className="block text-sm text-muted-foreground">
             HPP per porsi
           </span>
-          <strong className="font-display text-4xl font-bold">
+          <strong className="font-display text-3xl font-bold tabular-nums sm:text-4xl">
             {formatRupiah(result.hpp)}
           </strong>
         </div>
         <div>
           <span className="block text-sm text-muted-foreground">
-            Harga {recipe.currentPrice ? 'sekarang' : 'saran'}
+            Harga {recipe.currentPrice !== null ? 'sekarang' : 'saran'}
           </span>
-          <strong className="font-display text-4xl font-bold">
+          <strong className="font-display text-3xl font-bold tabular-nums sm:text-4xl">
             {price === null ? 'Belum tersedia' : formatRupiah(price)}
           </strong>
         </div>

@@ -113,6 +113,21 @@ export const priceHistory = pgTable(
   (table) => [index('price_history_user_idx').on(table.userId)],
 );
 
+/* Satu baris tiap marginBp resep benar-benar berubah (bukan tiap perintah). */
+export const marginSnapshots = pgTable(
+  'margin_snapshots',
+  {
+    id: serial('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    recipeId: text('recipe_id').notNull(),
+    marginBp: integer('margin_bp').notNull(),
+    recordedAt: timestamp('recorded_at').notNull(),
+  },
+  (table) => [index('margin_snapshots_user_idx').on(table.userId)],
+);
+
 export const userSettings = pgTable(
   'user_settings',
   {

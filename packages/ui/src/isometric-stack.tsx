@@ -14,6 +14,7 @@ const layerColors = [
   'var(--tan-300)',
   'var(--tan-400)',
 ];
+const PROFIT_COLOR = 'var(--caramel-500)';
 
 function asBig(value: number | Big): Big {
   return value instanceof Big ? value : new Big(String(value));
@@ -52,12 +53,52 @@ export interface IsometricStackProps {
   profit: number | Big;
 }
 
+/* Geometri proyeksi isometrik: tiap lapisan digambar sebagai balok pipih
+   (sisi kiri, kanan, atas), sudut tajam, ditumpuk dari bawah (bahan) ke atas
+   (untung), sesuai DESIGN.md §5 "sudut tajam di isometrik, membulat di UI". */
+const CX = 65;
+const HALF_WIDTH = 46;
+const HALF_DEPTH = 23;
+const STACK_HEIGHT = 150;
+const BASE_Y = 170;
+const VIEW_WIDTH = 132;
+const VIEW_HEIGHT = 194;
+
+function polygon(points: Array<[number, number]>): string {
+  return points.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+}
+
+function layerFaces(top: number, bottom: number) {
+  const cx = CX;
+  const a = HALF_WIDTH;
+  const b = HALF_DEPTH;
+  return {
+    left: polygon([
+      [cx - a, top],
+      [cx, top + b],
+      [cx, bottom + b],
+      [cx - a, bottom],
+    ]),
+    right: polygon([
+      [cx, top + b],
+      [cx + a, top],
+      [cx + a, bottom],
+      [cx, bottom + b],
+    ]),
+    top: polygon([
+      [cx, top - b],
+      [cx + a, top],
+      [cx, top + b],
+      [cx - a, top],
+    ]),
+  };
+}
+
 /**
- * Komposisi per porsi: batang proporsional (tinggi tiap segmen sesuai nilai)
- * di kiri, legenda teks biasa (baris tinggi tetap) di kanan. Legenda dipisah
- * dari geometri batang karena nilai antar lapisan (misalnya energi vs bahan)
- * sering jauh berbeda; menaruh teks di dalam segmen setipis itu membuatnya
- * bertumpuk.
+ * Komposisi per porsi: balok isometrik proporsional (tinggi tiap lapisan
+ * sesuai nilai), ditumpuk dari bahan (bawah) ke untung (atas), dengan
+ * legenda teks biasa di kanan (baris tinggi tetap, dibaca atas ke bawah
+ * mengikuti urutan visual tumpukan).
  */
 export function IsometricStack({ layers, profit }: IsometricStackProps) {
   const profitValue = asBig(profit);
@@ -69,6 +110,8 @@ export function IsometricStack({ layers, profit }: IsometricStackProps) {
   ];
   const heights = calculateLayerHeights(
     visibleLayers.map((layer) => layer.value),
+    STACK_HEIGHT,
+    8,
   );
   const total = visibleLayers.reduce(
     (sum, layer) => sum.plus(asBig(layer.value)),
@@ -81,47 +124,75 @@ export function IsometricStack({ layers, profit }: IsometricStackProps) {
       : `Untung ${formatRupiah(profitValue)}`,
   ].join(', ');
 
+  let y = BASE_Y;
+  const blocks = visibleLayers.map((layer, index) => {
+    const height = heights[index] ?? 8;
+    const bottom = y;
+    const top = y - height;
+    y = top;
+    const color =
+      layer.key === 'profit'
+        ? PROFIT_COLOR
+        : layerColors[index % layerColors.length];
+    return { layer, color, faces: layerFaces(top, bottom) };
+  });
+
   return (
     <div className="takaran-isometric-stack">
-      <div aria-hidden="true" className="takaran-isometric-stack__art">
-        {visibleLayers.map((layer, index) => (
-          <div
-            className="takaran-isometric-stack__segment"
-            key={layer.key}
-            style={{
-              background:
-                layer.key === 'profit'
-                  ? 'var(--caramel-500)'
-                  : layerColors[index % layerColors.length],
-              height: heights[index] ?? 6,
-            }}
-          />
+      <svg
+        aria-hidden="true"
+        viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
+        className="takaran-isometric-stack__art"
+      >
+        <ellipse
+          className="takaran-isometric-stack__shadow"
+          cx={CX}
+          cy={BASE_Y + HALF_DEPTH + 5}
+          rx={HALF_WIDTH + 6}
+          ry={7}
+        />
+        {blocks.map(({ layer, color, faces }) => (
+          <g key={layer.key}>
+            <polygon
+              className="takaran-isometric-stack__face-left"
+              points={faces.left}
+              fill={color}
+            />
+            <polygon
+              className="takaran-isometric-stack__face-right"
+              points={faces.right}
+              fill={color}
+            />
+            <polygon
+              className="takaran-isometric-stack__face-top"
+              points={faces.top}
+              fill={color}
+            />
+          </g>
         ))}
-      </div>
+      </svg>
       <ul
         aria-label={`Komposisi per porsi: ${summary}. Total komponen ${formatRupiah(total)}.`}
         className="takaran-isometric-stack__legend"
       >
-        {visibleLayers.map((layer, index) => (
-          <li key={layer.key}>
-            <span
-              aria-hidden="true"
-              className="takaran-isometric-stack__dot"
-              style={{
-                background:
-                  layer.key === 'profit'
-                    ? 'var(--caramel-500)'
-                    : layerColors[index % layerColors.length],
-              }}
-            />
-            <span className="takaran-isometric-stack__label">
-              {layer.label}
-            </span>
-            <span className="takaran-isometric-stack__value">
-              {formatRupiah(layer.value)}
-            </span>
-          </li>
-        ))}
+        {blocks
+          .slice()
+          .reverse()
+          .map(({ layer, color }) => (
+            <li key={layer.key}>
+              <span
+                aria-hidden="true"
+                className="takaran-isometric-stack__dot"
+                style={{ background: color }}
+              />
+              <span className="takaran-isometric-stack__label">
+                {layer.label}
+              </span>
+              <span className="takaran-isometric-stack__value">
+                {formatRupiah(layer.value)}
+              </span>
+            </li>
+          ))}
         {profitValue.lt(0) ? (
           <li className="takaran-isometric-stack__loss">
             <span className="takaran-isometric-stack__label">Rugi</span>

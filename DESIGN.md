@@ -28,7 +28,9 @@ Dua referensi visual dari pemilik produk. Keduanya dipakai sebagai inspirasi, bu
 | Kartu "Step 01/02/03" dengan ikon dalam lingkaran | Section "Cara pakai" (tiga langkah: masukkan harga bahan, susun resep, lihat harga jual dan untung) | Isinya alur nyata memakai Takaran, bukan teks generik seperti referensi ("Pick a tool") yang tidak berarti apa-apa untuk produk satu-fungsi ini |
 | Grid ikon "trust badge" ("No hidden fees", dll.) menjelang penutup | Section "Kenapa penjual pakai Takaran" (privasi data, alarm margin, Pro sekali bayar, gratis 3 resep) | Klaim yang bisa diverifikasi dari kode dan `PRICING`/`FREE_LIMITS`, bukan janji generik |
 
-Cahaya gradasi blur di belakang kartu hero (ornamen referensi Kindly) sempat dicoba lalu **dibatalkan**: karena kartu demo sudah persegi dengan radius yang sama, blur-nya hanya menjiplak bentuk kotak kartu jadi terlihat seperti garis pinggir/outline ganda di luar kartu, bukan cahaya ambient yang lembut seperti referensi. Kartu hasil tetap tampil hanya dengan gradasi dan bayangannya sendiri (bagian 9.6), tanpa cahaya tambahan di baliknya.
+Cahaya gradasi blur di belakang kartu hero (ornamen referensi Kindly) sempat dicoba lalu **dibatalkan**: karena kartu demo sudah persegi dengan radius yang sama, blur-nya hanya menjiplak bentuk kotak kartu jadi terlihat seperti garis pinggir/outline ganda di luar kartu, bukan cahaya ambient yang lembut seperti referensi. Kartu demo landing tetap tampil hanya dengan gradasi dan bayangannya sendiri, tanpa cahaya tambahan di baliknya.
+
+**Revisi kartu hasil kalkulator (28 September 2026):** gradasi karamel di kartu hasil kalkulator aplikasi (bukan kartu demo landing) **dibatalkan** pemilik setelah dicoba di halaman sungguhan: sepanjang kartu jadi terlalu penuh warna oranye dan menenggelamkan tumpukan isometrik serta kotak Margin/Untung per jam di dalamnya. Kartu hasil kalkulator sekarang latar `--surface` (putih) dengan garis `--line` dan bayangan tingkat 2, sama seperti kartu lain di aplikasi; gradasi karamel 160° tetap dipakai, tapi hanya di kartu demo kalkulator pada landing page (bagian 3, baris Hero). Detail baru ada di bagian 9.6.
 
 Yang **sengaja tidak diambil** (bertentangan dengan aturan keras "Tanpa data palsu" dan R-05/R-09/R-16/R-17/R-18/R-36/R-38 di `antislop.md`, sudah dibahas juga di tabel bagian 1 untuk referensi B):
 - Lencana "#1 AI Finance platform", rating "4,9/5 Reviews", dan avatar pengulas karangan.
@@ -49,7 +51,7 @@ Dua ikon baru masuk daftar di bagian 7 karena dipakai section-section ini: `wall
 
 | Dial | Nilai | Artinya di produk ini |
 |---|---|---|
-| ENERGY | 2 | Tenang dan rapi, dengan satu momen yang "berbunyi": kartu hasil oranye dan angka serif besar. Bukan halaman eksperimental. |
+| ENERGY | 2 | Tenang dan rapi, dengan satu momen yang "berbunyi": angka serif besar dan tumpukan isometrik di kartu hasil (kartu sendiri putih; oranye hanya di kartu demo landing dan aksen teks/lapisan). Bukan halaman eksperimental. |
 | RHYTHM | 2 | Layar aplikasi konsisten (pengguna harus cepat terbiasa). Landing page punya beberapa jeda: satu section penuh warna, satu section tabel, satu section angka besar. |
 | MOTION | 2 | Gerak hanya untuk menunjukkan sebab-akibat: angka berganti saat slider digeser, lapisan isometrik naik-turun saat harga bahan berubah. Tidak ada animasi masuk berulang. |
 
@@ -114,9 +116,9 @@ Semua ilustrasi memakai palet bagian 4 saja.
 | `--line` | `#EADBD2` | Garis pemisah dekoratif (bukan batas kontrol) |
 | `--ink` | `#2B1D14` | Teks utama (cokelat kakao, bukan hitam murni) |
 | `--ink-muted` | `#6E5A4B` | Teks sekunder, label satuan |
-| `--caramel-300` | `#FFC4A8` | Ujung terang peach pada gradasi kartu hasil |
+| `--caramel-300` | `#FFC4A8` | Ujung terang peach pada gradasi kartu demo landing |
 | `--caramel-400` | `#FF9C6D` | Isi slider aktif, tengah gradasi |
-| `--caramel-500` | `#F07A1F` | Aksen utama: lempeng Untung, ujung gelap gradasi |
+| `--caramel-500` | `#F07A1F` | Aksen utama: lempeng Untung, ujung gelap gradasi kartu demo |
 | `--caramel-600` | `#C85A0C` | Batas kontrol aktif, thumb slider, teks besar (≥ 24 px) |
 | `--caramel-700` | `#9E4308` | Teks tautan dan teks oranye ukuran normal |
 | `--peach-100` | `#FFE5D9` | Latar chip dan latar alarm margin |
@@ -131,8 +133,8 @@ Token di bagian 4.1 adalah satu-satunya palet produk. Nilai latar, panel, teks, 
 ### 4.3 Aturan pakai
 
 1. **Palet inti:** kakao (ink), karamel, krem. **Satu aksen:** karamel-500, dan artinya selalu "untung". Jangan pakai karamel untuk hal yang bukan uang atau aksi utama.
-2. **Gradasi fokus:** kartu hasil kalkulator dan kartu demo memakai arah 160° dari `--caramel-300` ke `--caramel-500` untuk menandai hasil. Landing boleh memakai satu gradasi vertikal tipis pada bidang tengah agar perpindahan antarbagian terasa halus seperti referensi. Tombol dan ikon tidak memakai gradasi.
-3. **Teks di atas oranye selalu `--ink`,** tidak pernah putih. Putih di atas `#F07A1F` hanya 2,80:1.
+2. **Gradasi fokus:** hanya kartu demo kalkulator di landing memakai arah 160° dari `--caramel-300` ke `--caramel-500` untuk menandai hasil. Kartu hasil kalkulator di aplikasi latar `--surface` polos (lihat 9.6). Landing boleh memakai satu gradasi vertikal tipis pada bidang tengah agar perpindahan antarbagian terasa halus seperti referensi. Tombol dan ikon tidak memakai gradasi.
+3. **Teks di atas oranye (kartu demo landing) selalu `--ink`,** tidak pernah putih. Putih di atas `#F07A1F` hanya 2,80:1.
 4. **Tombol utama:** kapsul `--ink` dengan teks putih (16,3:1), mengikuti referensi B.
 5. Hijau dan merah hanya untuk status margin, tidak untuk dekorasi.
 
@@ -262,34 +264,36 @@ Diadaptasi dari "Rental Duration" dan "Node amount" di referensi A.
 - Setiap slider punya tombol kecil "Ketik angka" untuk nilai di luar titik (misal margin 35%).
 
 ### 9.6 Kartu hasil (titik fokus)
-Diadaptasi dari kartu biru referensi A dan kartu oranye referensi B.
+Diadaptasi dari kartu biru referensi A; gradasi oranye referensi B dipakai di kartu demo landing (bagian 3), bukan di sini — dicoba di kartu hasil kalkulator lalu **dibatalkan** (28 September 2026, lihat catatan di bagian 1) karena warna penuh oranye menenggelamkan tumpukan isometrik dan kotak Margin/Untung per jam di dalamnya.
 
 ```
 ┌───────────────────────────────────────┐
 │ [chip] Brownies · 16 potong            │  ← tab kecil menempel di atas kartu
 │                                        │
 │  Rp 5.000                              │  ← display-num, serif
-│  harga jual per potong                 │
-│                                        │
-│  Rp 22.133 / jam                       │  ← display-l, serif
-│  untungmu setelah 1,5 jam kerja        │
+│  harga jual per potong · Langsung      │
 │                                        │
 │  ┌──────────────────────────────────┐  │
-│  │ Margin 41,5% · markup 70,9%      │  │  ← pita ringkas, latar putih 55%
+│  │            ╱▔▔▔╲  Untung Rp 2.075 │  │  ← panel latar --bg,
+│  │           ▕    ▏  Kemasan Rp 1.000│  │     tumpukan isometrik + label
+│  │           ▕    ▏  Energi  Rp 188  │  │
+│  │           ▕    ▏  Bahan   Rp 1.738│  │
 │  └──────────────────────────────────┘  │
-│                        ╱▔▔▔╲  Untung    │
-│                       ▕    ▏ Rp 2.075   │  ← tumpukan isometrik + label
-│                       ▕    ▏ Kemasan    │
-│                       ▕    ▏ Bahan      │
+│  ┌───────────────┐ ┌─────────────────┐ │
+│  │ Margin        │ │ untungmu setelah│ │  ← dua kotak --surface-soft
+│  │ 41,5%         │ │ 1,5 jam kerja   │ │     bersebelahan
+│  │               │ │ Rp 22.133       │ │
+│  └───────────────┘ └─────────────────┘ │
 │                                        │
 │ [ Simpan harga ini ] [ Buat gambar > ] │
 └───────────────────────────────────────┘
 ```
 
-- Latar gradasi 160° `--caramel-300` ke `--caramel-500`, radius 28 px, bayangan tingkat 2. Semua teks `--ink`.
-- Tumpukan isometrik menggantikan garis sirkuit referensi A dan berada di kanan bawah.
-- Dua tombol putih seperti referensi A: "Simpan harga ini" (aksi) dan "Buat gambar daftar harga" (membuka layar lain, jadi boleh memakai chevron).
-- Jika margin di bawah target: pita berubah menjadi latar `--surface` dengan teks `--danger` "Di bawah target 40%". Jika rugi: angka harga tetap, dan baris kedua berubah menjadi "Rugi Rp 350 per potong".
+- Latar `--surface` (putih), garis 1 px `--line`, radius 28 px, bayangan tingkat 2. Semua teks `--ink`; label tab "Harga saran" `--caramel-700`.
+- Tumpukan isometrik menggantikan garis sirkuit referensi A, duduk di panel `--bg` radius 16 px sebagai jendela terang di dalam kartu.
+- Margin dan untung per jam masing-masing kotak radius 16 px `--surface-soft`, bersebelahan (grid 2 kolom) di bawah panel isometrik. Markup hanya muncul di kartu ringkas HP (kalimat singkat, bukan kotak terpisah), untuk menghemat ruang.
+- Dua tombol: "Simpan harga ini" (kapsul `--ink`, aksi) dan "Buat gambar daftar harga" (kapsul sekunder bergaris `--ink-muted`, membuka layar lain sehingga boleh memakai chevron).
+- Jika margin di bawah target: tab berubah menjadi teks `--danger` "Di bawah target 40%". Jika rugi: angka harga tetap, dan baris kedua berubah menjadi "Rugi Rp 350 per potong".
 
 ### 9.7 Baris bahan
 - Tinggi minimum 56 px. Kiri: nama bahan (body) dan "1 kg · Rp 14/gram" (label, muted). Kanan: harga beli dalam input angka yang bisa diubah langsung.
@@ -303,8 +307,7 @@ Diadaptasi dari kartu biru referensi A dan kartu oranye referensi B.
 | Jenis | Tampilan | Contoh label |
 |---|---|---|
 | Utama | Kapsul `--ink`, teks putih, tinggi 48 px | "Hitung resep pertamamu", "Simpan harga ini" |
-| Sekunder | Kapsul `--surface`, garis `--ink-muted`, teks `--ink` | "Tambah bahan" |
-| Di kartu hasil | Kotak radius 12 px `--surface`, teks `--ink` | "Buat gambar daftar harga" |
+| Sekunder | Kapsul `--surface`, garis `--ink-muted`, teks `--ink` | "Tambah bahan", "Buat gambar daftar harga" (di kartu hasil, sama seperti sekunder biasa) |
 | Tautan | Teks `--caramel-700`, garis bawah 1 px | "Lihat cara hitungnya" |
 
 Fokus keyboard semua tombol: cincin 2 px `--caramel-600` dengan jarak 2 px. `outline: none` tanpa pengganti dilarang (R-32).
@@ -429,7 +432,7 @@ Yang sengaja tidak ada: deretan logo, rating bintang, testimoni, statistik jumla
 |---|---|
 | Palet krem, kakao, karamel | Warna dapur kue; langsung terbaca "untuk penjual kue", bukan aplikasi bank |
 | Satu aksen karamel yang berarti "untung" | Mata pengguna belajar bahwa oranye selalu menunjukkan uang yang mereka dapat |
-| Gradasi hanya di kartu hasil | Menandai satu titik fokus per layar, tempat jawaban berada |
+| Gradasi hanya di kartu demo landing | Menandai satu titik fokus di halaman landing; kartu hasil di aplikasi tetap putih supaya tumpukan isometrik dan kotak Margin/Untung per jam tidak tenggelam oleh warna |
 | Tata letak dua kolom input/hasil | Sebab (slider) dan akibat (harga) terlihat bersamaan |
 | Slider bertitik, bukan input angka | Penjual rumahan lebih cepat memilih "40%" daripada mengetik; tetap ada opsi ketik |
 | Georgia atau serif sistem untuk judul dan angka | Nuansa buku resep dan membuat angka jawaban terasa penting |
