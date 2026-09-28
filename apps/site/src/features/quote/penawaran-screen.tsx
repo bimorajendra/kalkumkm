@@ -18,7 +18,7 @@ export function PenawaranScreen() {
         <PaywallDialog
           open
           trigger="quote"
-          onClose={() => router.push('/hitung')}
+          onClose={() => router.push('/dashboard/hitung')}
         />
       </Page>
     );

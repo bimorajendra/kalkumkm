@@ -30,11 +30,11 @@ const faqItems = [
 
 export default async function HargaPage() {
   const user = await getSessionUser().catch(() => null);
-  const start = user ? '/hitung' : '/masuk';
+  const start = user ? '/dashboard' : '/masuk';
 
   return (
     <>
-      <section className="flex flex-col items-center gap-4 px-5 pt-10 pb-10 text-center lg:px-20 lg:pt-18 lg:pb-12">
+      <section className="mk-up flex flex-col items-center gap-4 px-5 pt-10 pb-10 text-center lg:px-20 lg:pt-18 lg:pb-12">
         <span className="text-sm font-semibold text-[var(--mk-primary-ink)]">
           Harga
         </span>
@@ -63,7 +63,7 @@ export default async function HargaPage() {
         />
         <PlanCard
           badge="Harga awal · 100 pembeli pertama"
-          ctaHref={user ? '/beli' : '/masuk'}
+          ctaHref={user ? '/dashboard/beli' : '/masuk'}
           ctaLabel="Beli Pro"
           description="Sekali bayar. Lebih murah dari satu loyang brownies (Rp 80.000)."
           features={[

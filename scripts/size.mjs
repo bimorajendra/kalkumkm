@@ -15,8 +15,15 @@ if (!existsSync(root)) {
 const JS_LIMIT = 220 * 1024;
 const TOTAL_LIMIT = 300 * 1024;
 const routes = [
-  { name: 'Kalkulator (/hitung)', manifest: 'app/(app)/hitung/page' },
-  { name: 'Landing (/)', manifest: 'app/page' },
+  {
+    name: 'Kalkulator (/dashboard/hitung)',
+    manifest: 'app/(app)/dashboard/hitung/page',
+  },
+  {
+    name: 'Dashboard (/dashboard)',
+    manifest: 'app/(app)/dashboard/page',
+  },
+  { name: 'Landing (/)', manifest: 'app/(marketing)/page' },
   { name: 'Halaman statis (/kebijakan-privasi)', manifest: 'app/kebijakan-privasi/page' },
 ];
 

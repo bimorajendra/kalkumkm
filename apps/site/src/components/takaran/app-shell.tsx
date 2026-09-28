@@ -1,6 +1,6 @@
 'use client';
 
-import { Calculator, CookingPot, Ellipsis, LogOut, Wheat } from 'lucide-react';
+import { Calculator, CookingPot, Home, LogOut, Wheat } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
@@ -17,17 +17,18 @@ import { cn } from '@/lib/utils';
 import { useSnapshot } from './data-provider';
 
 const tabs = [
-  { href: '/hitung', label: 'Hitung', icon: Calculator },
-  { href: '/bahan', label: 'Bahan', icon: Wheat },
-  { href: '/resep', label: 'Resep', icon: CookingPot },
-  { href: '/lainnya', label: 'Lainnya', icon: Ellipsis },
+  { href: '/dashboard', label: 'Ringkasan', icon: Home },
+  { href: '/dashboard/hitung', label: 'Hitung', icon: Calculator },
+  { href: '/dashboard/bahan', label: 'Bahan', icon: Wheat },
+  { href: '/dashboard/resep', label: 'Resep', icon: CookingPot },
 ];
 const desktopLinks = [
-  { href: '/hitung', label: 'Kalkulator' },
-  { href: '/bahan', label: 'Bahan' },
-  { href: '/resep', label: 'Resep' },
-  { href: '/penawaran', label: 'Penawaran' },
-  { href: '/bagikan', label: 'Daftar harga' },
+  { href: '/dashboard', label: 'Ringkasan' },
+  { href: '/dashboard/hitung', label: 'Hitung' },
+  { href: '/dashboard/bahan', label: 'Bahan' },
+  { href: '/dashboard/resep', label: 'Resep' },
+  { href: '/dashboard/penawaran', label: 'Penawaran' },
+  { href: '/dashboard/bagikan', label: 'Daftar harga' },
 ];
 
 export function AppShell({
@@ -42,7 +43,8 @@ export function AppShell({
   const pathname = usePathname();
   const { plan } = useSnapshot();
   const active = (href: string) =>
-    pathname === href || pathname.startsWith(`${href}/`);
+    pathname === href ||
+    (href !== '/dashboard' && pathname.startsWith(`${href}/`));
 
   return (
     <div className="min-h-dvh">
@@ -55,9 +57,9 @@ export function AppShell({
       <header className="sticky top-0 z-30 bg-background/90 px-4 py-3 backdrop-blur lg:px-8">
         <div className="mx-auto flex max-w-[1120px] items-center justify-between gap-3">
           <Link
-            href="/hitung"
+            href="/dashboard"
             className="font-display text-2xl font-bold tracking-tight"
-            aria-label="Takaran, ke Hitung"
+            aria-label="Takaran, ke Ringkasan"
           >
             Takaran
           </Link>
@@ -71,7 +73,7 @@ export function AppShell({
                 href={link.href}
                 aria-current={active(link.href) ? 'page' : undefined}
                 className={cn(
-                  'flex h-11 items-center rounded-full px-4 text-base',
+                  'flex h-11 items-center rounded-full px-3 text-sm xl:px-4 xl:text-base',
                   active(link.href)
                     ? 'bg-secondary font-semibold'
                     : 'hover:bg-secondary/60',
@@ -96,7 +98,7 @@ export function AppShell({
                 size="sm"
                 className="hidden sm:inline-flex"
               >
-                <Link href="/beli">Lihat Pro</Link>
+                <Link href="/dashboard/beli">Lihat Pro</Link>
               </Button>
             )}
             <DropdownMenu>
@@ -114,10 +116,10 @@ export function AppShell({
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild className="h-11 text-base">
-                  <Link href="/lainnya">Pengaturan</Link>
+                  <Link href="/dashboard/lainnya">Pengaturan</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="h-11 text-base">
-                  <Link href="/beli">Takaran Pro</Link>
+                  <Link href="/dashboard/beli">Takaran Pro</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <form action={signOutAction}>

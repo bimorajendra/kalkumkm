@@ -148,7 +148,7 @@ export function MarginAlarm() {
             {affected.map((item) => (
               <li key={item.recipe.id} className="grid gap-1 py-3">
                 <Link
-                  href={`/resep/${item.recipe.id}`}
+                  href={`/dashboard/resep/${item.recipe.id}`}
                   className="font-semibold underline underline-offset-4"
                 >
                   {item.recipe.name}

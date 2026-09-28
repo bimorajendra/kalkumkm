@@ -66,10 +66,14 @@
    (marketing pakai oranye-krem baru, aplikasi login tetap karamel lama).
    Memakai nama variabel sendiri (--mk-*), bukan menimpa --color-primary dkk,
    supaya tidak bentrok dengan pemetaan shadcn punya aplikasi di atas.
-   Dipakai lewat kelas pembungkus .mk di layout (marketing), bukan lewat
-   utility Tailwind bawaan, konsisten dengan pola bg-[var(--x)] yang sudah
-   dipakai di seluruh repo ini untuk token satu-tujuan seperti ini. */
-.mk {
+   Didefinisikan di :root (bukan di dalam kelas .mk) walau cuma dipakai di
+   marketing: komponen Radix (Sheet menu HP, dkk) merender kontennya lewat
+   portal ke document.body, di LUAR pembungkus <div class="mk">, jadi kalau
+   variabelnya cuma didefinisikan di .mk, konten hasil portal tidak bisa
+   membacanya sama sekali (kelihatan transparan/tanpa warna). Aman karena
+   nama variabel sudah diberi awalan --mk- sendiri, tidak bentrok dengan
+   --color-primary dkk milik aplikasi. */
+:root {
   --mk-bg: #f7f5f2;
   --mk-surface: #ffffff;
   --mk-surface-muted: #fbfaf8;
@@ -107,6 +111,8 @@
     0 1px 2px rgba(28, 25, 23, 0.04), 0 16px 40px rgba(28, 25, 23, 0.07);
   --mk-shadow-highlight: 0 12px 32px rgba(194, 78, 18, 0.08);
   --mk-shadow-chip: 0 4px 12px rgba(28, 25, 23, 0.06);
+}
+.mk {
   background: var(--mk-bg);
   color: var(--mk-ink);
   font-variant-numeric: tabular-nums;
@@ -137,9 +143,27 @@
     transform: none;
   }
 }
+/* Kesan "terangkat" tipis saat disorot, dipakai di kartu-kartu marketing
+   (StepCard, PlanCard). Naik 2px + bayangan sedikit lebih tebal, bukan
+   animasi besar — cuma penanda bahwa kartu itu bisa disorot. */
+.mk-lift {
+  transition:
+    transform 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+.mk-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--mk-shadow-float);
+}
 @media (prefers-reduced-motion: reduce) {
   .mk-up {
     animation: none;
+  }
+  .mk-range,
+  .mk-lift,
+  .mk-lift:hover {
+    transition: none;
+    transform: none;
   }
 }
 
@@ -153,6 +177,7 @@
   margin: 12px 0 4px;
   border-radius: 999px;
   cursor: pointer;
+  transition: background 150ms ease-out;
 }
 .mk-range::-webkit-slider-runnable-track {
   height: 6px;

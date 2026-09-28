@@ -554,7 +554,10 @@ export function RecipeEditor({
               {showPaywallLink ? (
                 <>
                   {' '}
-                  <Link href="/beli" className="underline underline-offset-4">
+                  <Link
+                    href="/dashboard/beli"
+                    className="underline underline-offset-4"
+                  >
                     Takaran Pro, {formatRupiah(PRICING.pro.idr)} sekali bayar
                   </Link>
                 </>

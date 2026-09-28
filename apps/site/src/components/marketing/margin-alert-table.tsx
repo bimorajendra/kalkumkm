@@ -73,9 +73,72 @@ export function MarginAlertTable() {
         </svg>
         3 menu untungnya di bawah target 40%
       </div>
+      {/* Kartu bertumpuk khusus HP: tabel lebar (di bawah) sudah bisa digeser,
+          tapi di layar sempit itu tetap kelihatan "terpotong" tanpa ada
+          tanda jelas bahwa bisa digeser. Susunan kartu ini tidak mengubah
+          versi >= sm sama sekali (desktop tetap tabel seperti semula). */}
+      <div className="flex flex-col sm:hidden">
+        {rows.map((row, index) => (
+          <div
+            className={`flex flex-col gap-3 px-5 py-4 ${
+              index < rows.length - 1
+                ? 'border-b border-[var(--mk-divider)]'
+                : ''
+            } ${!row.flagged ? 'bg-[#F6FBF8]' : ''}`}
+            key={row.name}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="grid gap-0.5">
+                <span className="text-[15px] font-semibold">{row.name}</span>
+                <span className="text-[13px] text-[var(--mk-text-3)]">
+                  {row.detail}
+                </span>
+              </div>
+              <span className="flex items-baseline gap-1.5">
+                <span className="text-[13px] text-[var(--mk-text-3)] line-through">
+                  {row.before}
+                </span>
+                <span
+                  className={`text-base font-bold ${row.flagged ? 'text-[var(--mk-danger-ink)]' : 'text-[var(--mk-success-ink)]'}`}
+                >
+                  {row.after}
+                </span>
+              </span>
+            </div>
+            {row.flagged ? (
+              <div className="flex items-center justify-between gap-3">
+                <div className="grid gap-0.5">
+                  <span className="text-[13px] text-[var(--mk-text-3)]">
+                    Saran harga
+                  </span>
+                  <span className="text-[15px] font-semibold">
+                    {row.suggested}{' '}
+                    <span className="text-xs font-normal text-[var(--mk-success-ink)]">
+                      {row.note}
+                    </span>
+                  </span>
+                </div>
+                <button
+                  aria-label={`Pakai ${row.suggested} untuk ${row.name}`}
+                  className="h-11 shrink-0 rounded-[var(--mk-radius-sm)] border border-[var(--mk-border-strong)] bg-[var(--mk-surface)] px-4 text-sm font-semibold"
+                  disabled
+                  type="button"
+                >
+                  Pakai
+                </button>
+              </div>
+            ) : (
+              <span className="w-fit rounded-full bg-[var(--mk-success-tint)] px-2.5 py-1 text-xs font-semibold text-[var(--mk-success-ink)]">
+                Masih aman
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+
       <div
         aria-label="Geser ke samping bila terpotong"
-        className="overflow-x-auto"
+        className="hidden overflow-x-auto sm:block"
         role="region"
         tabIndex={0}
       >

@@ -24,7 +24,7 @@ export function PlanCard({
 }) {
   return (
     <div
-      className={`flex flex-col gap-4 rounded-[var(--mk-radius-xl)] bg-[var(--mk-surface)] p-7 sm:p-9 ${
+      className={`mk-lift flex flex-col gap-4 rounded-[var(--mk-radius-xl)] bg-[var(--mk-surface)] p-7 sm:p-9 ${
         highlighted
           ? 'border-[1.5px] border-[var(--mk-primary)] shadow-[var(--mk-shadow-highlight)]'
           : 'border border-[var(--mk-border)]'

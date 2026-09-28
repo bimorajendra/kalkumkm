@@ -10,7 +10,7 @@ export function StepCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-2.5 rounded-[var(--mk-radius-lg)] border border-[var(--mk-border)] bg-[var(--mk-surface)] p-6 lg:p-7">
+    <div className="mk-lift flex flex-col gap-2.5 rounded-[var(--mk-radius-lg)] border border-[var(--mk-border)] bg-[var(--mk-surface)] p-6 lg:p-7">
       <span className="w-fit rounded-full bg-[var(--mk-primary-tint)] px-2.5 py-1 text-xs font-bold text-[var(--mk-primary-ink)]">
         Langkah {step}
       </span>

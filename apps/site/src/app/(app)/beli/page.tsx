@@ -1,8 +1,5 @@
-import type { Metadata } from 'next';
-import { BeliScreen } from '@/features/billing/beli-screen';
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = { title: 'Takaran Pro' };
-
-export default function BeliPage() {
-  return <BeliScreen />;
+export default function LegacyBeliPage() {
+  redirect('/dashboard/beli');
 }

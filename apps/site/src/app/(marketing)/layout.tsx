@@ -8,7 +8,7 @@ export default async function MarketingLayout({
   children: React.ReactNode;
 }) {
   const user = await getSessionUser().catch(() => null);
-  const start = user ? '/hitung' : '/masuk';
+  const start = user ? '/dashboard' : '/masuk';
   const ctaLabel = user ? 'Buka kalkulator' : 'Coba gratis';
   return (
     <div className="mk flex min-h-dvh flex-col">

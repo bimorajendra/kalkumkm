@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -37,7 +37,7 @@ export function SiteHeader({
         className="lg:justify-self-start"
         href="/"
       >
-        <MkLogo iconSize={28} />
+        <MkLogo height={28} />
       </Link>
       <nav
         aria-label="Halaman"
@@ -82,25 +82,55 @@ export function SiteHeader({
             </button>
           </SheetTrigger>
           <SheetContent
-            className="bg-[var(--mk-surface)] text-[var(--mk-ink)]"
+            className="w-[86vw] gap-0 bg-[var(--mk-surface)] p-0 text-[var(--mk-ink)] sm:max-w-[340px]"
+            showCloseButton={false}
             side="right"
           >
             <SheetTitle className="sr-only">Menu navigasi</SheetTitle>
-            <nav
-              aria-label="Halaman"
-              className="grid gap-1 p-4 text-base font-medium"
-            >
-              {navItems.map((item) => (
-                <SheetClose asChild key={item.href}>
-                  <Link
-                    className="flex min-h-11 items-center rounded-[var(--mk-radius-sm)] px-3 hover:bg-[var(--mk-surface-muted)]"
-                    href={item.href}
-                  >
-                    {item.label}
-                  </Link>
-                </SheetClose>
-              ))}
+            <div className="flex h-16 items-center justify-between border-b border-[var(--mk-border)] px-5">
+              <Link aria-label="Takaran, beranda" href="/">
+                <MkLogo height={28} />
+              </Link>
+              <SheetClose asChild>
+                <button
+                  aria-label="Tutup menu"
+                  className="flex size-11 items-center justify-center rounded-full hover:bg-[var(--mk-surface-muted)]"
+                  type="button"
+                >
+                  <X aria-hidden="true" size={20} />
+                </button>
+              </SheetClose>
+            </div>
+            <nav aria-label="Halaman" className="flex flex-col px-2 py-2">
+              {navItems.map((item) => {
+                const active = pathname === item.href;
+                return (
+                  <SheetClose asChild key={item.href}>
+                    <Link
+                      aria-current={active ? 'page' : undefined}
+                      className={`flex min-h-13 items-center rounded-[var(--mk-radius-sm)] px-3 text-base font-medium transition-colors ${
+                        active
+                          ? 'bg-[var(--mk-primary-tint)] font-semibold text-[var(--mk-primary-ink)]'
+                          : 'hover:bg-[var(--mk-surface-muted)]'
+                      }`}
+                      href={item.href}
+                    >
+                      {item.label}
+                    </Link>
+                  </SheetClose>
+                );
+              })}
             </nav>
+            <div className="mt-auto border-t border-[var(--mk-border)] p-5">
+              <SheetClose asChild>
+                <Link
+                  className={`${mkButtonClasses('primary', 'lg')} w-full`}
+                  href={ctaHref}
+                >
+                  {ctaLabel}
+                </Link>
+              </SheetClose>
+            </div>
           </SheetContent>
         </Sheet>
       </div>

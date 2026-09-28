@@ -1,13 +1,15 @@
-import type { Metadata } from 'next';
-import { Suspense } from 'react';
-import { PriceListBuilder } from '@/features/share/price-list-builder';
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = { title: 'Daftar harga' };
-
-export default function BagikanPage() {
-  return (
-    <Suspense>
-      <PriceListBuilder />
-    </Suspense>
-  );
+export default async function LegacyBagikanPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(await searchParams)) {
+    for (const item of Array.isArray(value) ? value : value ? [value] : [])
+      query.append(key, item);
+  }
+  const suffix = query.size ? `?${query.toString()}` : '';
+  redirect(`/dashboard/bagikan${suffix}`);
 }

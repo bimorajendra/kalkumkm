@@ -78,7 +78,9 @@ export function CalculatorResult({
           variant="outline"
           className="rounded-lg border-transparent bg-white text-[#2b1d14] hover:bg-white/90 hover:text-[#2b1d14]"
         >
-          <Link href={`/bagikan?recipe=${encodeURIComponent(recipeId)}`}>
+          <Link
+            href={`/dashboard/bagikan?recipe=${encodeURIComponent(recipeId)}`}
+          >
             Buat gambar daftar harga
             <ChevronRight aria-hidden="true" />
           </Link>

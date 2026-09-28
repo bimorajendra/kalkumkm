@@ -46,7 +46,7 @@ export function PaywallDialog({
           Sekali bayar {formatRupiah(PRICING.pro.idr)}, tanpa langganan.
         </p>
         <Button asChild size="lg">
-          <Link href="/beli">Lihat Takaran Pro</Link>
+          <Link href="/dashboard/beli">Lihat Takaran Pro</Link>
         </Button>
       </DialogContent>
     </Dialog>

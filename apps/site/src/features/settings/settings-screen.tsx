@@ -3,7 +3,7 @@
 import { Download } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
-import { deleteAccount } from '@/app/(app)/lainnya/actions';
+import { deleteAccount } from '@/app/(app)/dashboard/lainnya/actions';
 import { useSnapshot } from '@/components/takaran/data-provider';
 import { Page, PageTitle } from '@/components/takaran/page';
 import { Button } from '@/components/ui/button';
@@ -47,10 +47,15 @@ export function SettingsScreen({
   async function confirmDelete() {
     setDeleting(true);
     setError('');
-    const result = await deleteAccount(phrase);
-    // Berhasil berarti server mengalihkan halaman; sampai sini hanya bila gagal.
-    if (result && !result.ok) setError(result.message);
-    setDeleting(false);
+    try {
+      const result = await deleteAccount(phrase);
+      // Berhasil berarti server mengalihkan halaman; sampai sini hanya bila gagal.
+      if (result && !result.ok) setError(result.message);
+    } catch {
+      setError('Akun belum bisa dihapus. Periksa koneksi lalu coba lagi.');
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -72,7 +77,7 @@ export function SettingsScreen({
         <Card title="Penawaran pesanan">
           <p>Buat rincian harga untuk pesanan dengan tambahan khusus.</p>
           <Button asChild variant="outline">
-            <Link href="/penawaran">Buka penawaran</Link>
+            <Link href="/dashboard/penawaran">Buka penawaran</Link>
           </Button>
         </Card>
         <Card title="Takaran Pro">
@@ -82,7 +87,7 @@ export function SettingsScreen({
               : 'Tambah resep dan saluran sesuai kebutuhan usahamu.'}
           </p>
           <Button asChild variant="outline">
-            <Link href="/beli">
+            <Link href="/dashboard/beli">
               {plan === 'pro' ? 'Lihat detail' : 'Lihat paket Pro'}
             </Link>
           </Button>

@@ -1,8 +1,5 @@
-import type { Metadata } from 'next';
-import { HitungScreen } from '@/features/pricing/hitung-screen';
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = { title: 'Kalkulator' };
-
-export default function HitungPage() {
-  return <HitungScreen />;
+export default function LegacyHitungPage() {
+  redirect('/dashboard/hitung');
 }

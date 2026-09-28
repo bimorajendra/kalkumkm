@@ -67,10 +67,10 @@ export function HitungScreen() {
           description="Pakai contoh brownies atau buat sendiri."
         >
           <Button asChild>
-            <Link href="/resep">Lihat resep</Link>
+            <Link href="/dashboard/resep">Lihat resep</Link>
           </Button>
           <Button asChild variant="outline">
-            <Link href="/bahan">Tambah bahan</Link>
+            <Link href="/dashboard/bahan">Tambah bahan</Link>
           </Button>
         </EmptyState>
       </Page>
@@ -158,7 +158,7 @@ function CalculatorScreen({
           </h1>
           <p>{message}</p>
           <Button asChild>
-            <Link href={`/resep/${recipe.id}`}>Periksa resep</Link>
+            <Link href={`/dashboard/resep/${recipe.id}`}>Periksa resep</Link>
           </Button>
         </section>
       </Page>

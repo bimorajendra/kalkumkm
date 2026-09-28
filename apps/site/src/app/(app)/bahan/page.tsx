@@ -1,8 +1,5 @@
-import type { Metadata } from 'next';
-import { BahanScreen } from '@/features/ingredients/bahan-screen';
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = { title: 'Bahan' };
-
-export default function Page() {
-  return <BahanScreen />;
+export default function LegacyBahanPage() {
+  redirect('/dashboard/bahan');
 }

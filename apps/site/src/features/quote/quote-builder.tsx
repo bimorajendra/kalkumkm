@@ -125,7 +125,7 @@ export function QuoteBuilder() {
           description={quoteCopy.emptyRecipes}
         >
           <Button asChild>
-            <Link href="/resep">Buka daftar resep</Link>
+            <Link href="/dashboard/resep">Buka daftar resep</Link>
           </Button>
         </EmptyState>
       </Page>

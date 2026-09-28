@@ -21,7 +21,7 @@ export async function checkMayarAction(formData: FormData) {
   const db = await getDb();
   const [order] = await db.select().from(orders).where(eq(orders.id, id));
   if (order) await checkOrder(db, mayar, order).catch(() => false);
-  revalidatePath('/admin');
+  revalidatePath('/dashboard/admin');
 }
 
 export async function grantProAction(formData: FormData) {
@@ -36,11 +36,11 @@ export async function grantProAction(formData: FormData) {
     .from(user)
     .where(eq(user.email, email));
   if (target) await grantPro(db, target.id);
-  revalidatePath('/admin');
+  revalidatePath('/dashboard/admin');
 }
 
 export async function refundAction(formData: FormData) {
   await requireAdmin();
   await markRefunded(await getDb(), String(formData.get('orderId') ?? ''));
-  revalidatePath('/admin');
+  revalidatePath('/dashboard/admin');
 }

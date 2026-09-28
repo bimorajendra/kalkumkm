@@ -47,7 +47,7 @@ export function ResepDetailScreen({ id }: { id: string }) {
         </h1>
         <p className="my-3">{recipeCopy.loadError}</p>
         <Button asChild>
-          <Link href="/resep">Kembali ke resep</Link>
+          <Link href="/dashboard/resep">Kembali ke resep</Link>
         </Button>
       </Page>
     );
@@ -59,14 +59,14 @@ export function ResepDetailScreen({ id }: { id: string }) {
         </h1>
         <p className="my-3">Resep ini mungkin sudah dihapus.</p>
         <Button asChild>
-          <Link href="/resep">Kembali ke resep</Link>
+          <Link href="/dashboard/resep">Kembali ke resep</Link>
         </Button>
       </Page>
     );
 
   const back = (
     <Link
-      href="/resep"
+      href="/dashboard/resep"
       className="mb-2 inline-flex min-h-11 items-center gap-1 text-link underline underline-offset-4"
     >
       <ChevronLeft aria-hidden="true" className="size-4" />
@@ -78,7 +78,7 @@ export function ResepDetailScreen({ id }: { id: string }) {
       open={editing}
       recipe={recipe}
       onOpenChange={setEditing}
-      onDeleted={() => router.push('/resep')}
+      onDeleted={() => router.push('/dashboard/resep')}
     />
   );
 
@@ -128,7 +128,7 @@ export function ResepDetailScreen({ id }: { id: string }) {
       const before = new Set(snapshot.recipes.map((row) => row.id));
       const next = await run({ type: 'recipe.duplicate', id });
       const copy = next.recipes.find((row) => !before.has(row.id));
-      if (copy) router.push(`/resep/${copy.id}`);
+      if (copy) router.push(`/dashboard/resep/${copy.id}`);
     } catch (cause) {
       if (cause instanceof CommandError && cause.code === 'FREE_LIMIT')
         setPaywall(true);

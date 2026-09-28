@@ -8,7 +8,7 @@ import {
   type BillingStatus,
   billingStatus,
   startCheckout,
-} from '@/app/(app)/beli/actions';
+} from '@/app/(app)/dashboard/beli/actions';
 import { useSnapshot } from '@/components/takaran/data-provider';
 import { Field, fieldProps } from '@/components/takaran/field';
 import { Page, PageTitle } from '@/components/takaran/page';
@@ -87,7 +87,7 @@ export function BeliScreen() {
         <PageTitle>Takaran Pro aktif</PageTitle>
         <p>Terima kasih. Semua fitur Pro di akunmu sudah terbuka.</p>
         <Button asChild className="w-fit">
-          <Link href="/hitung">Kembali ke kalkulator</Link>
+          <Link href="/dashboard/hitung">Kembali ke kalkulator</Link>
         </Button>
       </Page>
     );

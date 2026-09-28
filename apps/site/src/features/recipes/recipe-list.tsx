@@ -97,7 +97,7 @@ export function RecipeList() {
                 const id = next.recipes.find(
                   (row) => row.name === 'Brownies',
                 )?.id;
-                router.push(id ? `/resep/${id}` : '/resep');
+                router.push(id ? `/dashboard/resep/${id}` : '/dashboard/resep');
               } catch (cause) {
                 setMessage(errorMessage(cause, recipeCopy.saveError));
               }
@@ -119,7 +119,7 @@ export function RecipeList() {
         <RecipeEditor
           open={editorOpen}
           onOpenChange={setEditorOpen}
-          onSaved={(id) => id && router.push(`/resep/${id}`)}
+          onSaved={(id) => id && router.push(`/dashboard/resep/${id}`)}
         />
       </>
     );
@@ -177,7 +177,10 @@ export function RecipeList() {
                 key={recipe.id}
                 className="flex min-h-14 flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3"
               >
-                <Link href={`/resep/${recipe.id}`} className="min-w-0 flex-1">
+                <Link
+                  href={`/dashboard/resep/${recipe.id}`}
+                  className="min-w-0 flex-1"
+                >
                   <strong className="block text-base">{recipe.name}</strong>
                   <span className="block text-sm text-muted-foreground">
                     {hasError ? (

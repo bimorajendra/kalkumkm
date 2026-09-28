@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getSessionUser } from '@/server/session';
 
 export const metadata: Metadata = {
-  title: { absolute: 'Takaran — Kalkulator HPP usaha makanan rumahan' },
+  title: { absolute: 'Takaran, Kalkulator HPP usaha makanan rumahan' },
   description:
     'Masukkan harga bahan dari struk belanja. Takaran menghitung modal per potong dan harga jual yang tetap untung.',
 };
@@ -21,7 +21,7 @@ export default async function BerandaPage({
   searchParams: Promise<{ akun?: string }>;
 }) {
   const user = await getSessionUser().catch(() => null);
-  const start = user ? '/hitung' : '/masuk';
+  const start = user ? '/dashboard' : '/masuk';
   const { akun } = await searchParams;
 
   return (

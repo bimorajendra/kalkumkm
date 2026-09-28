@@ -98,7 +98,7 @@ function IngredientRowView({
         </span>
         {showUsage && used > 0 ? (
           <Link
-            href="/resep"
+            href="/dashboard/resep"
             className="text-sm text-link underline underline-offset-4"
           >
             {ingredientCopy.usedBy(used)}

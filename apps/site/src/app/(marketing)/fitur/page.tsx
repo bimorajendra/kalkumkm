@@ -28,11 +28,11 @@ const orderIdeas = [
 
 export default async function FiturPage() {
   const user = await getSessionUser().catch(() => null);
-  const start = user ? '/hitung' : '/masuk';
+  const start = user ? '/dashboard' : '/masuk';
 
   return (
     <>
-      <section className="flex flex-col gap-4.5 px-5 pt-10 pb-10 lg:px-20 lg:pt-18 lg:pb-14">
+      <section className="mk-up flex flex-col gap-4.5 px-5 pt-10 pb-10 lg:px-20 lg:pt-18 lg:pb-14">
         <span className="text-sm font-semibold text-[var(--mk-primary-ink)]">
           Fitur
         </span>

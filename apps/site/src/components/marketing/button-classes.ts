@@ -10,8 +10,11 @@ export type MkButtonVariant =
   | 'onDarkPrimary';
 export type MkButtonSize = 'sm' | 'md' | 'lg' | 'xl';
 
+/* Transisi + naik tipis saat hover: kesan "terangkat" yang ringan, mati
+   otomatis kalau perangkat minta gerak dikurangi (aturan global ada di
+   globals.css lewat motion-reduce:transition-none/transform-none). */
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-[var(--mk-radius-md)] font-semibold whitespace-nowrap transition-colors';
+  'inline-flex items-center justify-center gap-2 rounded-[var(--mk-radius-md)] font-semibold whitespace-nowrap transition-[color,background-color,border-color,box-shadow,transform] duration-150 hover:-translate-y-px active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0';
 
 /* 'primary' pakai --mk-ink (bukan --mk-primary oranye) untuk latar tombol:
    oranye-di-tengah dites dengan axe-core dan kontras teks putihnya tidak

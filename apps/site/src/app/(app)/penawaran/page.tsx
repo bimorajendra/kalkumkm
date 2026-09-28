@@ -1,8 +1,5 @@
-import type { Metadata } from 'next';
-import { PenawaranScreen } from '@/features/quote/penawaran-screen';
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = { title: 'Penawaran' };
-
-export default function PenawaranPage() {
-  return <PenawaranScreen />;
+export default function LegacyPenawaranPage() {
+  redirect('/dashboard/penawaran');
 }

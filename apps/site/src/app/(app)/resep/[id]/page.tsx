@@ -1,13 +1,10 @@
-import type { Metadata } from 'next';
-import { ResepDetailScreen } from '@/features/recipes/resep-detail-screen';
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = { title: 'Detail resep' };
-
-export default async function ResepDetailPage({
+export default async function LegacyResepDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  return <ResepDetailScreen id={id} />;
+  redirect(`/dashboard/resep/${encodeURIComponent(id)}`);
 }

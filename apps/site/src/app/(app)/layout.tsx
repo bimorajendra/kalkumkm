@@ -9,6 +9,7 @@ import { requireUser } from '@/server/session';
 import { getSnapshot } from '@/server/store';
 
 export const metadata: Metadata = { robots: { index: false } };
+export const dynamic = 'force-dynamic';
 
 async function signOut() {
   'use server';
