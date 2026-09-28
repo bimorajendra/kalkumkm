@@ -61,30 +61,125 @@
   color: var(--caramel-700);
 }
 
-.landing-backdrop {
-  min-height: 100dvh;
-  padding: clamp(8px, 3vw, 32px);
-  background: var(--tan-100);
+/* Token situs marketing (docs/design/DESIGN-HANDOFF.md), sengaja terpisah
+   dari token aplikasi di atas: dua palet berbeda dipakai berdampingan
+   (marketing pakai oranye-krem baru, aplikasi login tetap karamel lama).
+   Memakai nama variabel sendiri (--mk-*), bukan menimpa --color-primary dkk,
+   supaya tidak bentrok dengan pemetaan shadcn punya aplikasi di atas.
+   Dipakai lewat kelas pembungkus .mk di layout (marketing), bukan lewat
+   utility Tailwind bawaan, konsisten dengan pola bg-[var(--x)] yang sudah
+   dipakai di seluruh repo ini untuk token satu-tujuan seperti ini. */
+.mk {
+  --mk-bg: #f7f5f2;
+  --mk-surface: #ffffff;
+  --mk-surface-muted: #fbfaf8;
+  --mk-sand: #f2ede6;
+  --mk-border: #e7e2db;
+  --mk-border-strong: #dcd5cc;
+  --mk-divider: #efeae4;
+  --mk-ink: #1c1917;
+  /* text-2/text-3/primary-ink/success-ink dibuat lebih gelap dari draf desain
+     asli: warna aslinya lolos hitung kontras manual (~7:1) tapi axe-core
+     mengukur teks kecil di lebar font ini di bawah 4,5:1 secara konsisten
+     (dites dengan tangkapan kanvas axe sungguhan, bukan cuma dihitung
+     manual). Diberi lebih banyak jarak aman daripada dikira-kira. */
+  --mk-text-2: #262320;
+  --mk-text-3: #423d38;
+  --mk-text-4: #8a8178;
+  --mk-primary: #8f360a;
+  --mk-primary-hover: #6b2807;
+  --mk-primary-tint: #fdf1e9;
+  --mk-primary-ink: #6b2807;
+  --mk-success: #1f7a4d;
+  --mk-success-ink: #103e24;
+  --mk-success-tint: #e7f4ec;
+  --mk-danger-ink: #9a2b1a;
+  --mk-danger-tint: #fbe4e0;
+  --mk-on-dark-muted: #c9c1b8;
+  --mk-chart-2: #5e4b3c;
+  --mk-chart-3: #e8b98f;
+  --mk-radius-sm: 8px;
+  --mk-radius-md: 10px;
+  --mk-radius-lg: 16px;
+  --mk-radius-xl: 20px;
+  --mk-radius-2xl: 24px;
+  --mk-shadow-float:
+    0 1px 2px rgba(28, 25, 23, 0.04), 0 16px 40px rgba(28, 25, 23, 0.07);
+  --mk-shadow-highlight: 0 12px 32px rgba(194, 78, 18, 0.08);
+  --mk-shadow-chip: 0 4px 12px rgba(28, 25, 23, 0.06);
+  background: var(--mk-bg);
+  color: var(--mk-ink);
+  font-variant-numeric: tabular-nums;
+}
+.mk h1,
+.mk h2,
+.mk h3 {
+  font-family: var(--font-jakarta), sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.mk :focus-visible {
+  outline: 2px solid var(--mk-primary);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mk-up {
+    animation: mk-up 0.6s ease-out both;
+  }
+}
+@keyframes mk-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk-up {
+    animation: none;
+  }
 }
 
-.landing-shell {
+/* Slider target untung di kalkulator demo: input range asli (bukan
+   komponen bertitik packages/ui), sesuai docs/design/DESIGN-HANDOFF.md.
+   Warna isi diatur lewat inline style (fill) dari nilai slider. */
+.mk-range {
+  appearance: none;
   width: 100%;
-  max-width: 1560px;
-  margin-inline: auto;
-  overflow: hidden;
-  border-radius: var(--radius-card);
-  background: var(--surface);
-  box-shadow: var(--shadow-floating);
+  height: 6px;
+  margin: 12px 0 4px;
+  border-radius: 999px;
+  cursor: pointer;
 }
-
-.landing-feature-band {
-  background: linear-gradient(
-    180deg,
-    var(--bg),
-    var(--surface-soft) 14%,
-    var(--surface-soft) 86%,
-    var(--bg)
-  );
+.mk-range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: transparent;
+}
+.mk-range::-moz-range-track {
+  height: 6px;
+  background: transparent;
+}
+.mk-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -8px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--mk-primary);
+  box-shadow: 0 1px 4px rgba(28, 25, 23, 0.2);
+}
+.mk-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--mk-primary);
+  box-shadow: 0 1px 4px rgba(28, 25, 23, 0.2);
 }
 
 @layer base {
@@ -103,5 +198,11 @@
     font-family: var(--font-display);
     letter-spacing: -0.01em;
     font-weight: 400;
+  }
+  /* Di dalam @layer base (bukan aturan polos) supaya utility warna Tailwind
+     yang eksplisit (mis. text-white pada tombol onDark) tetap menang lewat
+     urutan layer; ini cuma bekal warna bawaan saat tidak ada utility warna. */
+  .mk a {
+    color: inherit;
   }
 }

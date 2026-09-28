@@ -1,13 +1,19 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
 // CSP dengan nonce per permintaan. 'unsafe-eval' hanya di dev (kebutuhan React).
+// style-src di dev pakai 'unsafe-inline' saja (bukan nonce): overlay dev tools
+// Next.js menyuntik <style> sendiri tanpa nonce, jadi kena blokir kalau nonce
+// dipasang (nonce membuat browser mengabaikan 'unsafe-inline'). Produksi tetap
+// nonce ketat, tidak ada 'unsafe-inline' untuk style-src.
 export function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const dev = process.env.NODE_ENV === 'development';
   const csp = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev ? " 'unsafe-eval'" : ''}`,
-    `style-src 'self' 'nonce-${nonce}'`,
+    dev
+      ? "style-src 'self' 'unsafe-inline'"
+      : `style-src 'self' 'nonce-${nonce}'`,
     "style-src-attr 'unsafe-inline'",
     "img-src 'self' blob: data: https://lh3.googleusercontent.com",
     "font-src 'self'",

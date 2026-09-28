@@ -39,7 +39,10 @@
   "javascript": { "formatter": { "quoteStyle": "single" } },
   "overrides": [
     {
-      "includes": ["apps/site/src/components/ui/table.tsx"],
+      "includes": [
+        "apps/site/src/components/ui/table.tsx",
+        "apps/site/src/components/marketing/margin-alert-table.tsx"
+      ],
       "linter": {
         "rules": {
           "a11y": {

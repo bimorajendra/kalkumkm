@@ -1,6 +1,7 @@
 # DESIGN.md: Takaran (nama kerja)
 
-> **Arah pemilik (27 September 2026):** palet hangat dari referensi Kindly dipakai di seluruh halaman dan tema dikunci terang. Landing memakai bingkai putih membulat di atas latar aprikot, bidang peach lembut untuk menghubungkan section, dan judul serif sistem. Layout mengikuti konten Takaran tanpa menyalin elemen finance yang tidak relevan. Perubahan ini menggantikan pengecualian tipografi di `docs/CHANGE-002-visual-identity-flat.md`; ilustrasi data tetap memakai grafik yang sudah berfungsi.
+> **Arah pemilik (27 September 2026):** palet hangat dari referensi Kindly dipakai di seluruh halaman dan tema dikunci terang. Landing memakai bidang penuh (bukan bingkai bundar): latar putih polos, dengan gradasi hangat lembut (caramel ke peach ke putih) hanya di balik navbar dan hero, memudar sebelum section berikutnya. Judul serif sistem. Layout mengikuti konten Takaran tanpa menyalin elemen finance yang tidak relevan. Perubahan ini menggantikan pengecualian tipografi di `docs/CHANGE-002-visual-identity-flat.md`; ilustrasi data tetap memakai grafik yang sudah berfungsi.
+> **Susulan (27 September 2026, lanjutan):** bingkai putih membulat di atas latar aprikot (dipasang lebih dulu untuk meniru bentuk mockup di tangkapan layar referensi) dibatalkan pemilik: bentuk kartu-di-atas-latar itu tidak diperlukan untuk halaman sungguhan (bukan mockup), dan latar aprikot polos di sekitarnya dinilai terlalu sepi. Baris di §9.1 yang menyebut "bingkai" **tidak berlaku lagi**; landing sekarang bidang penuh (latar putih), dengan gradasi hangat lembut hanya di balik navbar dan hero sebagai aksen.
 > Arah visual untuk aplikasi kalkulator HPP dan landing page-nya. File ini adalah **data arah desain** yang dibaca bersama `antislop.md` (filter). `antislop.md` menyaring slop; file ini memberi karakter.
 > Kebutuhan fungsional ada di `PRD.md`. Jika keduanya bertentangan, `PRD.md` yang menang untuk fungsi, file ini yang menang untuk tampilan.
 > Status: Draf v0.2, 25 September 2026.
@@ -19,6 +20,24 @@ Dua referensi visual dari pemilik produk. Keduanya dipakai sebagai inspirasi, bu
 **Keputusan palet:** kedua referensi punya warna berbeda (biru vs oranye). Produk ini memakai **satu palet hangat** (krem, cokelat kakao, karamel oranye) untuk aplikasi dan landing page. Alasan: produk ini untuk dapur kue rumahan, dan warna karamel langsung terbaca "kue", sedangkan biru terbaca "keuangan/kripto". Tata letak tetap mengikuti referensi A.
 
 **Penyempurnaan tampilan (27 September 2026):** warna krem dibuat lebih terang dan panel form lebih peach seperti referensi Kindly; kartu hasil memakai gradasi peach-oranye dan bayangan lembut sebagai fokus. Kalkulator desktop menyeimbangkan kolom input dan hasil (6:5); pada HP, alur dan ringkasan hasil tetap seperti semula. Penyesuaian ini hanya menyentuh presentasi, tidak mengubah input, copy, atau perhitungan.
+
+**Penyempurnaan ornamen landing (27 September 2026, lanjutan):** pemilik minta landing page menyamai layout, dekorasi, dan ornamen referensi Kindly secara lebih menyeluruh. Yang diambil dan alasannya:
+
+| Ornamen referensi | Diterapkan sebagai | Kenapa cocok |
+|---|---|---|
+| Kartu "Step 01/02/03" dengan ikon dalam lingkaran | Section "Cara pakai" (tiga langkah: masukkan harga bahan, susun resep, lihat harga jual dan untung) | Isinya alur nyata memakai Takaran, bukan teks generik seperti referensi ("Pick a tool") yang tidak berarti apa-apa untuk produk satu-fungsi ini |
+| Grid ikon "trust badge" ("No hidden fees", dll.) menjelang penutup | Section "Kenapa penjual pakai Takaran" (privasi data, alarm margin, Pro sekali bayar, gratis 3 resep) | Klaim yang bisa diverifikasi dari kode dan `PRICING`/`FREE_LIMITS`, bukan janji generik |
+
+Cahaya gradasi blur di belakang kartu hero (ornamen referensi Kindly) sempat dicoba lalu **dibatalkan**: karena kartu demo sudah persegi dengan radius yang sama, blur-nya hanya menjiplak bentuk kotak kartu jadi terlihat seperti garis pinggir/outline ganda di luar kartu, bukan cahaya ambient yang lembut seperti referensi. Kartu hasil tetap tampil hanya dengan gradasi dan bayangannya sendiri (bagian 9.6), tanpa cahaya tambahan di baliknya.
+
+Yang **sengaja tidak diambil** (bertentangan dengan aturan keras "Tanpa data palsu" dan R-05/R-09/R-16/R-17/R-18/R-36/R-38 di `antislop.md`, sudah dibahas juga di tabel bagian 1 untuk referensi B):
+- Lencana "#1 AI Finance platform", rating "4,9/5 Reviews", dan avatar pengulas karangan.
+- Deretan logo perusahaan (ByteBoost, Hexagon, dll.) — Takaran tidak punya klien perusahaan yang mengizinkan logonya dipakai.
+- Kartu testimoni dengan nama dan foto karangan.
+- Section "Popular combinations" (Kindly menjual banyak tool sekaligus; Takaran satu alat, tidak ada kombinasi tool untuk dijual).
+- Footer 4 kolom dengan tautan ke halaman yang tidak ada (Help Center, Template, System Status, dll.) — melanggar R-24 (setiap tautan navigasi wajib menuju layar yang ada). Footer tetap satu baris (lihat bagian 10.5).
+
+Dua ikon baru masuk daftar di bagian 7 karena dipakai section-section ini: `wallet` (uang, untung, sekali bayar) dan `lock` (privasi data).
 
 ---
 
@@ -189,7 +208,7 @@ Aturan:
 ## 7. Ikon
 
 - Set: **Lucide**, stroke 1,75 px, ukuran 20 px (24 px di tab bar).
-- Hanya ikon yang maknanya langsung: `wheat` (bahan), `cookie` atau `cake` (resep), `receipt` (penawaran), `store` (saluran), `hard-drive-download` (cadangan), `triangle-alert` (alarm margin).
+- Hanya ikon yang maknanya langsung: `wheat` (bahan), `cookie` atau `cake` (resep), `receipt` (penawaran), `store` (saluran), `hard-drive-download` (cadangan), `triangle-alert` (alarm margin), `wallet` (uang, untung, sekali bayar), `lock` (privasi data).
 - Chip "✦ Calculator" di referensi A diganti chip berisi **mini tumpukan isometrik 16 px** + teks nama resep, karena ikon bintang tidak berhubungan dengan konten (R-04).
 - Tidak ada panah dekoratif di tombol. Chevron `>` hanya di tombol yang **membuka layar lain** (R-08).
 
@@ -349,10 +368,12 @@ Urutan mengikuti cerita masalah pengguna, bukan template (R-05, C-3). Semua taut
 | 5 | Pesanan custom | Kiri teks, kanan pratinjau gambar penawaran kue ulang tahun (data contoh diberi label) | Dua kolom terbalik dari hero |
 | 6 | Harga | Dua kolom Gratis dan Pro dengan daftar isi sesuai PRD bagian 12. Tidak ada lencana "Paling populer". Sisa kuota harga pendiri hanya ditampilkan jika angkanya nyata (`[REAL DATA]`) | Latar `--surface-soft` |
 | 7 | Daftar tunggu gratis | Formulir: nama usaha, nomor WA, jenis jualan, dan persetujuan. Tombol "Daftar gratis". State berhasil, gagal, dan sedang mengirim wajib ada | Kartu tunggal |
-| 8 | FAQ | **Tidak dibuat sampai ada pertanyaan nyata** dari wawancara/pre-order (R-28). Kandidat yang sudah pasti relevan: "Data resep saya disimpan di mana?" dan "Kalau ganti HP, datanya hilang?" | Accordion, bisa dibuka dengan keyboard |
+| 8 | FAQ | **Dibuat (27 September 2026, atas permintaan pemilik)**, tapi hanya 4 pertanyaan yang jawabannya adalah fakta produk yang sudah pasti benar (bukan tebakan keresahan pengguna): "Data resepku disimpan di mana?", "Kalau ganti HP, datanya hilang?", "Takaran gratis atau bayar?" (angka dari `FREE_LIMITS`/`PRICING`, bukan dikarang), "Harus punya akun Google?". Tidak menambah pertanyaan andaian di luar fakta yang sudah ada di dokumen ini | Accordion (`components/ui/accordion.tsx`, Radix), bisa dibuka dengan keyboard |
 | 9 | Footer | Satu baris: nama produk, email kontak `[REAL DATA]`, kalimat "Data resep kamu tersimpan di HP kamu, bukan di server kami." | Satu baris, bukan 4 kolom |
 
-Yang sengaja tidak ada: deretan logo, rating bintang, testimoni, statistik jumlah pengguna, section "3 langkah". Testimoni hanya ditambahkan setelah ada penjual nyata yang setuju nama dan kutipannya dipakai.
+Yang sengaja tidak ada: deretan logo, rating bintang, testimoni, statistik jumlah pengguna, section "3 langkah" generik ala "Trusted by 10.000+ businesses". Diminta pemilik (27 September 2026) meniru pola itu dari referensi baru, tapi ditolak: Takaran tidak punya 10.000 klien perusahaan atau logo yang boleh dipakai, jadi angka dan logonya pasti karangan (melanggar aturan keras "Tanpa data palsu"). Testimoni hanya ditambahkan setelah ada penjual nyata yang setuju nama dan kutipannya dipakai.
+
+**Aksen pemisah titik (27 September 2026):** satu baris titik dekoratif tipis (`.landing-dot-divider`) di bawah kartu hero, diadaptasi dari aksen bintik bergelombang dua-baris di bawah kartu gelap pada referensi. Dibuat satu baris tipis saja (bukan dua baris tebal bergelombang) supaya tetap tenang sesuai dial ENERGY 2, dipakai di satu tempat saja (bukan di setiap transisi) supaya tidak jadi dekorasi berulang tanpa arti.
 
 ### 10.6 Beli dan aktivasi Pro
 

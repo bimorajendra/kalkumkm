@@ -1,7 +1,14 @@
+'use client';
+
 /// <reference path="./big-js.d.ts" />
 import type Big from 'big.js';
 import type { ReactNode } from 'react';
 import { formatPercent, formatRupiah } from './format';
+import { useTweenedNumber } from './use-tweened-number';
+
+function toNumber(value: number | Big): number {
+  return typeof value === 'number' ? value : value.toNumber();
+}
 
 export interface ResultCardProps {
   tab?: ReactNode;
@@ -30,12 +37,18 @@ export function ResultCard({
   value,
   visual,
 }: ResultCardProps) {
+  const tweenedValue = useTweenedNumber(toNumber(value));
+  const tweenedSecondary = useTweenedNumber(
+    secondaryValue === undefined || secondaryValue === null
+      ? 0
+      : toNumber(secondaryValue),
+  );
   return (
     <section
       className={`takaran-result-card${compact ? ' takaran-result-card--compact' : ''}`}
     >
       {tab ? <div className="takaran-result-card__tab">{tab}</div> : null}
-      <p className="takaran-result-card__value">{formatRupiah(value)}</p>
+      <p className="takaran-result-card__value">{formatRupiah(tweenedValue)}</p>
       <p className="takaran-result-card__label">{label}</p>
       {compact ? (
         <>
@@ -52,7 +65,7 @@ export function ResultCard({
         <>
           {secondaryValue !== undefined && secondaryValue !== null ? (
             <div className="takaran-result-card__secondary">
-              <p>{formatRupiah(secondaryValue)}</p>
+              <p>{formatRupiah(tweenedSecondary)}</p>
               {secondaryLabel ? <span>{secondaryLabel}</span> : null}
             </div>
           ) : null}

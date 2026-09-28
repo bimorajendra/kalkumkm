@@ -1,24 +1,20 @@
-# CHANGE-002: Identitas visual pindah ke gaya sans-serif flat
+# CHANGE-002: Motif komposisi biaya jadi batang flat + perbaikan bug terkait
 
-> Status: disetujui pemilik, 27 September 2026
-> Menggantikan bagian tipografi, motif, dan elevasi kartu di `DESIGN.md`. Jika ada pertentangan, dokumen ini yang menang sampai `DESIGN.md` ditulis ulang menyeluruh.
+> Status: sebagian disetujui, sebagian sudah dibalik pemilik (27 September 2026)
+> **Bagian tipografi (font judul jadi sans-serif) sudah dibalik.** DESIGN.md kini kembali memakai judul serif (lihat banner "Arah pemilik" di atas file itu), yang menggantikan pengecualian tipografi yang tadinya ada di sini. Bagian di bawah ini yang **masih berlaku**: motif komposisi biaya (batang flat, bukan lagi isometrik 3D), ikon dekoratif lucide, elevasi `shadow-sm` pada kartu konten, warna segmen batang biaya, dan bug fix yang ditemukan sekalian. Jika ingin motif komposisi biaya dikembalikan ke isometrik 3D sesuai DESIGN.md §3 dan §9.6 saat ini, itu pekerjaan terpisah yang belum dikerjakan.
 
 ## Konteks
 
-Pemilik menunjukkan tiga referensi visual (fleet management tool, ZkCloud, Kindly) dan meminta tampilan Takaran diubah total mengikuti gaya itu: bersih, sans-serif, kartu dengan bayangan lembut, tanpa ilustrasi 3D. Ini bertentangan dengan `DESIGN.md` yang menetapkan judul serif (Instrument Serif) dan motif tumpukan isometrik sebagai ciri khas produk, jadi keputusan ini dikonfirmasi ke pemilik sebelum dikerjakan (lihat percakapan; pemilih memilih "ganti total ke gaya seperti referensi" atas tiga pilihan yang diajukan).
+Pemilik menunjukkan tiga referensi visual (fleet management tool, ZkCloud, Kindly) dan sempat meminta tampilan diubah total mengikuti gaya itu, termasuk motif komposisi biaya dari tumpukan isometrik 3D menjadi batang flat + legenda teks. Tipografi kemudian dibalik lagi ke serif, tapi motif batang flat dan perbaikan di bawah ini tetap dipertahankan.
 
-## Yang berubah
+## Yang masih berubah dari DESIGN.md asli
 
-| Aspek | Sebelum (`DESIGN.md` asli) | Sesudah |
+| Aspek | Sebelum (`DESIGN.md` asli) | Sesudah (masih berlaku) |
 |---|---|---|
-| Font judul dan angka besar | Instrument Serif, regular 400 | Plus Jakarta Sans, bold/semibold |
-| Bobot judul | 400 (elegan, tipis) | 600–700 (tegas) |
 | Motif komposisi biaya | Tumpukan 3D isometrik dengan label di dalam tiap lempeng | Batang vertikal flat proporsional + legenda teks terpisah (dot warna + label + nilai), baris tinggi tetap |
 | Ikon dekoratif kecil (chip resep, sudut gambar dibagikan) | `IsometricGlyph` (kubus 3D custom) | Ikon `Cookie` dari lucide-react |
 | Elevasi kartu | Hanya navbar dan kartu hasil yang berbayang; kartu lain datar dengan garis (R-12 lama) | Kartu konten (`bg-card`) memakai `shadow-sm` di seluruh aplikasi. Kotak contoh/placeholder bergaris putus-putus tetap tanpa bayangan. |
 | Warna, layout dua kolom, slider bertitik, bahasa Indonesia santai | Tetap | Tidak berubah |
-
-`--font-display` di `apps/site/src/app/globals.css` sekarang menunjuk ke `--font-jakarta` (bukan `--font-instrument`). Font Instrument Serif dan paket `@fontsource/instrument-serif` dihapus dari `apps/site` karena tidak lagi dipakai di mana pun (termasuk gambar penawaran dan daftar harga yang dibagikan, yang sebelumnya juga memakai serif).
 
 ## Alasan teknis
 
@@ -50,7 +46,10 @@ Setelah CHANGE-002 pertama, pemilik menilai warna belum sesuai referensi. Ditemu
 - `pnpm test:e2e` (80 test Playwright + axe, lebar 320 dan 1280, tema terang dan gelap) lulus dua kali jalan penuh.
 - Tangkapan layar manual: landing, kalkulator (desktop dan HP, kedua tema), bahan, resep, detail resep, penawaran, daftar harga, pengaturan.
 
+Verifikasi ini dijalankan sebelum tipografi dibalik ke serif; belum diuji ulang setelah pembalikan itu.
+
 ## Belum diverifikasi / diketahui masih ada
 
 - **Kartu hasil ringkas di HP (posisi tetap di atas tab bar) menutupi sebagian panel slider "Target untung" saat halaman pertama dibuka**, sebelum pengguna menggeser sedikit ke bawah. Ini ada sejak sebelum perubahan ini (bukan regresi dari redesain), muncul karena kartu ringkas sengaja dibuat menempel tetap di layar (`position: fixed`) sesuai `DESIGN.md` §10.1, dan kontennya lebih tinggi dari jarak yang tersisa di layar pertama. Bisa diatasi dengan menampilkan kartu ringkas hanya setelah pengguna mulai menggeser (intersection observer), atau memperpendek konten kartu ringkas — belum dikerjakan, perlu keputusan produk dulu karena mengubah perilaku, bukan sekadar CSS.
 - Lighthouse dan uji lapangan penjual nyata belum dijalankan (di luar cakupan perubahan ini).
+- Motif komposisi biaya masih batang flat, belum dikembalikan ke isometrik 3D sesuai `DESIGN.md` §3 dan §9.6 saat ini — ketidaksesuaian ini belum diperbaiki (lihat catatan status di atas).

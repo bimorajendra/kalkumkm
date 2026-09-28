@@ -8,6 +8,10 @@ const config: NextConfig = {
   serverExternalPackages: ['pg', '@electric-sql/pglite'],
   poweredByHeader: false,
   agentRules: false,
+  // CSP style-src pakai nonce ketat (lihat proxy.ts); overlay dev tools Next.js
+  // menyuntik <style> sendiri tanpa nonce itu, jadi kena blok dan tampil kosong.
+  // Overlay ini cuma alat bantu dev, tidak ada di build produksi.
+  devIndicators: false,
   async headers() {
     return [
       {

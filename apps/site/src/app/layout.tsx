@@ -24,6 +24,11 @@ const jakarta = localFont({
       weight: '700',
       style: 'normal',
     },
+    {
+      path: '../../node_modules/@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-800-normal.woff2',
+      weight: '800',
+      style: 'normal',
+    },
   ],
   variable: '--font-jakarta',
   display: 'swap',

@@ -7,7 +7,8 @@
     ".": "./src/index.ts",
     "./components.css": "./src/components.css",
     "./tokens.css": "./src/tokens.css",
-    "./format": "./src/format.ts"
+    "./format": "./src/format.ts",
+    "./isometric-stack": "./src/isometric-stack.tsx"
   },
   "dependencies": {
     "@radix-ui/react-slider": "^1.4.7",
