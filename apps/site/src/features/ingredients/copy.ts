@@ -7,7 +7,6 @@ export const ingredientCopy = {
   searchPlaceholder: 'Cari nama bahan',
   save: 'Simpan bahan',
   cancel: 'Batal',
-  editPrice: 'Ubah harga',
   savePrice: 'Simpan harga',
   delete: 'Hapus bahan',
   duplicate: 'Nama bahan ini sudah ada.',

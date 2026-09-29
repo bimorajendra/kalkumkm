@@ -218,8 +218,7 @@ export function RecipeEditor({
     }));
   }
 
-  async function save(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function saveRecipe() {
     const parsed = recipeFormSchema.safeParse(values);
     if (!parsed.success) {
       const next: Record<string, string> = {};
@@ -282,8 +281,6 @@ export function RecipeEditor({
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (step !== recipeSteps.length - 1 || saving) return;
-    void save(event);
   }
 
   async function remove() {
@@ -768,7 +765,11 @@ export function RecipeEditor({
                   Lanjutkan
                 </Button>
               ) : (
-                <Button type="submit" disabled={saving}>
+                <Button
+                  type="button"
+                  disabled={saving}
+                  onClick={() => void saveRecipe()}
+                >
                   {saving ? 'Menyimpan…' : 'Simpan resep'}
                 </Button>
               )}

@@ -18,6 +18,7 @@ import {
   Share2,
   Wheat,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -164,16 +165,60 @@ export function AppShell({
           sidebarCollapsed ? 'items-center px-2' : 'px-3 xl:px-4',
         )}
       >
-        <Link
-          href="/dashboard"
+        <div
           className={cn(
-            'mb-5 inline-flex min-h-11 items-center',
-            sidebarCollapsed ? 'px-1' : 'px-2',
+            'mb-5 flex min-h-11 items-center',
+            sidebarCollapsed ? 'flex-col gap-2' : 'justify-between',
           )}
-          aria-label="Takaran, ke Ringkasan"
         >
-          <MkLogo height={sidebarCollapsed ? 18 : 28} />
-        </Link>
+          <Link
+            href="/dashboard"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center"
+            aria-label="Takaran, ke Ringkasan"
+          >
+            {sidebarCollapsed ? (
+              <Image
+                src="/icon.png"
+                alt=""
+                width={28}
+                height={28}
+                className="rounded-md"
+              />
+            ) : (
+              <>
+                <span className="hidden xl:inline-flex">
+                  <MkLogo height={28} />
+                </span>
+                <span className="xl:hidden">
+                  <Image
+                    src="/icon.png"
+                    alt=""
+                    width={28}
+                    height={28}
+                    className="rounded-md"
+                  />
+                </span>
+              </>
+            )}
+          </Link>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={
+              sidebarCollapsed ? 'Perlebar sidebar' : 'Ciutkan sidebar'
+            }
+            title={sidebarCollapsed ? 'Perlebar sidebar' : 'Ciutkan sidebar'}
+            className="hidden size-11 xl:inline-flex"
+            onClick={() => setSidebarCollapsed((current) => !current)}
+          >
+            {sidebarCollapsed ? (
+              <PanelLeftOpen aria-hidden="true" />
+            ) : (
+              <PanelLeftClose aria-hidden="true" />
+            )}
+          </Button>
+        </div>
         <nav
           aria-label="Navigasi dashboard"
           className={cn(
@@ -214,7 +259,10 @@ export function AppShell({
         >
           <span
             aria-hidden="true"
-            className="text-lg text-caramel-700 xl:hidden"
+            className={cn(
+              'text-lg text-caramel-700',
+              sidebarCollapsed ? 'block' : 'block xl:hidden',
+            )}
           >
             {plan === 'pro' ? '✓' : '✦'}
           </span>
@@ -275,21 +323,6 @@ export function AppShell({
             Pengaturan
           </span>
         </Link>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label={sidebarCollapsed ? 'Perlebar sidebar' : 'Ciutkan sidebar'}
-          title={sidebarCollapsed ? 'Perlebar sidebar' : 'Ciutkan sidebar'}
-          className="absolute right-2 top-5 hidden size-11 xl:inline-flex"
-          onClick={() => setSidebarCollapsed((current) => !current)}
-        >
-          {sidebarCollapsed ? (
-            <PanelLeftOpen aria-hidden="true" />
-          ) : (
-            <PanelLeftClose aria-hidden="true" />
-          )}
-        </Button>
       </aside>
 
       <div id="isi" tabIndex={-1} className="min-w-0 outline-none">
