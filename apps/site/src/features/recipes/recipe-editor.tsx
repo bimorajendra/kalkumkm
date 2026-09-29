@@ -1,10 +1,15 @@
 'use client';
 
-import { unitFactor } from '@takaran/calc';
+import {
+  CalcError,
+  type RecipeResult,
+  recalcAll,
+  unitFactor,
+} from '@takaran/calc';
 import { PRICING } from '@takaran/schema';
 import { formatRupiah } from '@takaran/ui/format';
 import Link from 'next/link';
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import {
   CommandError,
   errorMessage,
@@ -127,15 +132,23 @@ function unitsFor(
 export function RecipeEditor({
   open,
   recipe,
+  inline = false,
+  hpp,
+  batchCost,
   onOpenChange,
   onSaved,
   onDeleted,
+  onDuplicate,
 }: {
   open: boolean;
   recipe?: RecipeRow;
+  inline?: boolean;
+  hpp?: RecipeResult['hpp'];
+  batchCost?: RecipeResult['batchCost'];
   onOpenChange: (open: boolean) => void;
   onSaved?: (recipeId: string) => void;
   onDeleted?: () => void;
+  onDuplicate?: () => void;
 }) {
   const run = useRun();
   const { ingredients, recipes, plan, settings } = useSnapshot();
@@ -145,6 +158,7 @@ export function RecipeEditor({
   const [laborOpen, setLaborOpen] = useState(false);
   const [subRecipeOpen, setSubRecipeOpen] = useState(false);
   const [message, setMessage] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [showPaywallLink, setShowPaywallLink] = useState(false);
   const [saving, setSaving] = useState(false);
   const [paywall, setPaywall] = useState<'sub_recipe' | 'recipe' | null>(null);
@@ -163,6 +177,7 @@ export function RecipeEditor({
       );
       setSubRecipeOpen(Boolean(recipe?.isSubRecipe));
       setMessage('');
+      setSaveSuccess(false);
       setShowPaywallLink(false);
     }
   }, [open, recipe]);
@@ -229,6 +244,7 @@ export function RecipeEditor({
     }
     setSaving(true);
     setMessage('');
+    setSaveSuccess(false);
     setShowPaywallLink(false);
     try {
       const input = recipeInputFromForm(
@@ -245,8 +261,12 @@ export function RecipeEditor({
       onSaved?.(
         recipe?.id ?? next.recipes.find((row) => !before.has(row.id))?.id ?? '',
       );
-      onOpenChange(false);
+      if (inline) {
+        setMessage('Perubahan resep tersimpan.');
+        setSaveSuccess(true);
+      } else onOpenChange(false);
     } catch (error) {
+      setSaveSuccess(false);
       if (error instanceof CommandError) {
         if (error.code === 'PRO_REQUIRED') setPaywall('sub_recipe');
         setShowPaywallLink(error.code === 'FREE_LIMIT');
@@ -288,7 +308,7 @@ export function RecipeEditor({
     try {
       await run({ type: 'recipe.delete', id: recipe.id });
       onDeleted?.();
-      onOpenChange(false);
+      if (!inline) onOpenChange(false);
     } catch (error) {
       setMessage(errorMessage(error, recipeCopy.deleteError));
     }
@@ -308,109 +328,178 @@ export function RecipeEditor({
         (entry) => entry.refType === 'ingredient' && entry.refId === item.id,
       ),
   );
+  const preview = useMemo(() => {
+    if (!inline || !recipe) return undefined;
+    const parsed = recipeFormSchema.safeParse(values);
+    if (!parsed.success) return undefined;
+    const nextRecipe = {
+      ...recipe,
+      ...recipeInputFromForm(
+        parsed.data,
+        { targetMarginBp: settings.defaultMarginBp },
+        recipe,
+      ),
+    };
+    const nextRecipes = new Map(recipes.map((item) => [item.id, item]));
+    nextRecipes.set(recipe.id, nextRecipe);
+    const nextResults = recalcAll({
+      ingredients: new Map(ingredients.map((item) => [item.id, item])),
+      recipes: nextRecipes,
+      roundingStep: settings.roundingStep,
+    });
+    const result = nextResults.get(recipe.id);
+    return result instanceof CalcError ? undefined : result;
+  }, [inline, ingredients, recipe, recipes, settings, values]);
+  const currentHpp = preview?.hpp ?? hpp;
+  const currentBatchCost = preview?.batchCost ?? batchCost;
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="max-h-[92dvh] overflow-y-auto bg-[linear-gradient(145deg,#fff_0%,#fff_68%,#fff4eb_100%)] sm:max-w-xl"
-        onInteractOutside={(event) => {
-          const target = event.target;
-          if (
-            target instanceof Element &&
-            target.closest('[data-slot="select-content"]')
-          )
-            event.preventDefault();
-        }}
-      >
-        <DialogHeader>
-          <DialogTitle className="font-display text-3xl font-semibold">
-            {recipe ? 'Ubah resep' : 'Buat resep'}
-          </DialogTitle>
-          <DialogDescription>
-            {recipeSteps[step]?.description} Nilai tetap tersimpan saat kamu
-            kembali ke langkah sebelumnya.
-          </DialogDescription>
-        </DialogHeader>
-        <form className="grid gap-5" onSubmit={submit} noValidate>
-          <div className="grid gap-2">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-medium">
-                Langkah {step + 1} dari {recipeSteps.length}:{' '}
-                {recipeSteps[step]?.title}
-              </p>
-              <span className="text-sm text-muted-foreground">
-                {Math.round(((step + 1) / recipeSteps.length) * 100)}%
-              </span>
-            </div>
-            <div
-              role="progressbar"
-              aria-label="Progres pembuatan resep"
-              aria-valuemin={1}
-              aria-valuemax={recipeSteps.length}
-              aria-valuenow={step + 1}
-              className="h-1.5 overflow-hidden rounded-full bg-secondary"
-            >
-              <div
-                className="h-full rounded-full bg-primary transition-[width]"
-                style={{ width: `${((step + 1) / recipeSteps.length) * 100}%` }}
-              />
-            </div>
+  const form = (
+    <form className="grid gap-5" onSubmit={submit} noValidate>
+      {!inline ? (
+        <div className="grid gap-2">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-medium">
+              Langkah {step + 1} dari {recipeSteps.length}:{' '}
+              {recipeSteps[step]?.title}
+            </p>
+            <span className="text-sm text-muted-foreground">
+              {Math.round(((step + 1) / recipeSteps.length) * 100)}%
+            </span>
           </div>
+          <div
+            role="progressbar"
+            aria-label="Progres pembuatan resep"
+            aria-valuemin={1}
+            aria-valuemax={recipeSteps.length}
+            aria-valuenow={step + 1}
+            className="h-1.5 overflow-hidden rounded-full bg-secondary"
+          >
+            <div
+              className="h-full rounded-full bg-primary transition-[width]"
+              style={{ width: `${((step + 1) / recipeSteps.length) * 100}%` }}
+            />
+          </div>
+        </div>
+      ) : null}
 
-          {step === 0 ? (
-            <section
-              aria-labelledby="recipe-details-title"
-              className="grid gap-4"
-            >
-              <div>
-                <h2 id="recipe-details-title" className="font-semibold">
-                  Detail resep
-                </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Mulai dari nama dan jumlah hasil satu adonan.
-                </p>
-              </div>
-              <Field id="recipe-name" label="Nama resep" error={errors.name}>
-                <Input
-                  {...fieldProps('recipe-name', errors.name)}
-                  maxLength={60}
-                  value={values.name}
-                  onChange={(event) => update('name', event.target.value)}
-                />
-              </Field>
-              <Field
-                id="recipe-yield"
-                label="Hasil per adonan (porsi)"
-                error={errors.yieldPortions}
+      {inline ? (
+        <header className="grid gap-3 sm:flex sm:items-center sm:justify-between">
+          <div className="grid gap-1.5">
+            <label className="sr-only" htmlFor="recipe-name-inline">
+              Nama resep
+            </label>
+            <Input
+              {...fieldProps('recipe-name-inline', errors.name)}
+              className="h-auto border-0 bg-transparent px-0 font-display text-3xl font-semibold shadow-none focus-visible:ring-0 sm:text-4xl"
+              maxLength={60}
+              value={values.name}
+              onChange={(event) => update('name', event.target.value)}
+            />
+            {errors.name ? (
+              <p
+                id="recipe-name-inline-error"
+                role="alert"
+                className="text-sm text-destructive"
               >
-                <Input
-                  {...fieldProps('recipe-yield', errors.yieldPortions)}
-                  inputMode="numeric"
-                  value={values.yieldPortions}
-                  onChange={(event) =>
-                    update('yieldPortions', event.target.value)
-                  }
-                />
-              </Field>
-            </section>
-          ) : null}
-
-          {step === 1 ? (
-            <fieldset className="grid gap-3">
-              <legend className="mb-1 text-sm font-medium">
-                Bahan dan takaran
-              </legend>
-              <p className="text-sm text-muted-foreground">
-                Pilih bahan yang sudah kamu simpan. Takaran awal mengikuti
-                satuan beli dan masih bisa diubah.
+                {errors.name}
               </p>
+            ) : null}
+          </div>
+          <div className="flex flex-wrap gap-2 sm:justify-end">
+            {onDuplicate ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl"
+                onClick={onDuplicate}
+              >
+                Duplikat
+              </Button>
+            ) : null}
+            <Button asChild variant="outline" className="rounded-xl">
+              <Link
+                href={`/dashboard/hitung?resep=${encodeURIComponent(recipe?.id ?? '')}`}
+              >
+                Hitung harga
+              </Link>
+            </Button>
+            <Button
+              type="button"
+              className="rounded-xl"
+              disabled={saving}
+              onClick={() => void saveRecipe()}
+            >
+              {saving ? 'Menyimpan…' : 'Simpan'}
+            </Button>
+          </div>
+        </header>
+      ) : null}
+
+      {!inline && step === 0 ? (
+        <section aria-labelledby="recipe-details-title" className="grid gap-4">
+          <div>
+            <h2 id="recipe-details-title" className="font-semibold">
+              Detail resep
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Mulai dari nama dan jumlah hasil satu adonan.
+            </p>
+          </div>
+          <Field id="recipe-name" label="Nama resep" error={errors.name}>
+            <Input
+              {...fieldProps('recipe-name', errors.name)}
+              maxLength={60}
+              value={values.name}
+              onChange={(event) => update('name', event.target.value)}
+            />
+          </Field>
+          <Field
+            id="recipe-yield"
+            label="Hasil per adonan (porsi)"
+            error={errors.yieldPortions}
+          >
+            <Input
+              {...fieldProps('recipe-yield', errors.yieldPortions)}
+              inputMode="numeric"
+              value={values.yieldPortions}
+              onChange={(event) => update('yieldPortions', event.target.value)}
+            />
+          </Field>
+        </section>
+      ) : null}
+
+      <div
+        className={
+          inline
+            ? 'grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.9fr)]'
+            : 'grid gap-5'
+        }
+      >
+        <div className="grid content-start gap-5">
+          {inline || step === 1 ? (
+            <fieldset
+              className={
+                inline
+                  ? 'grid gap-3 rounded-2xl border border-line bg-surface p-4 sm:p-6'
+                  : 'grid gap-3'
+              }
+            >
+              <legend className="mb-1 text-lg font-semibold">
+                {inline ? 'Bahan per adonan' : 'Bahan dan takaran'}
+              </legend>
+              {!inline ? (
+                <p className="text-sm text-muted-foreground">
+                  Pilih bahan yang sudah kamu simpan. Takaran awal mengikuti
+                  satuan beli dan masih bisa diubah.
+                </p>
+              ) : null}
               {errors.items ? (
                 <p role="alert" className="text-sm text-destructive">
                   {errors.items}
                 </p>
               ) : null}
               {values.items.length > 0 ? (
-                <ul className="grid gap-3">
+                <ul className="grid divide-y divide-line">
                   {values.items.map((item, index) => {
                     const ingredient =
                       item.refType === 'ingredient'
@@ -427,27 +516,11 @@ export function RecipeEditor({
                     return (
                       <li
                         key={`${item.refType}-${item.refId}`}
-                        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_6rem_6rem_auto]"
+                        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 py-3 sm:grid-cols-[minmax(0,1fr)_7rem_6rem_auto]"
                       >
                         <span className="min-w-0 font-medium">
                           {name ?? 'Bahan ini sudah dihapus'}
                         </span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="col-start-2 row-start-1 sm:col-start-4"
-                          onClick={() =>
-                            setValues((current) => ({
-                              ...current,
-                              items: current.items.filter(
-                                (_, i) => i !== index,
-                              ),
-                            }))
-                          }
-                        >
-                          Hapus
-                        </Button>
                         {name ? (
                           <div className="col-span-2 grid grid-cols-[minmax(0,1fr)_minmax(5.5rem,auto)] gap-2 sm:col-span-2 sm:col-start-2 sm:row-start-1">
                             <Input
@@ -491,6 +564,22 @@ export function RecipeEditor({
                             Hapus baris ini atau pilih bahan lain.
                           </span>
                         )}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="col-start-2 row-start-1 sm:col-start-4"
+                          onClick={() =>
+                            setValues((current) => ({
+                              ...current,
+                              items: current.items.filter(
+                                (_, i) => i !== index,
+                              ),
+                            }))
+                          }
+                        >
+                          Hapus
+                        </Button>
                         {error && name ? (
                           <p
                             role="alert"
@@ -505,13 +594,19 @@ export function RecipeEditor({
                 </ul>
               ) : null}
               {ingredients.length > 0 || subRecipes.length > 0 ? (
-                <Field id="recipe-add-item" label="Tambah bahan atau sub-resep">
+                <Field
+                  id={inline ? 'recipe-add-item-inline' : 'recipe-add-item'}
+                  label="Tambah bahan atau sub-resep"
+                >
                   <Select
                     key={values.items.length}
                     value=""
                     onValueChange={addItem}
                   >
-                    <SelectTrigger id="recipe-add-item" className="w-full">
+                    <SelectTrigger
+                      id={inline ? 'recipe-add-item-inline' : 'recipe-add-item'}
+                      className="w-full"
+                    >
                       <SelectValue placeholder="Pilih bahan atau sub-resep" />
                     </SelectTrigger>
                     <SelectContent>
@@ -547,23 +642,56 @@ export function RecipeEditor({
                   {recipeCopy.noIngredients}
                 </p>
               )}
+              {inline && currentBatchCost ? (
+                <p className="border-t border-line pt-3 text-right text-sm">
+                  Total biaya adonan{' '}
+                  <strong className="ml-2 tabular-nums">
+                    {formatRupiah(currentBatchCost)}
+                  </strong>
+                </p>
+              ) : null}
             </fieldset>
           ) : null}
+        </div>
 
-          {step === 2 ? (
+        <div className="grid content-start gap-5">
+          {inline || step === 2 ? (
             <section
               aria-labelledby="recipe-costs-title"
-              className="grid gap-4"
+              className={
+                inline
+                  ? 'grid gap-4 rounded-2xl border border-line bg-surface p-4 sm:p-6'
+                  : 'grid gap-4'
+              }
             >
               <div>
-                <h2 id="recipe-costs-title" className="font-semibold">
-                  Biaya per adonan
+                <h2 id="recipe-costs-title" className="text-lg font-semibold">
+                  {inline ? 'Biaya lain' : 'Biaya per adonan'}
                 </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Kosongkan biaya yang belum ingin dihitung. Nilai awalnya nol.
-                </p>
+                {!inline ? (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Kosongkan biaya yang belum ingin dihitung. Nilai awalnya
+                    nol.
+                  </p>
+                ) : null}
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
+              {inline ? (
+                <Field
+                  id="recipe-yield-inline"
+                  label="Hasil per adonan (porsi)"
+                  error={errors.yieldPortions}
+                >
+                  <Input
+                    {...fieldProps('recipe-yield-inline', errors.yieldPortions)}
+                    inputMode="numeric"
+                    value={values.yieldPortions}
+                    onChange={(event) =>
+                      update('yieldPortions', event.target.value)
+                    }
+                  />
+                </Field>
+              ) : null}
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
                 <Field
                   id="recipe-packaging"
                   label="Kemasan per porsi (Rp)"
@@ -596,7 +724,6 @@ export function RecipeEditor({
                   />
                 </Field>
               </div>
-
               <details
                 open={laborOpen}
                 onToggle={(event) => setLaborOpen(event.currentTarget.open)}
@@ -648,7 +775,6 @@ export function RecipeEditor({
                   </div>
                 </div>
               </details>
-
               <details
                 open={subRecipeOpen}
                 onToggle={(event) => setSubRecipeOpen(event.currentTarget.open)}
@@ -711,71 +837,138 @@ export function RecipeEditor({
                   ) : null}
                 </div>
               </details>
+              {inline ? (
+                <div className="flex items-center justify-between gap-3 rounded-xl bg-secondary p-4">
+                  <span className="font-medium">Modal per porsi</span>
+                  <strong className="font-display text-2xl font-bold tabular-nums">
+                    {currentHpp ? formatRupiah(currentHpp) : 'Menghitung…'}
+                  </strong>
+                </div>
+              ) : null}
             </section>
           ) : null}
+        </div>
+      </div>
 
-          {message ? (
-            <p role="alert" className="text-sm text-destructive">
-              {message}
-              {showPaywallLink ? (
-                <>
-                  {' '}
-                  <Link
-                    href="/dashboard/beli"
-                    className="underline underline-offset-4"
-                  >
-                    Takaran Pro, {formatRupiah(PRICING.pro.idr)} sekali bayar
-                  </Link>
-                </>
-              ) : null}
-            </p>
-          ) : null}
-          <DialogFooter className="gap-2 sm:justify-between">
-            {recipe ? (
-              <Button
-                type="button"
-                variant="ghost"
-                className="text-destructive"
-                onClick={remove}
+      {message ? (
+        <p
+          role={saveSuccess ? 'status' : 'alert'}
+          className={
+            saveSuccess
+              ? 'text-sm text-muted-foreground'
+              : 'text-sm text-destructive'
+          }
+        >
+          {message}
+          {showPaywallLink ? (
+            <>
+              {' '}
+              <Link
+                href="/dashboard/beli"
+                className="underline underline-offset-4"
               >
-                Hapus resep
-              </Button>
-            ) : (
-              <span />
-            )}
-            <div className="flex flex-wrap justify-end gap-2">
-              {step > 0 ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setStep((current) => Math.max(0, current - 1))}
-                >
-                  Kembali
-                </Button>
-              ) : null}
+                Takaran Pro, {formatRupiah(PRICING.pro.idr)} sekali bayar
+              </Link>
+            </>
+          ) : null}
+        </p>
+      ) : null}
+      {inline ? (
+        <div className="flex justify-start">
+          <Button
+            type="button"
+            variant="ghost"
+            className="text-destructive"
+            onClick={remove}
+          >
+            Hapus resep
+          </Button>
+        </div>
+      ) : (
+        <DialogFooter className="gap-2 sm:justify-between">
+          {recipe ? (
+            <Button
+              type="button"
+              variant="ghost"
+              className="text-destructive"
+              onClick={remove}
+            >
+              Hapus resep
+            </Button>
+          ) : (
+            <span />
+          )}
+          <div className="flex flex-wrap justify-end gap-2">
+            {step > 0 ? (
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
+                onClick={() => setStep((current) => Math.max(0, current - 1))}
               >
-                Batal
+                Kembali
               </Button>
-              {step < recipeSteps.length - 1 ? (
-                <Button type="button" onClick={continueStep}>
-                  Lanjutkan
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  disabled={saving}
-                  onClick={() => void saveRecipe()}
-                >
-                  {saving ? 'Menyimpan…' : 'Simpan resep'}
-                </Button>
-              )}
-            </div>
-          </DialogFooter>
-        </form>
+            ) : null}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              Batal
+            </Button>
+            {step < recipeSteps.length - 1 ? (
+              <Button type="button" onClick={continueStep}>
+                Lanjutkan
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                disabled={saving}
+                onClick={() => void saveRecipe()}
+              >
+                {saving ? 'Menyimpan…' : 'Simpan resep'}
+              </Button>
+            )}
+          </div>
+        </DialogFooter>
+      )}
+    </form>
+  );
+
+  if (inline)
+    return (
+      <section className="grid gap-5">
+        {form}
+        <PaywallDialog
+          open={paywall !== null}
+          trigger={paywall ?? 'sub_recipe'}
+          onClose={() => setPaywall(null)}
+        />
+      </section>
+    );
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="max-h-[92dvh] overflow-y-auto bg-[linear-gradient(145deg,#fff_0%,#fff_68%,#fff4eb_100%)] sm:max-w-xl"
+        onInteractOutside={(event) => {
+          const target = event.target;
+          if (
+            target instanceof Element &&
+            target.closest('[data-slot="select-content"]')
+          )
+            event.preventDefault();
+        }}
+      >
+        <DialogHeader>
+          <DialogTitle className="font-display text-3xl font-semibold">
+            {recipe ? 'Ubah resep' : 'Buat resep'}
+          </DialogTitle>
+          <DialogDescription>
+            {recipeSteps[step]?.description} Nilai tetap tersimpan saat kamu
+            kembali ke langkah sebelumnya.
+          </DialogDescription>
+        </DialogHeader>
+        {form}
         <PaywallDialog
           open={paywall !== null}
           trigger={paywall ?? 'sub_recipe'}
