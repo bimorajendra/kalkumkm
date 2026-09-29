@@ -154,7 +154,11 @@ export function ResepDetailScreen({ id }: { id: string }) {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button asChild size="lg" className="rounded-full">
-              <Link href="/dashboard/hitung">Hitung harga</Link>
+              <Link
+                href={`/dashboard/hitung?resep=${encodeURIComponent(recipe.id)}`}
+              >
+                Hitung harga
+              </Link>
             </Button>
             <Button
               type="button"

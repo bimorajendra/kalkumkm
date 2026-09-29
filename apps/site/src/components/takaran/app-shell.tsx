@@ -145,7 +145,7 @@ export function AppShell({
   return (
     <div
       className={cn(
-        'min-h-dvh bg-background lg:grid',
+        'min-h-dvh bg-card lg:grid',
         sidebarCollapsed
           ? 'lg:grid-cols-[80px_minmax(0,1fr)]'
           : 'lg:grid-cols-[80px_minmax(0,1fr)] xl:grid-cols-[248px_minmax(0,1fr)]',
@@ -293,7 +293,7 @@ export function AppShell({
       </aside>
 
       <div id="isi" tabIndex={-1} className="min-w-0 outline-none">
-        <header className="sticky top-0 z-30 border-b border-line bg-background/95 px-4 py-2 backdrop-blur lg:px-8">
+        <header className="sticky top-0 z-30 border-b border-line bg-card/95 px-4 py-2 backdrop-blur lg:px-8">
           <div className="mx-auto flex min-h-11 max-w-[1120px] items-center justify-between gap-3">
             <Link
               href="/dashboard"

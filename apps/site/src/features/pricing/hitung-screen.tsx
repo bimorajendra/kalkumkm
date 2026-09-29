@@ -31,16 +31,20 @@ import { MarginAlarm } from '@/features/margin-alarm/margin-alarm';
 import { CalculatorResult } from './calculator-result';
 import { pricingCopy } from './copy';
 import { CurrentPriceInput } from './current-price-input';
-import { RecipePicker } from './recipe-picker';
 import { SliderPanel } from './slider-panel';
 import { useCalculator } from './use-calculator';
 
-export function HitungScreen() {
+export function HitungScreen({
+  initialRecipeId,
+  fromPicker = false,
+}: {
+  initialRecipeId: string;
+  fromPicker?: boolean;
+}) {
   const { snapshot, results, error } = useRecipeResults();
   const run = useRun();
   const { recipes, settings } = snapshot;
-  const recipe =
-    recipes.find((item) => item.id === settings.lastRecipeId) ?? recipes[0];
+  const recipe = recipes.find((item) => item.id === initialRecipeId);
 
   useEffect(() => {
     if (recipe && recipe.id !== settings.lastRecipeId)
@@ -62,14 +66,25 @@ export function HitungScreen() {
     return (
       <Page>
         <EmptyState
-          title="Mulai dari satu resep."
-          description="Pakai contoh brownies atau buat sendiri."
+          title={
+            recipes.length
+              ? 'Resep ini tidak ditemukan.'
+              : 'Belum ada resep untuk dihitung.'
+          }
+          description={
+            recipes.length
+              ? 'Pilih resep dari daftar untuk melihat hitungan HPP-nya.'
+              : 'Buat resep terlebih dahulu agar HPP bisa dihitung.'
+          }
         >
           <Button asChild>
-            <Link href="/dashboard/resep">Lihat resep</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/dashboard/bahan">Tambah bahan</Link>
+            <Link href={fromPicker ? '/dashboard/hitung' : '/dashboard/resep'}>
+              {fromPicker
+                ? 'Kembali ke pilih resep'
+                : recipes.length
+                  ? 'Kembali ke resep'
+                  : 'Buat resep'}
+            </Link>
           </Button>
         </EmptyState>
       </Page>
@@ -79,9 +94,7 @@ export function HitungScreen() {
       snapshot={snapshot}
       results={results}
       recipe={recipe}
-      onSelect={(next) =>
-        void run({ type: 'settings.update', values: { lastRecipeId: next.id } })
-      }
+      fromPicker={fromPicker}
     />
   );
 }
@@ -90,15 +103,15 @@ function CalculatorScreen({
   snapshot,
   results,
   recipe,
-  onSelect,
+  fromPicker,
 }: {
   snapshot: Snapshot;
   results: Results;
   recipe: RecipeRow;
-  onSelect: (recipe: RecipeRow) => void;
+  fromPicker: boolean;
 }) {
   const run = useRun();
-  const { channels, recipes, settings } = snapshot;
+  const { channels, settings } = snapshot;
   const { roundingStep } = settings;
   const calculator = useCalculator(recipe);
   const [selectedChannelId, setSelectedChannelId] = useState('');
@@ -144,13 +157,6 @@ function CalculatorScreen({
             : pricingCopy.genericError;
     return (
       <Page className="grid gap-4">
-        <div>
-          <RecipePicker
-            onSelect={onSelect}
-            recipes={recipes}
-            selectedId={recipe.id}
-          />
-        </div>
         <section role="alert" className="grid justify-items-start gap-3">
           <h1 className="font-display text-3xl font-semibold">
             Belum bisa menghitung resep ini
@@ -260,15 +266,16 @@ function CalculatorScreen({
   return (
     <Page className="grid gap-6 pb-56 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:gap-8 lg:pb-12">
       <div className="grid content-start gap-5">
+        <Link
+          href={
+            fromPicker ? '/dashboard/hitung' : `/dashboard/resep/${recipe.id}`
+          }
+          className="inline-flex min-h-11 w-fit items-center font-semibold text-link underline-offset-4 hover:underline"
+        >
+          {fromPicker ? 'Kembali ke pilih resep' : 'Kembali ke detail resep'}
+        </Link>
         <MarginAlarm />
         <section aria-labelledby="calculator-title" className="grid gap-5">
-          <div>
-            <RecipePicker
-              onSelect={onSelect}
-              recipes={recipes}
-              selectedId={recipe.id}
-            />
-          </div>
           <h1
             id="calculator-title"
             className="font-display text-[34px] font-bold leading-[38px] lg:text-[44px] lg:leading-[48px]"

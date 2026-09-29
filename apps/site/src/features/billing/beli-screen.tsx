@@ -87,7 +87,7 @@ export function BeliScreen() {
         <PageTitle>Takaran Pro aktif</PageTitle>
         <p>Terima kasih. Semua fitur Pro di akunmu sudah terbuka.</p>
         <Button asChild className="w-fit">
-          <Link href="/dashboard/hitung">Kembali ke kalkulator</Link>
+          <Link href="/dashboard/resep">Kembali ke resep</Link>
         </Button>
       </Page>
     );

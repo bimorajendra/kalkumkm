@@ -51,7 +51,7 @@
   --radius-md: 8px;
   --radius-lg: 10px;
   --radius-xl: 20px;
-  --font-display: Georgia, "Times New Roman", serif;
+  --font-display: var(--font-jakarta), sans-serif;
   --font-ui: var(--font-jakarta), sans-serif;
   --font-sans: var(--font-jakarta), sans-serif;
 }

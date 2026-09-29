@@ -259,6 +259,7 @@ export function RecipeEditor({
   }
 
   function continueStep() {
+    if (step >= recipeSteps.length - 1 || saving) return;
     const fields = step === 0 ? ['name', 'yieldPortions'] : ['items'];
     const parsed = recipeFormSchema.safeParse(values);
     const nextErrors: Record<string, string> = {};
@@ -280,11 +281,8 @@ export function RecipeEditor({
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
-    if (step < 2) {
-      event.preventDefault();
-      continueStep();
-      return;
-    }
+    event.preventDefault();
+    if (step !== recipeSteps.length - 1 || saving) return;
     void save(event);
   }
 
@@ -316,7 +314,17 @@ export function RecipeEditor({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92dvh] overflow-y-auto sm:max-w-xl">
+      <DialogContent
+        className="max-h-[92dvh] overflow-y-auto bg-[linear-gradient(145deg,#fff_0%,#fff_68%,#fff4eb_100%)] sm:max-w-xl"
+        onInteractOutside={(event) => {
+          const target = event.target;
+          if (
+            target instanceof Element &&
+            target.closest('[data-slot="select-content"]')
+          )
+            event.preventDefault();
+        }}
+      >
         <DialogHeader>
           <DialogTitle className="font-display text-3xl font-semibold">
             {recipe ? 'Ubah resep' : 'Buat resep'}
@@ -743,7 +751,7 @@ export function RecipeEditor({
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setStep((current) => current - 1)}
+                  onClick={() => setStep((current) => Math.max(0, current - 1))}
                 >
                   Kembali
                 </Button>

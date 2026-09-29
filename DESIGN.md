@@ -1,8 +1,8 @@
 # DESIGN.md: Takaran (nama kerja)
 
-> **Arah pemilik (27 September 2026):** palet hangat dari referensi Kindly dipakai di seluruh halaman dan tema dikunci terang. Landing memakai bidang penuh (bukan bingkai bundar): latar putih polos, dengan gradasi hangat lembut (caramel ke peach ke putih) hanya di balik navbar dan hero, memudar sebelum section berikutnya. Judul serif sistem. Layout mengikuti konten Takaran tanpa menyalin elemen finance yang tidak relevan. Perubahan ini menggantikan pengecualian tipografi di `docs/CHANGE-002-visual-identity-flat.md`; ilustrasi data tetap memakai grafik yang sudah berfungsi.
+> **Arah pemilik (27 September 2026):** palet hangat dari referensi Kindly dipakai di seluruh halaman dan tema dikunci terang. Landing memakai bidang penuh (bukan bingkai bundar): latar putih polos, dengan gradasi hangat lembut (caramel ke peach ke putih) hanya di balik navbar dan hero, memudar sebelum section berikutnya. Judul Plus Jakarta Sans yang sederhana. Layout mengikuti konten Takaran tanpa menyalin elemen finance yang tidak relevan. Perubahan ini menggantikan pengecualian tipografi di `docs/CHANGE-002-visual-identity-flat.md`; ilustrasi data tetap memakai grafik yang sudah berfungsi.
 > **Susulan (27 September 2026, lanjutan):** bingkai putih membulat di atas latar aprikot (dipasang lebih dulu untuk meniru bentuk mockup di tangkapan layar referensi) dibatalkan pemilik: bentuk kartu-di-atas-latar itu tidak diperlukan untuk halaman sungguhan (bukan mockup), dan latar aprikot polos di sekitarnya dinilai terlalu sepi. Baris di §9.1 yang menyebut "bingkai" **tidak berlaku lagi**; landing sekarang bidang penuh (latar putih), dengan gradasi hangat lembut hanya di balik navbar dan hero sebagai aksen.
-> **Arah dashboard terbaru (28 September 2026):** tangkapan layar desktop Ringkasan, Bahan, Resep, Ubah resep, dan Daftar harga dari pemilik menjadi acuan untuk seluruh halaman aplikasi yang sudah login. Arah ini menggantikan komposisi aplikasi lama di §9.1, §9.2, §10.1–§10.4; token warna hangat, tipografi, aturan aksesibilitas, dan alur tiga bagian editor resep tetap berlaku. Landing dan halaman marketing tetap mengikuti arahan tersendiri di §10.5.
+> **Arah dashboard terbaru (29 September 2026):** tangkapan layar desktop Ringkasan, Bahan, Resep, Ubah resep, dan Daftar harga dari pemilik menjadi acuan untuk seluruh halaman aplikasi yang sudah login. Arah ini menggantikan komposisi aplikasi lama di §9.1, §9.2, §10.1–§10.5. Kalkulator dimulai dari pilihan resep, dan popup editor tetap tiga langkah dengan latar putih bersemburat peach. Landing dan halaman marketing tetap mengikuti arahan tersendiri di §10.8.
 > Arah visual untuk aplikasi kalkulator HPP dan landing page-nya. File ini adalah **data arah desain** yang dibaca bersama `antislop.md` (filter). `antislop.md` menyaring slop; file ini memberi karakter.
 > Kebutuhan fungsional ada di `PRD.md`. Jika keduanya bertentangan, `PRD.md` yang menang untuk fungsi, file ini yang menang untuk tampilan.
 > Status: Draf v0.2, 25 September 2026.
@@ -52,7 +52,7 @@ Dua ikon baru masuk daftar di bagian 7 karena dipakai section-section ini: `wall
 
 | Dial | Nilai | Artinya di produk ini |
 |---|---|---|
-| ENERGY | 2 | Tenang dan rapi, dengan satu momen yang "berbunyi": angka serif besar dan tumpukan isometrik di kartu hasil (kartu sendiri putih; oranye hanya di kartu demo landing dan aksen teks/lapisan). Bukan halaman eksperimental. |
+| ENERGY | 2 | Tenang dan rapi, dengan satu momen yang "berbunyi": angka besar Plus Jakarta Sans tebal dan tumpukan isometrik di kartu hasil (kartu sendiri putih; oranye hanya di kartu demo landing dan aksen teks/lapisan). Bukan halaman eksperimental. |
 | RHYTHM | 2 | Layar aplikasi konsisten (pengguna harus cepat terbiasa). Landing page punya beberapa jeda: satu section penuh warna, satu section tabel, satu section angka besar. |
 | MOTION | 2 | Gerak hanya untuk menunjukkan sebab-akibat: angka berganti saat slider digeser, lapisan isometrik naik-turun saat harga bahan berubah. Tidak ada animasi masuk berulang. |
 
@@ -168,20 +168,20 @@ Tema terang dikunci untuk semua halaman agar latar krem, panel putih-peach, dan 
 
 ## 5. Tipografi
 
-Judul dan angka besar memakai serif sistem yang tersedia; teks UI memakai Plus Jakarta Sans lokal. Ini mengikuti referensi visual tanpa mengunduh font baru.
+Semua teks, judul, dan angka besar memakai Plus Jakarta Sans lokal. Bobot semibold dan bold memberi hierarki tanpa serif dekoratif atau font tambahan.
 
 | Peran | Font | Alasan |
 |---|---|---|
-| Display: judul, angka hasil besar | **Georgia**, dengan fallback serif sistem | Memberi karakter buku resep pada judul sesuai referensi, tanpa menambah font eksternal |
+| Display: judul, angka hasil besar | **Plus Jakarta Sans**, 600/700 | Konsisten dengan landing page dan tetap jelas dibaca tanpa serif dekoratif |
 | UI: teks, label, tabel, tombol | **Plus Jakarta Sans** (font lokal), 400/500/600/700 | Dirancang untuk Jakarta, terasa lokal, jelas di ukuran kecil di layar HP. Wajib cek dukungan `tnum`; jika tidak tersedia, kolom angka di tabel memakai `Inter` dengan `tabular-nums` |
 
 ### Skala
 
 | Token | Ukuran / tinggi baris | Font | Dipakai untuk |
 |---|---|---|---|
-| `display-xl` | 64/64 (desktop), 44/46 (HP) | Georgia atau serif sistem | Judul hero landing |
-| `display-num` | 72/72 (desktop), 52/54 (HP) | Georgia atau serif sistem | Harga jual disarankan di kartu hasil |
-| `display-l` | 44/48, HP 34/38 | Georgia atau serif sistem | Judul layar ("Hitung untung brownies") |
+| `display-xl` | 64/64 (desktop), 44/46 (HP) | Plus Jakarta Sans, 700 | Judul hero landing |
+| `display-num` | 72/72 (desktop), 52/54 (HP) | Plus Jakarta Sans, 700 | Harga jual disarankan di kartu hasil |
+| `display-l` | 44/48, HP 34/38 | Plus Jakarta Sans, 600/700 | Judul layar ("Hitung untung brownies") |
 | `title` | 20/28, 600 | Plus Jakarta Sans | Judul panel ("Target untung", "Saluran jual") |
 | `body` | 16/24, 400 | Plus Jakarta Sans | Teks umum. Minimum 16 px di input agar HP tidak zoom |
 | `label` | 14/20, 500 | Plus Jakarta Sans | Label slider, satuan |
@@ -190,7 +190,7 @@ Judul dan angka besar memakai serif sistem yang tersedia; teks UI memakai Plus J
 Aturan:
 - Tidak ada label huruf kapital dengan jarak huruf lebar (R-06). Label "DETAILS:" di referensi A diganti kalimat biasa ("Rincian biaya per potong").
 - Angka rupiah selalu format Indonesia: `Rp 5.000`, `41,5%`. Simbol `Rp` di angka besar memakai ukuran 50% dari angka.
-- Judul serif memakai `letter-spacing: -0.01em`; teks UI tanpa pengaturan jarak huruf.
+- Judul memakai Plus Jakarta Sans semibold atau bold dengan `letter-spacing: -0.01em`; teks UI tanpa pengaturan jarak huruf.
 
 ---
 
@@ -276,7 +276,7 @@ Diadaptasi dari kartu biru referensi A; gradasi oranye referensi B dipakai di ka
 ┌───────────────────────────────────────┐
 │ [chip] Brownies · 16 potong            │  ← tab kecil menempel di atas kartu
 │                                        │
-│  Rp 5.000                              │  ← display-num, serif
+│  Rp 5.000                              │  ← display-num, Plus Jakarta Sans
 │  harga jual per potong · Langsung      │
 │                                        │
 │  ┌──────────────────────────────────┐  │
@@ -319,7 +319,7 @@ Diadaptasi dari kartu biru referensi A; gradasi oranye referensi B dipakai di ka
 Fokus keyboard semua tombol: cincin 2 px `--caramel-600` dengan jarak 2 px. `outline: none` tanpa pengganti dilarang (R-32).
 
 ### 9.10 Gambar daftar harga (untuk dibagikan)
-- Ukuran 1080×1920 dan 1080×1080. Latar `--bg`, judul serif nama usaha pengguna, daftar menu dengan harga, satu tumpukan isometrik kecil sebagai motif sudut.
+- Ukuran 1080×1920 dan 1080×1080. Latar `--bg`, judul Plus Jakarta Sans nama usaha pengguna, daftar menu dengan harga, satu tumpukan isometrik kecil sebagai motif sudut.
 - Versi gratis: baris kecil di bawah "dihitung dengan Takaran" (13 px setara, `--ink-muted`). Versi Pro: tanpa baris itu.
 - Tidak menampilkan HPP atau margin (data internal penjual).
 
@@ -358,8 +358,8 @@ Fokus keyboard semua tombol: cincin 2 px `--caramel-600` dengan jarak 2 px. `out
 ### 10.2 Ringkasan usaha
 - Judul menyapa pengguna dengan nama depan dan tanggal lokal Jakarta. CTA utama "Hitung resep baru" berada di kanan pada desktop dan turun di bawah judul pada layar sempit.
 - Empat kartu menampilkan rata-rata margin, jumlah menu di bawah target, bahan yang benar-benar naik harga dalam 30 hari, dan untung per jam terbaik. Perubahan margin hanya dibandingkan bila histori memuat titik pembanding; perubahan harga diambil dari riwayat milik akun. Nilai tanpa sumber ditampilkan sebagai belum tersedia.
-- Bagian analitik membagi grafik margin bulanan dan komposisi harga resep 7:5. Filter resep memperbarui grafik/donut; donut merinci bahan, energi, tenaga, kemasan, dan untung dari hasil `packages/calc`.
-- Tabel "Menu kamu" menampilkan hasil per adonan, HPP, harga jual, margin beserta penanda target, dan status teks. Panel "Perlu kamu cek" hanya berisi resep yang gagal dihitung atau berada di bawah target, disertai aksi harga saran yang menyimpan nilai lewat perintah yang sudah ada.
+- Bagian analitik menampilkan grafik margin bulanan selebar konten. Filter resep memperbarui grafik.
+- Tabel "Menu kamu" menampilkan hasil per adonan, HPP, harga jual, margin beserta penanda target, dan status teks. Kanvas dan kartu dashboard memakai latar putih seperti sidebar; aksen peach hanya digunakan pada elemen penanda yang relevan. Di kolom kanan tabel, "Isi harga jual" berdiri sendiri dan "Perlu kamu cek" berada sebagai kartu terpisah di bawahnya. Panel ini hanya berisi resep yang gagal dihitung atau berada di bawah target, disertai aksi harga saran yang menyimpan nilai lewat perintah yang sudah ada.
 - Untuk akun tanpa data, pertahankan kartu ringkasan nol/keadaan belum tersedia dan CTA membuat resep; jangan mengisi angka contoh dari mockup.
 - Alasan: pemilik usaha dapat melihat kesehatan harga dan tindakan berikutnya dalam satu layar tanpa laporan yang mengarang tren.
 
@@ -371,29 +371,35 @@ Fokus keyboard semua tombol: cincin 2 px `--caramel-600` dengan jarak 2 px. `out
 
 ### 10.4 Resep dan editor
 - Header menampilkan jumlah resep dibanding batas paket (misalnya "3 dari 3 resep gratis") dan tombol "Buat resep". Filter Semua, Di bawah target, dan Di atas target memakai nilai margin aktual.
-- Resep ditampilkan sebagai baris tabel: logo tumpukan Takaran, nama dan hasil per adonan, modal, harga jual atau saran, margin dengan garis target, status teks, dan chevron menuju detail. Pada HP, angka penting diringkas dalam baris tanpa overflow horizontal.
+- Resep ditampilkan sebagai baris tabel: ikon yang sama dengan favicon Takaran, nama dan hasil per adonan, modal, harga jual atau saran, margin dengan garis target, status teks, dan chevron menuju detail. Pada HP, angka penting diringkas dalam baris tanpa overflow horizontal.
 - Editor tetap tiga langkah agar banyak field tidak muncul sekaligus: Detail resep, Bahan, lalu Biaya tambahan. Gunakan kartu putih, garis tipis, input beradius 10 px, progres karamel, dan tombol kapsul; validasi langkah, data formulir, batas Pro, hapus, dan simpan tidak berubah.
 - Detail resep menampilkan tombol Hitung harga, Ubah, dan Duplikat; kartu ringkasan HPP/harga/margin, rincian komponen, serta modal editor yang sama.
 - Alasan: tabel mempertahankan kepadatan data desktop, sedangkan langkah editor mengurangi beban saat menambahkan resep.
 
-### 10.5 Penawaran pesanan custom
+### 10.5 Alur Hitung HPP
+- Menu Hitung HPP membuka halaman pemilih resep. Memilih resep membuka layar hitung detail untuk resep tersebut. Tombol "Hitung harga" pada detail resep membuka layar hitung detail secara langsung.
+- Layar kalkulator menampilkan nama resep yang sedang dibuka tanpa dropdown untuk berpindah resep. Tautan kembali menuju pemilih resep bila kalkulator dibuka dari menu Hitung HPP, atau menuju detail resep bila dibuka dari halaman Resep.
+- Akun tanpa resep diarahkan untuk membuat resep atau menambahkan bahan terlebih dahulu.
+- Alasan: jalur dari menu membantu pengguna memilih resep lebih dulu, sementara jalur dari detail resep mempertahankan konteks pilihan mereka.
+
+### 10.6 Penawaran pesanan custom
 Kiri: resep dasar + daftar opsi (checkbox) dengan harga tambahan. Kanan: pratinjau gambar penawaran dengan nama usaha, rincian, dan total. Tombol "Unduh gambar penawaran".
 
-### 10.6 Daftar harga
+### 10.7 Daftar harga
 - Panel kiri berisi nama usaha, pilihan menu beserta harga, dan pilihan Story 9:16/Feed 1:1 sebagai kontrol tersegmentasi. Tombol Bagikan dan Unduh berada di bawah form bila kedua aksi didukung browser.
 - Panel kanan berwarna `--surface-soft` menjadi bidang pratinjau; kanvas Story berukuran hingga 432 px agar tetap terbaca tanpa menutupi form. Gambar memakai desain §9.10 dan selalu memakai data resep serta nama usaha aktual.
 - Alasan: form dan hasil terlihat bersamaan sehingga perubahan pilihan cepat diperiksa sebelum dibagikan.
 
-### 10.7 Landing page (mengikuti referensi B, disaring)
+### 10.8 Landing page (mengikuti referensi B, disaring)
 
 Urutan mengikuti cerita masalah pengguna, bukan template (R-05, C-3). Semua tautan navbar menuju section yang ada di bawah.
 
 | # | Section | Isi | Komposisi |
 |---|---|---|---|
 | 1 | Navbar kapsul | `[LOGO]` Takaran · Cara hitung · Harga bahan naik · Pesanan custom · Harga · tombol utama "Coba hitung resepmu" | Kapsul melayang di atas krem |
-| 2 | Hero | Judul serif: "Laris, tapi uangnya nggak kelihatan?" Sub: "Masukkan harga bahan dari struk belanja. Dalam 5 menit kamu tahu HPP per potong dan harga jual yang benar-benar untung." Tombol utama "Hitung HPP brownies-mu" (scroll ke demo), tautan "Lihat harga Pro". **Kanan: demo kalkulator yang benar-benar bisa dipakai** (kartu hasil + satu slider), bukan gambar kerangka abu-abu. Ilustrasi meja dapur isometrik di belakang demo | Dua kolom, gradasi karamel hanya di kartu demo |
-| 3 | Harga bahan naik | Judul serif "Telur naik Rp 600. Brownies-mu masih untung?" Tabel sebelum-sesudah dari contoh PRD bagian 7, diberi label "Contoh hitungan" | Latar `--surface`, tabel lebar penuh, tanpa kartu |
-| 4 | Untungmu per jam | Angka serif sangat besar "Rp 22.133 / jam" dengan penjelasan satu paragraf dan label "Contoh: brownies, 1,5 jam per loyang" | Satu kolom tengah, jarak atas-bawah 112 px |
+| 2 | Hero | Judul Plus Jakarta Sans: "Laris, tapi uangnya nggak kelihatan?" Sub: "Masukkan harga bahan dari struk belanja. Dalam 5 menit kamu tahu HPP per potong dan harga jual yang benar-benar untung." Tombol utama "Hitung HPP brownies-mu" (scroll ke demo), tautan "Lihat harga Pro". **Kanan: demo kalkulator yang benar-benar bisa dipakai** (kartu hasil + satu slider), bukan gambar kerangka abu-abu. Ilustrasi meja dapur isometrik di belakang demo | Dua kolom, gradasi karamel hanya di kartu demo |
+| 3 | Harga bahan naik | Judul Plus Jakarta Sans "Telur naik Rp 600. Brownies-mu masih untung?" Tabel sebelum-sesudah dari contoh PRD bagian 7, diberi label "Contoh hitungan" | Latar `--surface`, tabel lebar penuh, tanpa kartu |
+| 4 | Untungmu per jam | Angka Plus Jakarta Sans sangat besar "Rp 22.133 / jam" dengan penjelasan satu paragraf dan label "Contoh: brownies, 1,5 jam per loyang" | Satu kolom tengah, jarak atas-bawah 112 px |
 | 5 | Pesanan custom | Kiri teks, kanan pratinjau gambar penawaran kue ulang tahun (data contoh diberi label) | Dua kolom terbalik dari hero |
 | 6 | Harga | Dua kolom Gratis dan Pro dengan daftar isi sesuai PRD bagian 12. Tidak ada lencana "Paling populer". Sisa kuota harga pendiri hanya ditampilkan jika angkanya nyata (`[REAL DATA]`) | Latar `--surface-soft` |
 | 7 | Daftar tunggu gratis | Formulir: nama usaha, nomor WA, jenis jualan, dan persetujuan. Tombol "Daftar gratis". State berhasil, gagal, dan sedang mengirim wajib ada | Kartu tunggal |
@@ -404,7 +410,7 @@ Yang sengaja tidak ada: deretan logo, rating bintang, testimoni, statistik jumla
 
 **Aksen pemisah titik (27 September 2026):** satu baris titik dekoratif tipis (`.landing-dot-divider`) di bawah kartu hero, diadaptasi dari aksen bintik bergelombang dua-baris di bawah kartu gelap pada referensi. Dibuat satu baris tipis saja (bukan dua baris tebal bergelombang) supaya tetap tenang sesuai dial ENERGY 2, dipakai di satu tempat saja (bukan di setiap transisi) supaya tidak jadi dekorasi berulang tanpa arti.
 
-### 10.6 Beli dan aktivasi Pro
+### 10.9 Beli dan aktivasi Pro
 
 - `/beli` memakai palet hangat dan form yang sudah ada. Tampilkan harga dari `PRICING` dan satu CTA utama: **"Bayar dengan Mayar"**.
 - Form checkout berisi nama, email, nomor WhatsApp, nama usaha, persetujuan pemakaian data, dan Turnstile. Jelaskan singkat bahwa kontak dipakai untuk pesanan dan aktivasi lisensi.
@@ -461,7 +467,7 @@ Yang sengaja tidak ada: deretan logo, rating bintang, testimoni, statistik jumla
 | Gradasi hanya di kartu demo landing | Menandai satu titik fokus di halaman landing; kartu hasil di aplikasi tetap putih supaya tumpukan isometrik dan kotak Margin/Untung per jam tidak tenggelam oleh warna |
 | Tata letak dua kolom input/hasil | Sebab (slider) dan akibat (harga) terlihat bersamaan |
 | Slider bertitik, bukan input angka | Penjual rumahan lebih cepat memilih "40%" daripada mengetik; tetap ada opsi ketik |
-| Georgia atau serif sistem untuk judul dan angka | Nuansa buku resep dan membuat angka jawaban terasa penting |
+| Satu keluarga Plus Jakarta Sans untuk judul, angka, dan UI | Konsisten dengan landing page dan terasa sederhana |
 | Plus Jakarta Sans untuk UI | Terbaca jelas di HP dan terasa lokal |
 | Tumpukan isometrik sebagai motif | Mengubah rumus HPP menjadi gambar yang bisa dipahami dalam sekali lihat, dan menjadi ciri khas saat dibagikan |
 | Sudut tajam di isometrik, membulat di UI | Memisahkan "data" dari "kontrol" secara visual |

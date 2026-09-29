@@ -30,7 +30,7 @@ export function PageTitle({
   return (
     <h1
       id={id}
-      className="font-display text-[34px] font-normal leading-[38px] lg:text-[44px] lg:leading-[48px]"
+      className="font-display text-[34px] font-semibold leading-[38px] lg:text-[44px] lg:leading-[48px]"
     >
       {children}
     </h1>

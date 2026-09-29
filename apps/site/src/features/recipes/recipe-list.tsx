@@ -4,10 +4,10 @@ import { actualMarginBp, CalcError, suggestPrice } from '@takaran/calc';
 import { FREE_LIMITS } from '@takaran/schema';
 import { formatRupiah } from '@takaran/ui/format';
 import { ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { MkMark } from '@/components/marketing/logo';
 import {
   errorMessage,
   useRecipeResults,
@@ -280,7 +280,13 @@ export function RecipeList() {
                     href={`/dashboard/resep/${recipe.id}`}
                     className="flex min-w-0 items-center gap-3"
                   >
-                    <MkMark size={28} />
+                    <Image
+                      src="/icon.png"
+                      alt=""
+                      width={28}
+                      height={28}
+                      className="size-7 shrink-0 object-contain"
+                    />
                     <span className="min-w-0">
                       <strong className="block min-h-11 content-center text-base">
                         {recipe.name}
