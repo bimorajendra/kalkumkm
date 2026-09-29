@@ -231,3 +231,22 @@
     color: inherit;
   }
 }
+
+.takaran-app a:not([data-slot="button"]) {
+  transition: color 140ms ease-out;
+}
+@media (hover: hover) {
+  .takaran-app a:not([data-slot="button"]):hover {
+    color: var(--caramel-700);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root :is(*, *::before, *::after) {
+    animation: none;
+    scroll-behavior: auto;
+    transition: none;
+  }
+  .takaran-app a:not([data-slot="button"]) {
+    transition: none;
+  }
+}

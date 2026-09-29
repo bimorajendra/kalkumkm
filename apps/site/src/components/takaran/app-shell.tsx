@@ -146,7 +146,7 @@ export function AppShell({
   return (
     <div
       className={cn(
-        'min-h-dvh bg-card lg:grid',
+        'min-h-dvh bg-card transition-[grid-template-columns] duration-200 ease-out motion-reduce:transition-none lg:grid takaran-app',
         sidebarCollapsed
           ? 'lg:grid-cols-[80px_minmax(0,1fr)]'
           : 'lg:grid-cols-[80px_minmax(0,1fr)] xl:grid-cols-[248px_minmax(0,1fr)]',

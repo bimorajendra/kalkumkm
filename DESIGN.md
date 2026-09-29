@@ -225,9 +225,12 @@ Aturan:
 | Lempeng isometrik berubah tinggi | 240 ms, `cubic-bezier(.2,.8,.2,1)` | Memperlihatkan bagian mana yang membengkak |
 | Alarm margin muncul | Geser turun 8 px + fade 160 ms, sekali | Menarik perhatian tanpa berkedip |
 | Thumb slider | Membesar 1,15× saat ditekan | Umpan balik sentuhan |
+| Tombol dan tautan aplikasi | Warna 140 ms; tombol terangkat 1 px saat diarahkan dan mengecil tipis saat ditekan | Menegaskan kontrol yang sedang disentuh tanpa mengalihkan perhatian |
+| Panel sidebar desktop | Lebar kolom 200 ms | Menjelaskan perubahan ruang saat sidebar diciutkan atau dibuka |
+| Slider saat keyboard | Isi track 120 ms; saat digeser pointer mengikuti jari tanpa jeda | Perubahan nilai terasa halus tanpa membuat kontrol tertinggal |
 | Transisi antar layar | Tidak ada selain crossfade 120 ms | Aplikasi alat kerja harus terasa cepat |
 
-- `prefers-reduced-motion: reduce` mematikan semua tween; angka dan lempeng langsung berganti.
+- `prefers-reduced-motion: reduce` mematikan semua tween dan transisi; angka dan lempeng langsung berganti.
 - Tidak ada animasi saat scroll di aplikasi. Di landing page, hanya demo hero yang bergerak saat pengunjung memakainya.
 
 ---
