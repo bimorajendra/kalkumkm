@@ -1,6 +1,6 @@
 'use client';
 
-import { Search } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { useState } from 'react';
 import { useSnapshot } from '@/components/takaran/data-provider';
 import { EmptyState, Page, PageTitle } from '@/components/takaran/page';
@@ -25,61 +25,48 @@ export function BahanScreen() {
 
   return (
     <Page className="pb-36 lg:pb-12">
-      <MarginAlarm />
       <section aria-labelledby="page-title" className="grid gap-5">
-        <header className="grid gap-2 sm:flex sm:items-end sm:justify-between">
-          <div>
+        <header className="flex flex-wrap items-end justify-between gap-3">
+          <div className="flex flex-wrap items-baseline gap-3">
             <PageTitle>{ingredientCopy.title}</PageTitle>
-            <p className="mt-2 text-muted-foreground">
-              Catat harga dari struk belanja agar modal resepmu ikut terbarui.
+            <p className="text-sm text-muted-foreground">
+              {ingredients.length} bahan
             </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {ingredients.length} bahan tersimpan
-          </p>
+          <Button
+            type="button"
+            size="lg"
+            className="min-h-12 rounded-full"
+            onClick={() => openForm()}
+          >
+            <Plus aria-hidden="true" />
+            {ingredientCopy.add}
+          </Button>
         </header>
+        <MarginAlarm />
         {ingredients.length === 0 ? (
           <EmptyState
             title={ingredientCopy.emptyTitle}
             description={ingredientCopy.emptyDescription}
-          >
-            <Button
-              type="button"
-              size="lg"
-              onClick={() => openForm()}
-              className="rounded-full"
-            >
-              {ingredientCopy.add}
-            </Button>
-          </EmptyState>
+          />
         ) : (
           <>
-            <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-              <div className="relative">
-                <label className="sr-only" htmlFor="ingredient-search">
-                  {ingredientCopy.searchLabel}
-                </label>
-                <Search
-                  aria-hidden="true"
-                  className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
-                />
-                <Input
-                  id="ingredient-search"
-                  type="search"
-                  className="min-h-12 rounded-[10px] border-line bg-surface pl-10"
-                  placeholder={ingredientCopy.searchPlaceholder}
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                />
-              </div>
-              <Button
-                type="button"
-                size="lg"
-                className="min-h-12 rounded-full"
-                onClick={() => openForm()}
-              >
-                {ingredientCopy.add}
-              </Button>
+            <div className="relative">
+              <label className="sr-only" htmlFor="ingredient-search">
+                {ingredientCopy.searchLabel}
+              </label>
+              <Search
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
+              />
+              <Input
+                id="ingredient-search"
+                type="search"
+                className="min-h-12 rounded-[10px] bg-surface pl-10"
+                placeholder={ingredientCopy.searchPlaceholder}
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
             </div>
             <IngredientList query={query} onEdit={openForm} />
           </>

@@ -145,7 +145,7 @@ export function PriceListBuilder() {
       </Page>
     );
 
-  async function createImage() {
+  async function createImage(action: 'share' | 'download') {
     setMessage('');
     setShowCopyLink(false);
     setCopyMessage('');
@@ -168,13 +168,29 @@ export function PriceListBuilder() {
     setExporting(true);
     try {
       const png = await renderPng(svgRef.current, dimensions);
-      const result = await shareOrDownload(png, `daftar-harga-${format}.png`, {
-        title: 'Daftar harga',
-        text: shareText,
-      });
-      setShowCopyLink(result === 'downloaded');
-      if (result === 'shared')
-        setMessage('Gambar daftar harga siap dibagikan.');
+      const filename = `daftar-harga-${format}.png`;
+      if (action === 'share') {
+        const result = await shareOrDownload(png, filename, {
+          title: 'Daftar harga',
+          text: shareText,
+        });
+        setShowCopyLink(result === 'downloaded');
+        if (result === 'shared')
+          setMessage('Gambar daftar harga siap dibagikan.');
+      } else {
+        const url = URL.createObjectURL(png);
+        try {
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          document.body.append(link);
+          link.click();
+          link.remove();
+        } finally {
+          window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+        setShowCopyLink(true);
+      }
     } catch {
       setMessage(priceListCopy.imageError);
     } finally {
@@ -205,11 +221,7 @@ export function PriceListBuilder() {
   return (
     <Page className="grid gap-6">
       <header>
-        <p className="text-sm text-muted-foreground">Bagikan ke pelanggan</p>
         <PageTitle>{priceListCopy.title}</PageTitle>
-        <p className="mt-1 max-w-prose text-muted-foreground">
-          {priceListCopy.description}
-        </p>
       </header>
       <div className="grid gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-8">
         <section
@@ -279,15 +291,27 @@ export function PriceListBuilder() {
             </p>
           ) : null}
           {message ? <output className="text-sm">{message}</output> : null}
-          <Button
-            type="button"
-            size="lg"
-            className="min-h-12 rounded-full"
-            disabled={exporting || !menus.length || !fits}
-            onClick={() => void createImage()}
-          >
-            {exporting ? 'Menyiapkan gambar…' : 'Buat gambar daftar harga'}
-          </Button>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Button
+              type="button"
+              size="lg"
+              className="min-h-12 rounded-full"
+              disabled={exporting || !menus.length || !fits}
+              onClick={() => void createImage('share')}
+            >
+              {exporting ? 'Menyiapkan gambar…' : 'Bagikan'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="min-h-12 rounded-full"
+              disabled={exporting || !menus.length || !fits}
+              onClick={() => void createImage('download')}
+            >
+              {exporting ? 'Menyiapkan gambar…' : 'Unduh PNG'}
+            </Button>
+          </div>
           {showCopyLink ? (
             <div className="grid gap-2 rounded-xl bg-secondary p-4">
               <a
@@ -319,7 +343,7 @@ export function PriceListBuilder() {
           </h2>
           <div
             className={`mx-auto w-full overflow-hidden rounded-[20px] border border-line bg-surface [&>svg]:h-auto [&>svg]:w-full ${
-              format === 'story' ? 'max-w-xs' : 'max-w-md'
+              format === 'story' ? 'max-w-[432px]' : 'max-w-[560px]'
             }`}
           >
             <PriceListImage
@@ -342,7 +366,7 @@ export function PriceListBuilder() {
         onOpenChange={setNameOpen}
         onSaved={() =>
           setMessage(
-            'Nama usaha tersimpan. Tekan “Buat gambar daftar harga” untuk melanjutkan.',
+            'Nama usaha tersimpan. Pilih Bagikan atau Unduh PNG untuk melanjutkan.',
           )
         }
       />

@@ -26,7 +26,7 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="grid content-start justify-items-start gap-3 rounded-xl bg-card p-5 shadow-sm">
+    <section className="grid content-start justify-items-start gap-3 rounded-[20px] border border-line bg-surface p-5">
       <h2 className="text-xl font-semibold">{title}</h2>
       {children}
     </section>

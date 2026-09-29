@@ -94,10 +94,10 @@ export function MarginAlarm() {
 
   return (
     <section aria-label="Pemberitahuan margin" className="mb-4">
-      <div className="flex items-start gap-3 rounded-xl bg-[var(--peach-100)] p-4 text-[#2b1d14]">
+      <div className="flex items-start gap-3 rounded-xl bg-peach-100 p-4 text-ink">
         <TriangleAlert
           aria-hidden="true"
-          className="mt-0.5 size-5 shrink-0 text-[#9e4308]"
+          className="mt-0.5 size-5 shrink-0 text-caramel-700"
           strokeWidth={1.75}
         />
         <p className="flex-1">
@@ -107,7 +107,7 @@ export function MarginAlarm() {
             : marginAlarmCopy.plural}{' '}
           <button
             type="button"
-            className="min-h-11 font-semibold text-[#9e4308] underline underline-offset-4"
+            className="min-h-11 font-semibold text-caramel-700 underline underline-offset-4"
             onClick={() => setListOpen(true)}
           >
             Lihat menu

@@ -64,6 +64,8 @@ export interface Snapshot {
   settings: Settings;
   /** Riwayat margin, dibatasi ke beberapa ratus titik terakhir per akun. */
   marginHistory: MarginSnapshotRow[];
+  /** Riwayat harga yang dibatasi saat dimuat untuk ringkasan perubahan bahan. */
+  priceHistory?: PriceHistoryRow[];
 }
 
 export interface Delta<T> {

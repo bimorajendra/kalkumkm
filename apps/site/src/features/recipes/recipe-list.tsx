@@ -1,17 +1,19 @@
 'use client';
 
 import { actualMarginBp, CalcError, suggestPrice } from '@takaran/calc';
+import { FREE_LIMITS } from '@takaran/schema';
 import { formatRupiah } from '@takaran/ui/format';
-import { ChevronRight, CookingPot } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { MkMark } from '@/components/marketing/logo';
 import {
   errorMessage,
   useRecipeResults,
   useRun,
 } from '@/components/takaran/data-provider';
-import { EmptyState } from '@/components/takaran/page';
+import { EmptyState, PageTitle } from '@/components/takaran/page';
 import { Button } from '@/components/ui/button';
 import type { RecipeRow } from '@/domain/types';
 import { MarginAlarm } from '@/features/margin-alarm/margin-alarm';
@@ -98,6 +100,29 @@ export function RecipeList() {
   const [filter, setFilter] = useState<'all' | 'below' | 'above'>('all');
   const { recipes, settings } = snapshot;
   const { marginAlarm, roundingStep } = settings;
+  const header = (
+    <header className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex flex-wrap items-baseline gap-3">
+        <PageTitle>Resep</PageTitle>
+        <p className="text-sm text-muted-foreground">
+          {snapshot.plan === 'pro'
+            ? `${recipes.length} resep tersimpan`
+            : `${recipes.length} dari ${FREE_LIMITS.recipes} resep gratis`}
+        </p>
+      </div>
+      <Button
+        type="button"
+        size="lg"
+        className="min-h-12 rounded-full"
+        onClick={() => {
+          setSelected(undefined);
+          setEditorOpen(true);
+        }}
+      >
+        Buat resep
+      </Button>
+    </header>
+  );
 
   if (error)
     return (
@@ -108,7 +133,8 @@ export function RecipeList() {
 
   if (recipes.length === 0)
     return (
-      <>
+      <div className="grid gap-5">
+        {header}
         <EmptyState
           title={recipeCopy.emptyTitle}
           description={recipeCopy.emptyDescription}
@@ -135,23 +161,13 @@ export function RecipeList() {
           >
             {recipeCopy.example}
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              setSelected(undefined);
-              setEditorOpen(true);
-            }}
-          >
-            {recipeCopy.create}
-          </Button>
         </EmptyState>
         <RecipeEditor
           open={editorOpen}
           onOpenChange={setEditorOpen}
           onSaved={(id) => id && router.push(`/dashboard/resep/${id}`)}
         />
-      </>
+      </div>
     );
 
   const rows = [...recipes]
@@ -203,22 +219,7 @@ export function RecipeList() {
   return (
     <div className="grid gap-4">
       <MarginAlarm />
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <p className="max-w-prose text-muted-foreground">
-          HPP, harga jual, dan status margin dari data resep yang kamu simpan.
-        </p>
-        <Button
-          type="button"
-          size="lg"
-          className="rounded-full"
-          onClick={() => {
-            setSelected(undefined);
-            setEditorOpen(true);
-          }}
-        >
-          Buat resep
-        </Button>
-      </div>
+      {header}
       <fieldset className="flex flex-wrap gap-2">
         <legend className="sr-only">Saring resep</legend>
         {(
@@ -279,11 +280,7 @@ export function RecipeList() {
                     href={`/dashboard/resep/${recipe.id}`}
                     className="flex min-w-0 items-center gap-3"
                   >
-                    <CookingPot
-                      aria-hidden="true"
-                      className="size-6 shrink-0 text-caramel-600"
-                      strokeWidth={1.75}
-                    />
+                    <MkMark size={28} />
                     <span className="min-w-0">
                       <strong className="block min-h-11 content-center text-base">
                         {recipe.name}

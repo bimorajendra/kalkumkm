@@ -9,13 +9,13 @@ import {
   type RecipeResult,
   suggestPrice,
 } from '@takaran/calc';
-import { type IsometricLayer, IsometricStack } from '@takaran/ui';
 import { formatPercent, formatRupiah } from '@takaran/ui/format';
-import { TrendingDown, TrendingUp, TriangleAlert } from 'lucide-react';
+import { Plus, TrendingDown, TrendingUp, TriangleAlert } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { monthlySeries } from '@/domain/margin-history';
+import type { RecipeRow } from '@/domain/types';
 import { errorMessage, useRecipeResults, useRun } from './data-provider';
 import { MarginTrendChart } from './margin-trend-chart';
 import { EmptyState, Page, PageTitle } from './page';
@@ -31,17 +31,29 @@ type RecipeMetric = {
   error: boolean;
 };
 
-export function DashboardOverview() {
+export function DashboardOverview({
+  userName,
+  greeting,
+  dateLabel,
+}: {
+  userName: string;
+  greeting: string;
+  dateLabel: string;
+}) {
   const { snapshot, results, error } = useRecipeResults();
   const run = useRun();
-  const { ingredients, recipes, channels, settings, plan } = snapshot;
+  const { ingredients, recipes, channels, settings } = snapshot;
   const [filter, setFilter] = useState<'all' | 'below' | 'ok'>('all');
   const [applyError, setApplyError] = useState('');
   const [trendRecipeId, setTrendRecipeId] = useState('all');
+  const [compositionRecipeId, setCompositionRecipeId] = useState('last');
   const activeRecipe =
     recipes.find((recipe) => recipe.id === settings.lastRecipeId) ?? recipes[0];
+  const compositionRecipe =
+    recipes.find((recipe) => recipe.id === compositionRecipeId) ?? activeRecipe;
   const directChannel =
     channels.find((channel) => channel.name === 'Langsung') ?? channels[0];
+  const firstName = userName.trim().split(/\s+/)[0] || 'teman';
 
   if (error)
     return (
@@ -131,6 +143,24 @@ export function DashboardOverview() {
           (item) => item.id === settings.marginAlarm?.triggeredBy,
         )
       : undefined;
+  const recentPriceChanges = (snapshot.priceHistory ?? []).filter(
+    (row) => Date.parse(row.changedAt) >= Date.now() - 30 * 24 * 60 * 60 * 1000,
+  );
+  const latestPriceChange = new Map(
+    recentPriceChanges.map((row) => [row.ingredientId, row]),
+  );
+  const risingIngredients = [...latestPriceChange.values()]
+    .filter((row) => row.oldPrice !== null && row.newPrice > row.oldPrice)
+    .flatMap((row) => {
+      const ingredient = ingredients.find(
+        (item) => item.id === row.ingredientId,
+      );
+      return ingredient
+        ? [{ ingredient, change: row.newPrice - (row.oldPrice ?? 0) }]
+        : [];
+    })
+    .sort((a, b) => b.change - a.change);
+  const topRisingIngredient = risingIngredients[0];
   const trendRecipeIds =
     trendRecipeId === 'all'
       ? recipes.map((recipe) => recipe.id)
@@ -167,39 +197,64 @@ export function DashboardOverview() {
       if (b.hourlyProfit.lt(a.hourlyProfit)) return -1;
       return 0;
     })[0];
-  const activeResult = activeRecipe ? results.get(activeRecipe.id) : undefined;
-  const activeMetric = activeRecipe
-    ? metrics.find((item) => item.id === activeRecipe.id)
+  const compositionResult = compositionRecipe
+    ? results.get(compositionRecipe.id)
     : undefined;
-  let layers: IsometricLayer[] = [];
+  const compositionMetric = compositionRecipe
+    ? metrics.find((item) => item.id === compositionRecipe.id)
+    : undefined;
+  let compositionRows: {
+    label: string;
+    value: RecipeResult['hpp'];
+    color: string;
+  }[] = [];
   let compositionProfit: ReturnType<typeof profitPerPortion> | null = null;
   if (
-    activeRecipe &&
-    activeResult &&
-    !(activeResult instanceof CalcError) &&
-    activeMetric?.price !== null &&
-    activeMetric?.price !== undefined
+    compositionRecipe &&
+    compositionResult &&
+    !(compositionResult instanceof CalcError) &&
+    compositionMetric?.price !== null &&
+    compositionMetric?.price !== undefined
   ) {
-    const breakdown = activeResult.breakdown;
-    layers = [
+    const breakdown = compositionResult.breakdown;
+    const costs = [
       {
-        key: 'ingredients',
         label: 'Bahan',
         value: breakdown.ingredients.plus(breakdown.subRecipes),
       },
-      { key: 'energy', label: 'Energi', value: breakdown.energy },
-      { key: 'labor', label: 'Tenaga', value: breakdown.labor },
-      { key: 'packaging', label: 'Kemasan', value: breakdown.packaging },
-    ].filter((layer) => layer.value.gt(0));
-    if (!layers.length)
-      layers = [
-        { key: 'ingredients', label: 'Biaya', value: activeResult.hpp },
-      ];
+      { label: 'Energi', value: breakdown.energy },
+      { label: 'Tenaga', value: breakdown.labor },
+      { label: 'Kemasan', value: breakdown.packaging },
+    ].filter((row) => row.value.gt(0));
     compositionProfit = profitPerPortion(
-      activeMetric.price,
-      activeResult.hpp,
+      compositionMetric.price,
+      compositionResult.hpp,
       directChannel?.rateBp ?? 0,
     );
+    const palette = [
+      'var(--tan-400)',
+      'var(--tan-300)',
+      'var(--tan-200)',
+      'var(--tan-100)',
+    ];
+    compositionRows = costs.map((row, index) => ({
+      ...row,
+      color: palette[index % palette.length] ?? 'var(--tan-400)',
+    }));
+    if (compositionProfit.gt(0))
+      compositionRows.push({
+        label: 'Untung',
+        value: compositionProfit,
+        color: 'var(--caramel-500)',
+      });
+    if (!compositionRows.length)
+      compositionRows = [
+        {
+          label: 'Biaya',
+          value: compositionResult.hpp,
+          color: 'var(--tan-300)',
+        },
+      ];
   }
   const filteredMetrics = metrics.filter((item) => {
     if (filter === 'below')
@@ -210,18 +265,31 @@ export function DashboardOverview() {
   });
 
   return (
-    <Page className="grid gap-7">
+    <Page className="grid gap-6 xl:gap-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="grid gap-2">
-          <PageTitle>Ringkasan usaha</PageTitle>
+        <div className="grid gap-1">
+          <p className="text-sm capitalize text-muted-foreground">
+            {dateLabel}
+          </p>
+          <PageTitle>
+            Selamat {greeting}, {firstName}
+          </PageTitle>
           <p className="max-w-prose text-muted-foreground">
-            {attention.length > 0
-              ? `${attention.length} resep perlu kamu cek. Mulai dari harga jual atau data bahan.`
-              : 'Semua resep dan bahan yang kamu simpan ada di sini.'}
+            {belowCount > 0 ? (
+              <>
+                <strong className="text-destructive">{belowCount} menu</strong>{' '}
+                untungnya di bawah target.
+              </>
+            ) : (
+              'Cek ringkasan bahan dan keuntungan usahamu hari ini.'
+            )}
           </p>
         </div>
-        <Button asChild size="lg">
-          <Link href="/dashboard/hitung">Hitung resep baru</Link>
+        <Button asChild size="lg" className="min-h-12 rounded-full">
+          <Link href="/dashboard/hitung">
+            <Plus aria-hidden="true" />
+            Hitung resep baru
+          </Link>
         </Button>
       </header>
 
@@ -248,9 +316,13 @@ export function DashboardOverview() {
           tone={belowCount > 0 ? 'warning' : 'normal'}
         />
         <MetricCard
-          label="Bahan tersimpan"
-          value={String(ingredients.length)}
-          hint={plan === 'pro' ? 'Takaran Pro' : 'Harga beli yang kamu catat'}
+          label="Bahan naik harga"
+          value={`${risingIngredients.length} bahan`}
+          hint={
+            topRisingIngredient
+              ? `${topRisingIngredient.ingredient.name} naik ${formatRupiah(topRisingIngredient.change)} dalam 30 hari`
+              : 'Belum ada kenaikan dalam 30 hari'
+          }
         />
         <MetricCard
           label="Untung per jam terbaik"
@@ -268,70 +340,81 @@ export function DashboardOverview() {
       </section>
 
       {recipes.length > 0 ? (
-        <section
-          aria-labelledby="trend-title"
-          className="grid gap-4 rounded-[20px] border border-line bg-surface p-4 sm:p-5"
-        >
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h2 id="trend-title" className="text-xl font-semibold">
-                Margin dari bulan ke bulan
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Terisi otomatis tiap kali harga bahan atau harga jual berubah.
-              </p>
-            </div>
-            {trendLast ? (
-              <div className="text-right">
-                <p className="font-display text-2xl font-semibold tabular-nums">
-                  {formatPercent(trendLast.marginBp)}
+        <div className="grid items-start gap-5 xl:grid-cols-12">
+          <section
+            aria-labelledby="trend-title"
+            className="grid gap-4 rounded-[20px] border border-line bg-surface p-4 sm:p-5 xl:col-span-7"
+          >
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 id="trend-title" className="text-xl font-semibold">
+                  Margin dari bulan ke bulan
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Terisi otomatis tiap kali harga bahan atau harga jual berubah.
                 </p>
-                {trendPrevious ? (
-                  <p
-                    className={`text-sm font-medium tabular-nums ${trendLast.marginBp >= trendPrevious.marginBp ? 'text-success' : 'text-destructive'}`}
-                  >
-                    {trendLast.marginBp >= trendPrevious.marginBp
-                      ? 'naik'
-                      : 'turun'}{' '}
-                    {Math.abs(
-                      (trendLast.marginBp - trendPrevious.marginBp) / 100,
-                    ).toLocaleString('id-ID', {
-                      maximumFractionDigits: 1,
-                    })}{' '}
-                    poin
-                  </p>
-                ) : null}
               </div>
-            ) : null}
-          </div>
-          <fieldset className="flex flex-wrap gap-2">
-            <legend className="sr-only">Pilih menu untuk grafik</legend>
-            <FilterButton
-              active={trendRecipeId === 'all'}
-              onClick={() => setTrendRecipeId('all')}
-            >
-              Semua menu
-            </FilterButton>
-            {recipes.map((recipe) => (
+              {trendLast ? (
+                <div className="text-right">
+                  <p className="font-display text-2xl font-semibold tabular-nums">
+                    {formatPercent(trendLast.marginBp)}
+                  </p>
+                  {trendPrevious ? (
+                    <p
+                      className={`text-sm font-medium tabular-nums ${trendLast.marginBp >= trendPrevious.marginBp ? 'text-success' : 'text-destructive'}`}
+                    >
+                      {trendLast.marginBp >= trendPrevious.marginBp
+                        ? 'naik'
+                        : 'turun'}{' '}
+                      {Math.abs(
+                        (trendLast.marginBp - trendPrevious.marginBp) / 100,
+                      ).toLocaleString('id-ID', {
+                        maximumFractionDigits: 1,
+                      })}{' '}
+                      poin
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+            <fieldset className="flex flex-wrap gap-2">
+              <legend className="sr-only">Pilih menu untuk grafik</legend>
               <FilterButton
-                key={recipe.id}
-                active={trendRecipeId === recipe.id}
-                onClick={() => setTrendRecipeId(recipe.id)}
+                active={trendRecipeId === 'all'}
+                onClick={() => setTrendRecipeId('all')}
               >
-                {recipe.name}
+                Semua menu
               </FilterButton>
-            ))}
-          </fieldset>
-          {trendPoints.length >= 2 ? (
-            <MarginTrendChart points={trendPoints} />
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Grafik akan muncul setelah ada perubahan harga di bulan
-              berikutnya. Titik pertama tercatat begitu harga bahan atau harga
-              jual berubah.
-            </p>
-          )}
-        </section>
+              {recipes.map((recipe) => (
+                <FilterButton
+                  key={recipe.id}
+                  active={trendRecipeId === recipe.id}
+                  onClick={() => setTrendRecipeId(recipe.id)}
+                >
+                  {recipe.name}
+                </FilterButton>
+              ))}
+            </fieldset>
+            {trendPoints.length >= 2 ? (
+              <MarginTrendChart points={trendPoints} />
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Grafik akan muncul setelah ada perubahan harga di bulan
+                berikutnya. Titik pertama tercatat begitu harga bahan atau harga
+                jual berubah.
+              </p>
+            )}
+          </section>
+          <CompositionPanel
+            recipes={recipes}
+            selectedRecipe={compositionRecipe}
+            rows={compositionRows}
+            profit={compositionProfit}
+            marginBp={compositionMetric?.marginBp ?? null}
+            price={compositionMetric?.price ?? null}
+            onSelect={setCompositionRecipeId}
+          />
+        </div>
       ) : null}
 
       <div className="grid items-start gap-5 xl:grid-cols-12">
@@ -414,9 +497,14 @@ export function DashboardOverview() {
                       <th scope="row" className="px-3 py-3 font-semibold">
                         <Link
                           href={`/dashboard/resep/${item.id}`}
-                          className="inline-flex min-h-11 items-center text-left underline-offset-4 hover:text-link hover:underline"
+                          className="inline-flex min-h-11 flex-col justify-center text-left underline-offset-4 hover:text-link hover:underline"
                         >
-                          {item.name}
+                          <span>{item.name}</span>
+                          <span className="text-xs font-normal text-muted-foreground">
+                            {recipes.find((recipe) => recipe.id === item.id)
+                              ?.yieldPortions ?? 'Belum diatur'}{' '}
+                            porsi per adonan
+                          </span>
                         </Link>
                       </th>
                       <td className="px-3 py-3 text-right tabular-nums">
@@ -597,29 +685,6 @@ export function DashboardOverview() {
         </aside>
       </div>
 
-      {activeRecipe && activeResult && !(activeResult instanceof CalcError) ? (
-        <section
-          aria-labelledby="composition-title"
-          className="grid gap-4 rounded-[20px] border border-line bg-surface p-4 sm:p-5"
-        >
-          <div>
-            <h2 id="composition-title" className="text-xl font-semibold">
-              Komposisi harga · {activeRecipe.name}
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Rincian per porsi dari data resep yang terakhir kamu buka.
-            </p>
-          </div>
-          {layers.length && compositionProfit !== null ? (
-            <IsometricStack layers={layers} profit={compositionProfit} />
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Komposisi belum tersedia untuk resep ini.
-            </p>
-          )}
-        </section>
-      ) : null}
-
       {recipes.length === 0 ? (
         <EmptyState
           title="Mulai dari satu resep."
@@ -678,6 +743,116 @@ function MetricCard({
         <p className="text-sm text-ink-muted">{hint}</p>
       )}
     </article>
+  );
+}
+
+function CompositionPanel({
+  recipes,
+  selectedRecipe,
+  rows,
+  profit,
+  marginBp,
+  price,
+  onSelect,
+}: {
+  recipes: RecipeRow[];
+  selectedRecipe?: RecipeRow;
+  rows: { label: string; value: RecipeResult['hpp']; color: string }[];
+  profit: ReturnType<typeof profitPerPortion> | null;
+  marginBp: number | null;
+  price: number | null;
+  onSelect: (id: string) => void;
+}) {
+  const total = rows.reduce((sum, row) => sum + row.value.toNumber(), 0);
+  let position = 0;
+  const stops = rows.map((row) => {
+    const start = position;
+    position += total > 0 ? (row.value.toNumber() / total) * 100 : 0;
+    return `${row.color} ${start}% ${position}%`;
+  });
+  const gradient = stops.length
+    ? `conic-gradient(${stops.join(', ')})`
+    : 'var(--surface-soft)';
+
+  return (
+    <section
+      aria-labelledby="composition-title"
+      className="grid content-start gap-4 rounded-[20px] border border-line bg-surface p-4 sm:p-5 xl:col-span-5"
+    >
+      <div>
+        <h2 id="composition-title" className="text-xl font-semibold">
+          Isi harga jual
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {selectedRecipe && price !== null
+            ? `${selectedRecipe.name} · ${formatRupiah(price)} per porsi`
+            : 'Pilih resep untuk melihat rincian harga.'}
+        </p>
+      </div>
+      <fieldset className="flex flex-wrap gap-2">
+        <legend className="sr-only">Pilih resep untuk rincian harga</legend>
+        {recipes.map((recipe) => (
+          <FilterButton
+            key={recipe.id}
+            active={selectedRecipe?.id === recipe.id}
+            onClick={() => onSelect(recipe.id)}
+          >
+            {recipe.name}
+          </FilterButton>
+        ))}
+      </fieldset>
+      {rows.length > 0 ? (
+        <div className="grid items-center gap-4 sm:grid-cols-[minmax(145px,1fr)_minmax(0,1.2fr)]">
+          <div
+            role="img"
+            aria-label={`Komposisi harga ${selectedRecipe?.name ?? ''}`}
+            className="mx-auto grid size-40 place-items-center rounded-full"
+            style={{ background: gradient }}
+          >
+            <div className="grid size-24 place-content-center rounded-full bg-surface text-center">
+              <span className="text-xs text-muted-foreground">
+                {profit?.lt(0) ? 'Rugi' : 'Untung'}
+              </span>
+              <strong className="font-display text-2xl font-bold tabular-nums">
+                {marginBp === null ? '—' : formatPercent(marginBp)}
+              </strong>
+            </div>
+          </div>
+          <ul className="grid gap-2 text-sm">
+            {rows.map((row) => (
+              <li
+                key={row.label}
+                className="grid grid-cols-[10px_minmax(0,1fr)_auto_auto] items-center gap-2"
+              >
+                <span
+                  aria-hidden="true"
+                  className="size-3 rounded-sm"
+                  style={{ backgroundColor: row.color }}
+                />
+                <span>{row.label}</span>
+                <strong className="tabular-nums">
+                  {formatRupiah(row.value)}
+                </strong>
+                <span className="w-9 text-right text-muted-foreground tabular-nums">
+                  {total > 0
+                    ? `${Math.round((row.value.toNumber() / total) * 100)}%`
+                    : '0%'}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <p className="rounded-2xl bg-surface-soft p-4 text-sm text-muted-foreground">
+          Rincian akan tampil setelah HPP resep bisa dihitung.
+        </p>
+      )}
+      {profit?.lt(0) ? (
+        <p className="text-sm font-medium text-destructive">
+          Rugi {formatRupiah(profit)} per porsi pada harga ini.
+        </p>
+      ) : null}
+    </section>
   );
 }
 

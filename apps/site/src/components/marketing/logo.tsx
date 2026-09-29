@@ -14,3 +14,21 @@ export function MkLogo({ height = 28 }: { height?: number }) {
     />
   );
 }
+
+export function MkMark({ size = 28 }: { size?: number }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="relative block shrink-0 overflow-hidden"
+      style={{ width: size, height: size }}
+    >
+      <Image
+        alt=""
+        fill
+        sizes={`${size}px`}
+        src="/logo.png"
+        style={{ objectFit: 'cover', objectPosition: 'left center' }}
+      />
+    </span>
+  );
+}

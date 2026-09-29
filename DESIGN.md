@@ -2,6 +2,7 @@
 
 > **Arah pemilik (27 September 2026):** palet hangat dari referensi Kindly dipakai di seluruh halaman dan tema dikunci terang. Landing memakai bidang penuh (bukan bingkai bundar): latar putih polos, dengan gradasi hangat lembut (caramel ke peach ke putih) hanya di balik navbar dan hero, memudar sebelum section berikutnya. Judul serif sistem. Layout mengikuti konten Takaran tanpa menyalin elemen finance yang tidak relevan. Perubahan ini menggantikan pengecualian tipografi di `docs/CHANGE-002-visual-identity-flat.md`; ilustrasi data tetap memakai grafik yang sudah berfungsi.
 > **Susulan (27 September 2026, lanjutan):** bingkai putih membulat di atas latar aprikot (dipasang lebih dulu untuk meniru bentuk mockup di tangkapan layar referensi) dibatalkan pemilik: bentuk kartu-di-atas-latar itu tidak diperlukan untuk halaman sungguhan (bukan mockup), dan latar aprikot polos di sekitarnya dinilai terlalu sepi. Baris di §9.1 yang menyebut "bingkai" **tidak berlaku lagi**; landing sekarang bidang penuh (latar putih), dengan gradasi hangat lembut hanya di balik navbar dan hero sebagai aksen.
+> **Arah dashboard terbaru (28 September 2026):** tangkapan layar desktop Ringkasan, Bahan, Resep, Ubah resep, dan Daftar harga dari pemilik menjadi acuan untuk seluruh halaman aplikasi yang sudah login. Arah ini menggantikan komposisi aplikasi lama di §9.1, §9.2, §10.1–§10.4; token warna hangat, tipografi, aturan aksesibilitas, dan alur tiga bagian editor resep tetap berlaku. Landing dan halaman marketing tetap mengikuti arahan tersendiri di §10.5.
 > Arah visual untuk aplikasi kalkulator HPP dan landing page-nya. File ini adalah **data arah desain** yang dibaca bersama `antislop.md` (filter). `antislop.md` menyaring slop; file ini memberi karakter.
 > Kebutuhan fungsional ada di `PRD.md`. Jika keduanya bertentangan, `PRD.md` yang menang untuk fungsi, file ini yang menang untuk tampilan.
 > Status: Draf v0.2, 25 September 2026.
@@ -198,7 +199,7 @@ Aturan:
 | Aspek | Nilai | Alasan |
 |---|---|---|
 | Satuan ruang | Kelipatan 4 px: 4, 8, 12, 16, 24, 32, 48, 72, 112 | Konsisten dan mudah diterapkan di Tailwind |
-| Grid aplikasi desktop (≥ 1024 px) | 12 kolom, lebar maks 1120 px, input 6 kolom, jarak 1 kolom, kartu hasil 5 kolom | Meniru proporsi referensi A |
+| Grid aplikasi desktop (≥ 1024 px) | Sidebar tetap 248 px pada layar lebar; konten memakai grid 12 kolom dan lebar baca maks 1120 px. Ringkasan membagi grafik dan komposisi 7:5; form harga memakai 5:7 | Menjaga navigasi tetap terlihat dan memberi ruang lebih untuk pratinjau yang sedang diatur |
 | Grid tablet (640 sampai 1023 px) | Satu kolom, kartu hasil menempel di atas panel input (sticky ringkas) | Hasil tetap terlihat saat slider digeser |
 | HP (< 640 px) | Satu kolom, gutter 16 px, kartu hasil ringkas menempel di bawah layar di atas tab bar | Jempol mengatur slider, mata melihat hasil |
 | Radius | Kontrol dan chip 10 px; kartu 20 px; kartu hasil 28 px; navbar kapsul penuh | Variasi radius menandai hierarki (R-11). Hanya navbar dan tombol yang berbentuk kapsul |
@@ -233,14 +234,19 @@ Aturan:
 
 ## 9. Komponen
 
-### 9.1 Navbar kapsul (desktop dan landing)
-- Landing diletakkan di dalam bingkai putih membulat di atas latar aprikot. Bingkai memberi batas visual halaman penuh dan tetap menyisakan gutter yang cukup pada HP.
-- Kapsul navbar putih melayang, radius penuh, bayangan tingkat 1, lebar menyesuaikan isi, di tengah.
-- Isi aplikasi: wordmark `[LOGO]` teks "Takaran", lalu Kalkulator, Bahan, Resep, dan Penawaran. Item aktif memakai latar `--surface-soft` dan teks `--ink` tebal.
-- Semua item wajib menuju layar yang ada (R-24). Penawaran tampil hanya jika fitur FR-19 sudah dibangun; sebelum itu disembunyikan.
+### 9.1 Kerangka aplikasi desktop
+- Sidebar putih selebar 248 px menempel di kiri. Logo berada di atas; menu dikelompokkan menjadi Ringkasan, Dapur (Hitung HPP, Bahan, Resep), dan Jualan (Penawaran, Daftar harga). Pengaturan berada dekat bawah, sesudah meter paket.
+- Item aktif memakai latar `--surface-soft`, teks `--ink` tebal, dan radius 12 px. Jumlah bahan, alarm resep, dan label Pro berasal dari data akun/paket.
+- Bilah atas setinggi 64 px memakai latar `--bg`: pencarian resep/bahan di kiri dan menu akun berbentuk chip di kanan. Chip menampilkan inisial nama, nama depan, dan chevron; menu tetap memuat pengaturan, paket, dan keluar.
+- Sidebar dapat diciutkan di desktop lebar. Pada keadaan ciut, logo, ikon, dan kontrol tetap memiliki nama aksesibel.
+- Isi halaman memakai latar `--bg`; kartu data memakai `--surface` dengan garis `--line`. Konten mengikuti lebar layar, dengan batas 1120 px untuk layar ringkasan dan form.
+- Alasan: menu kerja selalu terlihat, sedangkan latar kartu putih menjaga angka dan input mudah dipindai.
 
-### 9.2 Tab bar (HP, < 640 px)
-- Menggantikan navbar. 4 tab: Hitung, Bahan, Resep, Lainnya. Tinggi 64 px, target sentuh 48 px, label teks selalu tampil di bawah ikon.
+### 9.2 Navigasi HP dan tablet
+- Sidebar diganti tab bawah untuk Ringkasan, Hitung, Bahan, Resep, dan Lainnya. Tab Lainnya membuka sheet untuk Penawaran, Daftar harga, Pengaturan, dan Pro.
+- Bilah atas mempertahankan logo dan chip akun; pencarian desktop disembunyikan pada HP, bukan diperkecil menjadi input yang sulit dipakai.
+- Tinggi tab bar 64 px, target sentuh minimal 48 px, label selalu tampil. Konten mendapat ruang bawah agar tab bar tidak menutupi tombol atau hasil.
+- Alasan: empat pekerjaan yang paling sering dipakai dapat dijangkau ibu jari; alat tambahan tetap mudah ditemukan.
 
 ### 9.3 Chip konteks
 - Latar `--peach-100`, teks `--caramel-700`, radius 10 px, mini tumpukan isometrik di kiri. Isi: nama resep aktif ("Brownies · 16 potong"). Mengetuknya membuka pemilih resep.
@@ -349,16 +355,36 @@ Fokus keyboard semua tombol: cincin 2 px `--caramel-600` dengan jarak 2 px. `out
 
 **HP (< 640 px)**: urutan dari atas: chip, judul (display-l), rincian biaya (bisa dilipat), panel slider, kotak catatan. Kartu hasil ringkas (harga jual + margin + tombol "Detail") menempel di bawah di atas tab bar; mengetuk "Detail" membuka kartu penuh sebagai sheet yang bisa ditutup dengan `Escape`/geser turun.
 
-### 10.2 Bahan
-Daftar baris bahan (9.7), kotak pencarian di atas, tombol "Tambah bahan" menempel di bawah pada HP. Alarm margin (9.8) di atas daftar setelah ada perubahan harga.
+### 10.2 Ringkasan usaha
+- Judul menyapa pengguna dengan nama depan dan tanggal lokal Jakarta. CTA utama "Hitung resep baru" berada di kanan pada desktop dan turun di bawah judul pada layar sempit.
+- Empat kartu menampilkan rata-rata margin, jumlah menu di bawah target, bahan yang benar-benar naik harga dalam 30 hari, dan untung per jam terbaik. Perubahan margin hanya dibandingkan bila histori memuat titik pembanding; perubahan harga diambil dari riwayat milik akun. Nilai tanpa sumber ditampilkan sebagai belum tersedia.
+- Bagian analitik membagi grafik margin bulanan dan komposisi harga resep 7:5. Filter resep memperbarui grafik/donut; donut merinci bahan, energi, tenaga, kemasan, dan untung dari hasil `packages/calc`.
+- Tabel "Menu kamu" menampilkan hasil per adonan, HPP, harga jual, margin beserta penanda target, dan status teks. Panel "Perlu kamu cek" hanya berisi resep yang gagal dihitung atau berada di bawah target, disertai aksi harga saran yang menyimpan nilai lewat perintah yang sudah ada.
+- Untuk akun tanpa data, pertahankan kartu ringkasan nol/keadaan belum tersedia dan CTA membuat resep; jangan mengisi angka contoh dari mockup.
+- Alasan: pemilik usaha dapat melihat kesehatan harga dan tindakan berikutnya dalam satu layar tanpa laporan yang mengarang tren.
 
-### 10.3 Resep
-Daftar resep sebagai baris (bukan grid kartu identik): nama, HPP, harga jual, dan titik status margin (hijau/merah + teks "Di atas target" / "Di bawah target"). Editor resep: daftar bahan dengan takaran, hasil per adonan, kemasan, energi.
+### 10.3 Bahan
+- Judul dan jumlah bahan sejajar dengan tombol "Tambah bahan". Banner alarm berada setelah judul, pencarian memenuhi lebar konten, lalu tabel berkolom Bahan, Harga beli, Per satuan, dan Perubahan.
+- Baris menampilkan nama, jumlah resep yang memakai bahan, input harga dengan satuan beli, harga per satuan pakai, serta perubahan harga nyata. Di HP, kolom berubah menjadi baris bertumpuk dengan label yang tetap terbaca.
+- Penyuntingan harga, validasi, simpan, batal, dan tautan ke resep tetap memakai handler yang ada. Alarm margin (9.8) tidak menutup pencarian atau baris.
+- Alasan: kolom sejajar memudahkan membandingkan harga beli dengan dampaknya tanpa membuka tiap resep.
 
-### 10.4 Penawaran pesanan custom
+### 10.4 Resep dan editor
+- Header menampilkan jumlah resep dibanding batas paket (misalnya "3 dari 3 resep gratis") dan tombol "Buat resep". Filter Semua, Di bawah target, dan Di atas target memakai nilai margin aktual.
+- Resep ditampilkan sebagai baris tabel: logo tumpukan Takaran, nama dan hasil per adonan, modal, harga jual atau saran, margin dengan garis target, status teks, dan chevron menuju detail. Pada HP, angka penting diringkas dalam baris tanpa overflow horizontal.
+- Editor tetap tiga langkah agar banyak field tidak muncul sekaligus: Detail resep, Bahan, lalu Biaya tambahan. Gunakan kartu putih, garis tipis, input beradius 10 px, progres karamel, dan tombol kapsul; validasi langkah, data formulir, batas Pro, hapus, dan simpan tidak berubah.
+- Detail resep menampilkan tombol Hitung harga, Ubah, dan Duplikat; kartu ringkasan HPP/harga/margin, rincian komponen, serta modal editor yang sama.
+- Alasan: tabel mempertahankan kepadatan data desktop, sedangkan langkah editor mengurangi beban saat menambahkan resep.
+
+### 10.5 Penawaran pesanan custom
 Kiri: resep dasar + daftar opsi (checkbox) dengan harga tambahan. Kanan: pratinjau gambar penawaran dengan nama usaha, rincian, dan total. Tombol "Unduh gambar penawaran".
 
-### 10.5 Landing page (mengikuti referensi B, disaring)
+### 10.6 Daftar harga
+- Panel kiri berisi nama usaha, pilihan menu beserta harga, dan pilihan Story 9:16/Feed 1:1 sebagai kontrol tersegmentasi. Tombol Bagikan dan Unduh berada di bawah form bila kedua aksi didukung browser.
+- Panel kanan berwarna `--surface-soft` menjadi bidang pratinjau; kanvas Story berukuran hingga 432 px agar tetap terbaca tanpa menutupi form. Gambar memakai desain §9.10 dan selalu memakai data resep serta nama usaha aktual.
+- Alasan: form dan hasil terlihat bersamaan sehingga perubahan pilihan cepat diperiksa sebelum dibagikan.
+
+### 10.7 Landing page (mengikuti referensi B, disaring)
 
 Urutan mengikuti cerita masalah pengguna, bukan template (R-05, C-3). Semua tautan navbar menuju section yang ada di bawah.
 

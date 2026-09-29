@@ -28,7 +28,7 @@ export function RecipePicker({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[var(--peach-100)] px-3 text-[#9e4308]"
+        className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-peach-100 px-3 text-caramel-700"
       >
         <Cookie aria-hidden="true" className="size-4" strokeWidth={1.75} />
         <span>

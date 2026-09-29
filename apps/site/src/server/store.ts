@@ -24,6 +24,7 @@ import * as t from './db/schema';
 const ROW_CAP = 1000;
 /** Batas titik riwayat margin yang dikirim ke klien. */
 const MARGIN_HISTORY_CAP = 1000;
+const PRICE_HISTORY_CAP = 1000;
 
 async function lock(db: Db, userId: string) {
   await db.execute(sql`select pg_advisory_xact_lock(hashtext(${userId}))`);
@@ -57,6 +58,7 @@ export async function loadSnapshot(db: Db, userId: string): Promise<Snapshot> {
     quoteOptions,
     settings,
     marginHistory,
+    priceHistory,
   ] = await Promise.all([
     db
       .select({ plan: t.entitlements.plan })
@@ -89,6 +91,17 @@ export async function loadSnapshot(db: Db, userId: string): Promise<Snapshot> {
       .where(eq(t.marginSnapshots.userId, userId))
       .orderBy(desc(t.marginSnapshots.recordedAt))
       .limit(MARGIN_HISTORY_CAP),
+    db
+      .select({
+        ingredientId: t.priceHistory.ingredientId,
+        changedAt: t.priceHistory.changedAt,
+        oldPrice: t.priceHistory.oldPrice,
+        newPrice: t.priceHistory.newPrice,
+      })
+      .from(t.priceHistory)
+      .where(eq(t.priceHistory.userId, userId))
+      .orderBy(desc(t.priceHistory.changedAt))
+      .limit(PRICE_HISTORY_CAP),
   ]);
   const values: Record<string, unknown> = {};
   for (const row of settings) values[row.key] = row.value;
@@ -121,6 +134,14 @@ export async function loadSnapshot(db: Db, userId: string): Promise<Snapshot> {
         recipeId: row.recipeId,
         marginBp: row.marginBp,
         recordedAt: row.recordedAt.toISOString(),
+      }))
+      .reverse(),
+    priceHistory: priceHistory
+      .map((row) => ({
+        ingredientId: row.ingredientId,
+        changedAt: row.changedAt.toISOString(),
+        oldPrice: row.oldPrice,
+        newPrice: row.newPrice,
       }))
       .reverse(),
   };

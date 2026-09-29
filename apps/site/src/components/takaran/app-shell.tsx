@@ -4,6 +4,7 @@ import { actualMarginBp, CalcError, suggestPrice } from '@takaran/calc';
 import { FREE_LIMITS } from '@takaran/schema';
 import {
   Calculator,
+  ChevronDown,
   CookingPot,
   Ellipsis,
   Home,
@@ -99,6 +100,8 @@ export function AppShell({
       return count;
     }
   }, 0);
+  const userInitial =
+    user.name.trim().charAt(0).toLocaleUpperCase('id-ID') || 'A';
   const businessLinks: NavLink[] = [
     { href: '/dashboard/hitung', label: 'Hitung HPP', icon: Calculator },
     {
@@ -169,14 +172,7 @@ export function AppShell({
           )}
           aria-label="Takaran, ke Ringkasan"
         >
-          {sidebarCollapsed ? (
-            <span className="font-display text-xl font-bold text-foreground xl:hidden">
-              T
-            </span>
-          ) : null}
-          <span className={sidebarCollapsed ? 'hidden' : 'hidden xl:block'}>
-            <MkLogo height={28} />
-          </span>
+          <MkLogo height={sidebarCollapsed ? 18 : 28} />
         </Link>
         <nav
           aria-label="Navigasi dashboard"
@@ -203,18 +199,6 @@ export function AppShell({
               active={active}
               collapsed={sidebarCollapsed}
             />
-            <SidebarGroup
-              title="Akun"
-              links={[
-                {
-                  href: '/dashboard/lainnya',
-                  label: 'Pengaturan',
-                  icon: Settings2,
-                },
-              ]}
-              active={active}
-              collapsed={sidebarCollapsed}
-            />
           </div>
         </nav>
         <Link
@@ -224,7 +208,7 @@ export function AppShell({
             plan === 'pro' ? 'Takaran Pro aktif' : 'Lihat Takaran Pro'
           }
           className={cn(
-            'mt-auto flex min-h-11 items-center rounded-xl bg-secondary text-sm font-semibold',
+            'flex min-h-11 items-center rounded-xl bg-secondary text-sm font-semibold',
             sidebarCollapsed ? 'justify-center px-2' : 'grid gap-1 p-4',
           )}
         >
@@ -272,6 +256,25 @@ export function AppShell({
             </span>
           </span>
         </Link>
+        <Link
+          href="/dashboard/lainnya"
+          aria-current={active('/dashboard/lainnya') ? 'page' : undefined}
+          aria-label="Pengaturan"
+          title="Pengaturan"
+          className={cn(
+            'mt-auto flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground hover:bg-secondary/70 hover:text-foreground',
+            sidebarCollapsed
+              ? 'justify-center'
+              : 'justify-center xl:justify-start',
+            active('/dashboard/lainnya') &&
+              'bg-secondary font-semibold text-foreground',
+          )}
+        >
+          <Settings2 aria-hidden="true" className="size-5" strokeWidth={1.75} />
+          <span className={sidebarCollapsed ? 'hidden' : 'hidden xl:inline'}>
+            Pengaturan
+          </span>
+        </Link>
         <Button
           type="button"
           variant="ghost"
@@ -290,7 +293,7 @@ export function AppShell({
       </aside>
 
       <div id="isi" tabIndex={-1} className="min-w-0 outline-none">
-        <header className="sticky top-0 z-30 border-b bg-background/95 px-4 py-3 backdrop-blur lg:px-8">
+        <header className="sticky top-0 z-30 border-b border-line bg-background/95 px-4 py-2 backdrop-blur lg:px-8">
           <div className="mx-auto flex min-h-11 max-w-[1120px] items-center justify-between gap-3">
             <Link
               href="/dashboard"
@@ -338,8 +341,18 @@ export function AppShell({
               )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="min-h-11 rounded-full">
-                    {user.name.split(' ')[0] || 'Akun'}
+                  <Button
+                    variant="outline"
+                    className="min-h-11 rounded-full border-line bg-surface py-1 pl-1 pr-3"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="grid size-8 place-items-center rounded-full bg-peach-100 font-display font-bold text-caramel-700"
+                    >
+                      {userInitial}
+                    </span>
+                    <span>{user.name.split(' ')[0] || 'Akun'}</span>
+                    <ChevronDown aria-hidden="true" className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="min-w-56">

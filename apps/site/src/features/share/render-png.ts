@@ -27,7 +27,7 @@ export async function renderPng(
     canvas.height = height;
     const context = canvas.getContext('2d');
     if (!context) throw new Error('Gambar belum bisa dibuat.');
-    context.fillStyle = '#fbf6f1';
+    context.fillStyle = '#fcf8f5';
     context.fillRect(0, 0, width, height);
     context.drawImage(image, 0, 0, width, height);
     return await new Promise((resolve, reject) => {

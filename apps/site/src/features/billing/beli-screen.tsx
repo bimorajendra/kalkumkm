@@ -103,7 +103,7 @@ export function BeliScreen() {
       </div>
       <section
         aria-label="Isi paket Pro"
-        className="grid gap-3 rounded-xl bg-card p-5 shadow-sm"
+        className="grid gap-3 rounded-[20px] border border-line bg-surface p-5"
       >
         <p className="font-display text-5xl font-bold">{formatRupiah(price)}</p>
         {price < PRICING.pro.idr ? (
@@ -121,7 +121,7 @@ export function BeliScreen() {
       {status?.pendingUrl ? (
         <section
           aria-live="polite"
-          className="grid gap-3 rounded-xl border border-input p-5"
+          className="grid gap-3 rounded-[20px] border border-line bg-surface p-5"
         >
           <h2 className="text-xl font-semibold">
             Pembayaran belum terkonfirmasi

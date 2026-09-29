@@ -30,7 +30,7 @@ function Shell({
   return (
     <section
       aria-labelledby={id}
-      className="grid gap-2 rounded-xl bg-card p-5 shadow-sm"
+      className="grid gap-2 rounded-[20px] border border-line bg-surface p-5"
     >
       <h2 id={id} className="text-xl font-semibold">
         Harga per saluran
