@@ -53,10 +53,15 @@ export function CalculatorResult({
   const secondary = hpp.lte(0) ? null : hourlyProfit;
 
   const actions = (
-    <>
+    <div
+      className={`grid w-full items-stretch gap-2 ${
+        canSavePrice && recipeId ? 'grid-cols-2' : 'grid-cols-1'
+      }`}
+    >
       {canSavePrice ? (
         <Button
           type="button"
+          className="h-14 w-full rounded-lg px-2 text-center text-sm leading-4 whitespace-normal"
           onClick={async () => {
             try {
               await onSavePrice();
@@ -72,7 +77,11 @@ export function CalculatorResult({
         </Button>
       ) : null}
       {recipeId ? (
-        <Button asChild variant="outline">
+        <Button
+          asChild
+          variant="outline"
+          className="h-14 w-full rounded-lg px-2 text-center text-sm leading-4 whitespace-normal"
+        >
           <Link
             href={`/dashboard/bagikan?recipe=${encodeURIComponent(recipeId)}`}
           >
@@ -81,7 +90,7 @@ export function CalculatorResult({
           </Link>
         </Button>
       ) : null}
-    </>
+    </div>
   );
 
   return (

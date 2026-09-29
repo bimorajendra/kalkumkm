@@ -82,6 +82,11 @@ function IngredientRowView({
     setEditing(false);
   }
 
+  function startEditingPrice() {
+    setPrice(String(ingredient.buyPrice));
+    setEditing(true);
+  }
+
   return (
     <li className="grid gap-3 py-4 sm:grid-cols-[minmax(0,1.5fr)_minmax(132px,1fr)_minmax(130px,1fr)_minmax(95px,0.7fr)] sm:items-center sm:gap-4 sm:px-4">
       <div className="min-w-0">
@@ -97,87 +102,84 @@ function IngredientRowView({
           {ingredient.buyUnit}
         </span>
       </div>
-      <div className="grid grid-cols-[auto_1fr] items-center gap-2 sm:flex sm:justify-end">
+      <div className="grid grid-cols-[auto_1fr] items-center gap-2 sm:block">
         <span className="text-sm text-muted-foreground sm:hidden">
           Harga beli
         </span>
-        {editing ? (
-          <>
-            <label className="sr-only" htmlFor={`price-${ingredient.id}`}>
-              {ingredient.name}, {ingredientCopy.priceLabel}
-            </label>
-            <div className="relative w-32">
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
+        <div className="col-span-2 flex flex-wrap items-center gap-2 sm:col-span-1 sm:justify-end">
+          {editing ? (
+            <>
+              <label className="sr-only" htmlFor={`price-${ingredient.id}`}>
+                {ingredient.name}, {ingredientCopy.priceLabel}
+              </label>
+              <div className="relative w-32">
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
+                >
+                  Rp
+                </span>
+                <Input
+                  id={`price-${ingredient.id}`}
+                  className="pl-9 text-right font-semibold tabular-nums"
+                  inputMode="numeric"
+                  autoFocus
+                  value={price}
+                  aria-invalid={error ? true : undefined}
+                  aria-describedby={
+                    error ? `price-error-${ingredient.id}` : undefined
+                  }
+                  onChange={(event) => {
+                    setPrice(event.target.value);
+                    setError('');
+                  }}
+                  onBlur={() => {
+                    if (!saving.current) void savePrice();
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      void savePrice();
+                    }
+                    if (event.key === 'Escape') {
+                      event.preventDefault();
+                      cancelPrice();
+                    }
+                  }}
+                />
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => void savePrice()}
               >
-                Rp
+                {ingredientCopy.savePrice}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={cancelPrice}
+              >
+                {ingredientCopy.cancel}
+              </Button>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="flex min-h-11 w-full max-w-40 items-center justify-between rounded-[10px] border border-input bg-surface px-3 text-sm font-medium tabular-nums transition-colors hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              aria-label={`Ubah harga ${ingredient.name}`}
+              onClick={startEditingPrice}
+            >
+              <span className="text-muted-foreground">Rp</span>
+              <span>
+                {formatRupiah(ingredient.buyPrice).replace(/^Rp\s*/, '')}
               </span>
-              <Input
-                id={`price-${ingredient.id}`}
-                className="pl-9 text-right font-semibold tabular-nums"
-                inputMode="numeric"
-                autoFocus
-                value={price}
-                aria-invalid={error ? true : undefined}
-                aria-describedby={
-                  error ? `price-error-${ingredient.id}` : undefined
-                }
-                onChange={(event) => {
-                  setPrice(event.target.value);
-                  setError('');
-                }}
-                onBlur={() => {
-                  if (!saving.current) void savePrice();
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    event.preventDefault();
-                    void savePrice();
-                  }
-                  if (event.key === 'Escape') {
-                    event.preventDefault();
-                    cancelPrice();
-                  }
-                }}
-              />
-            </div>
-            <Button
-              type="button"
-              size="sm"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => void savePrice()}
-            >
-              {ingredientCopy.savePrice}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={cancelPrice}
-            >
-              {ingredientCopy.cancel}
-            </Button>
-          </>
-        ) : (
-          <>
-            <span className="text-base font-semibold tabular-nums">
-              {formatRupiah(ingredient.buyPrice)}
-            </span>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                setPrice(String(ingredient.buyPrice));
-                setEditing(true);
-              }}
-            >
-              {ingredientCopy.editPrice}
-            </Button>
-          </>
-        )}
+            </button>
+          )}
+        </div>
       </div>
       <div className="flex items-center justify-between gap-3 sm:block">
         <span className="text-sm text-muted-foreground sm:hidden">

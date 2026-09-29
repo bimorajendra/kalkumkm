@@ -226,12 +226,15 @@ export function PriceListBuilder() {
       <div className="grid gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-8">
         <section
           aria-label="Atur daftar harga"
-          className="grid content-start gap-5 rounded-[20px] border border-line bg-surface p-4 sm:p-6"
+          className="grid content-start gap-5 rounded-[20px] border border-line bg-surface p-6"
         >
           <div className="grid gap-1.5">
-            <Label htmlFor="price-list-business-name">Nama usaha</Label>
+            <Label htmlFor="price-list-business-name" className="text-base">
+              Nama usaha
+            </Label>
             <Input
               id="price-list-business-name"
+              className="min-h-[52px] rounded-xl px-4 text-base"
               maxLength={60}
               placeholder="Nama usahamu"
               value={nameInput}
@@ -249,11 +252,11 @@ export function PriceListBuilder() {
             ) : null}
           </div>
           <fieldset className="grid gap-1">
-            <legend className="mb-1 text-sm font-medium">Pilih menu</legend>
+            <legend className="mb-1 text-base font-medium">Menu</legend>
             {priced.map(({ recipe, price }) => (
               <label
                 key={recipe.id}
-                className="flex min-h-11 items-center gap-3"
+                className="flex min-h-11 cursor-pointer items-center gap-3 text-base"
               >
                 <Checkbox
                   checked={selectedIds?.has(recipe.id) ?? false}
@@ -263,25 +266,50 @@ export function PriceListBuilder() {
                   }
                 />
                 <span className="flex-1">{recipe.name}</span>
-                <strong className="tabular-nums">
+                <span className="tabular-nums text-muted-foreground">
                   {price === null ? 'Belum bisa dihitung' : formatRupiah(price)}
-                </strong>
+                </span>
               </label>
             ))}
           </fieldset>
-          <fieldset className="grid gap-2">
-            <legend className="mb-1 text-sm font-medium">Ukuran gambar</legend>
+          <fieldset
+            aria-label="Ukuran gambar"
+            className="flex items-center justify-between gap-3"
+          >
+            <span className="text-base font-medium">Ukuran</span>
             <RadioGroup
+              aria-label="Ukuran gambar"
+              className="w-fit shrink-0 grid-cols-2 gap-0 rounded-full bg-surface-soft p-1"
               value={format}
               onValueChange={(value) => setFormat(value as PriceListFormat)}
             >
-              <div className="flex min-h-11 items-center gap-3">
-                <RadioGroupItem id="format-story" value="story" />
-                <Label htmlFor="format-story">Status · 1080 × 1920</Label>
+              <div className="relative">
+                <RadioGroupItem
+                  id="format-story"
+                  value="story"
+                  className="peer sr-only"
+                  aria-label="Story 9:16"
+                />
+                <Label
+                  htmlFor="format-story"
+                  className="flex min-h-11 cursor-pointer items-center justify-center rounded-full px-3 text-sm font-medium transition-colors peer-aria-checked:bg-primary peer-aria-checked:text-primary-foreground peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-ring"
+                >
+                  Story 9:16
+                </Label>
               </div>
-              <div className="flex min-h-11 items-center gap-3">
-                <RadioGroupItem id="format-square" value="square" />
-                <Label htmlFor="format-square">Feed · 1080 × 1080</Label>
+              <div className="relative">
+                <RadioGroupItem
+                  id="format-square"
+                  value="square"
+                  className="peer sr-only"
+                  aria-label="Feed 1:1"
+                />
+                <Label
+                  htmlFor="format-square"
+                  className="flex min-h-11 cursor-pointer items-center justify-center rounded-full px-3 text-sm font-medium transition-colors peer-aria-checked:bg-primary peer-aria-checked:text-primary-foreground peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-ring"
+                >
+                  Feed 1:1
+                </Label>
               </div>
             </RadioGroup>
           </fieldset>
@@ -291,11 +319,11 @@ export function PriceListBuilder() {
             </p>
           ) : null}
           {message ? <output className="text-sm">{message}</output> : null}
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-3">
             <Button
               type="button"
               size="lg"
-              className="min-h-12 rounded-full"
+              className="min-h-[52px] min-w-0 rounded-full px-3 sm:px-6"
               disabled={exporting || !menus.length || !fits}
               onClick={() => void createImage('share')}
             >
@@ -305,7 +333,7 @@ export function PriceListBuilder() {
               type="button"
               variant="outline"
               size="lg"
-              className="min-h-12 rounded-full"
+              className="min-h-[52px] min-w-0 rounded-full px-3 sm:px-6"
               disabled={exporting || !menus.length || !fits}
               onClick={() => void createImage('download')}
             >
