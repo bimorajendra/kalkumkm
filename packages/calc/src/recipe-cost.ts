@@ -1,4 +1,4 @@
-﻿import Big from 'big.js';
+import Big from 'big.js';
 import { CalcError } from './errors';
 import type {
   CalcContext,

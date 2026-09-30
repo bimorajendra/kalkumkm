@@ -8,7 +8,7 @@
 
 ## Ringkasan Produk
 
-PWA kalkulator HPP untuk penjual kue, hampers, frozen food, dan katering rumahan. Data resep dan harga tersimpan di HP dan aplikasi bekerja offline. Server Cloudflare menangani daftar tunggu, checkout Mayar, dan penerbitan kode Pro; Mayar hanya memicu penerbitan kode yang diverifikasi offline.
+Kalkulator HPP online untuk penjual kue, hampers, frozen food, dan katering rumahan. Data resep dan harga tersimpan per akun di Postgres; landing menyediakan demo publik tanpa login. Arsitektur aktif ditetapkan di `docs/CHANGE-001-online-nextjs.md`.
 
 Persona: **Rina** (penjual kue dan hampers, pembeli pertama) dan **Dimas** (frozen food dengan beberapa saluran jual).
 
@@ -16,21 +16,21 @@ Persona: **Rina** (penjual kue dan hampers, pembeli pertama) dan **Dimas** (froz
 
 | Prioritas | Jumlah |
 |----------|-------|
-| Must Have | 24 |
+| Must Have | 30 |
 | Should Have | 9 |
 | Could Have | 4 |
-| Won't Have (v1) | 5 |
-| **Total** | **42** |
+| Won't Have (v1) | 4 |
+| **Total** | **47** |
 
 | Kategori | Must | Should | Could | Won't |
 |---|---|---|---|---|
 | Fondasi | 4 | 0 | 0 | 0 |
 | Bahan | 2 | 1 | 1 | 1 |
 | Resep dan HPP | 3 | 2 | 1 | 1 |
-| Harga dan untung | 5 | 1 | 1 | 0 |
+| Harga dan untung | 7 | 1 | 1 | 0 |
 | Data dan lisensi | 4 | 0 | 1 | 1 |
-| Pesanan custom dan berbagi | 0 | 4 | 0 | 1 |
-| Validasi dan operasional | 6 | 1 | 0 | 0 |
+| Pesanan custom dan berbagi | 2 | 4 | 0 | 0 |
+| Validasi dan operasional | 8 | 1 | 0 | 0 |
 | Platform | 0 | 0 | 0 | 1 |
 
 ---
@@ -41,7 +41,7 @@ Persona: **Rina** (penjual kue dan hampers, pembeli pertama) dan **Dimas** (froz
 
 | ID | Fitur | Ref | Kompleksitas | Acceptance Criteria |
 |----|---------|-----|-----------|-------------------|
-| F1 | Mesin hitung HPP (`packages/calc`) | CR-01 s.d. CR-10, NFR-04 | High | Semua rumus CR tersedia sebagai fungsi murni; contoh brownies PRD bagian 7 menghasilkan angka persis (bahan Rp 27.800, HPP Rp 2.925, harga Rp 5.000, margin 4150 bp, markup 7094 bp, ojol Rp 7.500, untung/jam Rp 22.133, margin 3850 bp setelah telur Rp 2.600); property test margin lulus; siklus sub-resep terdeteksi; cakupan baris ≥ 95% |
+| F1 | Mesin hitung HPP (`packages/calc`) | CR-01 s.d. CR-12, NFR-04, NFR-11 | High | Semua rumus CR tersedia sebagai fungsi murni; contoh brownies PRD bagian 7 menghasilkan angka persis (bahan Rp 27.800, HPP Rp 2.925, harga Rp 5.000, margin 4150 bp, markup 7094 bp, ojol Rp 7.500, untung/jam Rp 22.133, margin 3850 bp setelah telur Rp 2.600); property test margin lulus; siklus sub-resep terdeteksi; What-if dan order memiliki tes deterministik/property untuk validasi, desimal presisi, nilai besar, dan pembulatan; cakupan baris ≥ 95% |
 | F2 | Penyimpanan lokal di perangkat | FR-23, NFR-05 | Medium | Data usaha tersimpan di IndexedDB lewat Dexie dengan skema TECH 7.1; `navigator.storage.persist()` dipanggil saat pertama buka; tidak ada data resep, bahan, atau harga yang dikirim ke jaringan |
 | F3 | PWA offline dan pembaruan | FR-23, NFR-03 | Medium | Setelah kunjungan pertama, kalkulasi, data lokal, dan aktivasi lisensi bekerja offline; checkout dan klaim kode membutuhkan koneksi; aplikasi bisa dipasang dan pembaruan tidak memuat ulang saat pengguna mengetik |
 | F4 | Token desain dan tema terang | NFR-06, DESIGN 4 dan 5 | Low | Semua warna dan tipografi berasal dari token DESIGN.md; semua halaman memakai palet hangat yang sama dan tetap terang pada preferensi perangkat apa pun; kontras WCAG AA |
@@ -90,6 +90,12 @@ Persona: **Rina** (penjual kue dan hampers, pembeli pertama) dan **Dimas** (froz
 | F22 | Penerbitan kode lisensi manual | FR-26, FR-27, TECH 8.2 dan 8.3 | Medium | Admin dapat menandai pembayaran transfer/QRIS lunas dan menerbitkan kode bertanda tangan memakai penanda tangan yang sama dengan jalur Mayar; tersedia tautan aktivasi dan `wa.me`; kunci privat hanya di Worker secret |
 | F23 | Analitik event anonim | PRD 13, NFR-05, TECH 10 | Low | Event di TECH 10 terkirim ke Umami tanpa nama bahan, resep, atau harga; kegagalan analitik tidak mengganggu aplikasi; nama event dibatasi daftar yang diizinkan |
 | F41 | Checkout otomatis lewat Mayar | FR-32, TECH 9.1 dan 9.3 | High | API membuat invoice v2 dengan harga dari `PRICING`; `claimToken` 32 byte hanya disimpan sebagai hash di D1 dan token mentah hanya di perangkat; pembayaran hanya dianggap lunas setelah `GET invoice` mengonfirmasi status `paid` dan nominal cocok; webhook idempoten, balas cepat, lalu verifikasi di `waitUntil`; klaim lisensi memakai token dan dibatasi cek invoice sekali per 30 detik; uji hanya dengan sandbox/mock; transfer manual tetap tersedia sebagai cadangan |
+| F37 | Pesanan menjadi daftar belanja | FR-28, FR-35 | Medium | Dari resep dan jumlah porsi, aplikasi menskalakan takaran tepat, mengekspansi sub-resep, menjumlahkan kebutuhan bahan, membulatkan kemasan beli ke atas, dan menampilkan estimasi biaya tanpa menyimpan pesanan |
+| F43 | What-if kenaikan harga bahan | FR-33, CR-01 s.d. CR-06 | Medium | Pengguna memasukkan kenaikan persen untuk satu bahan; selisih biaya berpresisi penuh dihitung sementara tanpa mengubah snapshot; perubahan HPP dan margin semua resep terkait tampil tanpa menulis snapshot ke server |
+| F44 | Analisis dampak lintas resep | FR-33, FR-13 | Medium | Menunjukkan resep terdampak, perubahan HPP/margin sebelum-sesudah, harga evaluasi, dan jumlah resep yang turun di bawah target; resep yang tidak memakai bahan tidak ditandai |
+| F45 | Kalkulator order/batch | FR-34, CR-03 s.d. CR-08 | Medium | Pilih resep dan jumlah porsi; takaran diskalakan tepat sesuai pesanan; menampilkan HPP, total biaya produksi, omzet, dan laba berdasarkan harga jual tersimpan atau saran |
+| F46 | Kalkulator publik | FR-36, CR-01 s.d. CR-11 | Medium | Halaman `/kalkulator-hpp`, `/margin`, `/bep`, `/harga-jual`, dan `/harga-ojol` dapat digunakan tanpa login, memakai `packages/calc`, dan tidak menyimpan input |
+| F47 | SEO use-case | FR-37 | Medium | Halaman brownies, katering, frozen food, rice bowl, minuman, dan hampers memiliki metadata unik, tautan kalkulator, konten kontekstual, serta tidak menampilkan klaim/testimoni/angka pasar rekaan |
 
 ---
 
@@ -120,7 +126,6 @@ Persona: **Rina** (penjual kue dan hampers, pembeli pertama) dan **Dimas** (froz
 
 | ID | Fitur | Kategori | Catatan |
 |----|---------|---------|-------|
-| F37 | Pesanan menjadi daftar belanja | Pesanan custom dan berbagi | FR-28, direncanakan v1.1 |
 | F38 | Label kemasan otomatis | Resep dan HPP | FR-29, direncanakan v1.2 |
 | F39 | Tampilan riwayat harga bahan | Bahan | v1.2; datanya sudah dicatat sejak F6 |
 | F40 | Akun dan sinkronisasi cloud terenkripsi | Data dan lisensi | TECH 16, v2 |
@@ -131,7 +136,7 @@ Persona: **Rina** (penjual kue dan hampers, pembeli pertama) dan **Dimas** (froz
 ## Pemeriksaan Mandiri
 
 Dijalankan saat penyusunan:
-- Jumlah per prioritas dihitung ulang dari tabel: Must 24 (F1 s.d. F23 ditambah F41), Should 9 (F24 s.d. F32), Could 4 (F33 s.d. F36), Won't 5 (F37 s.d. F40 dan F42), total 42. Tabel kategori dijumlahkan per kolom dan cocok (24, 9, 4, 5).
-- Setiap FR-01 s.d. FR-32 di PRD dipetakan ke tepat satu fitur: FR-01/02 ke F5, FR-03 ke F6, FR-04 ke F24, FR-05 ke F33, FR-06 ke F7, FR-07 ke F8, FR-08 ke F9, FR-09 ke F25, FR-10 ke F26, FR-11 ke F34, FR-12 ke F10, FR-13 ke F11, FR-14 ke F12, FR-15 ke F13, FR-16 ke F27, FR-17 ke F14, FR-18 ke F35, FR-19 ke F28, FR-20 ke F29, FR-21 ke F30, FR-22 ke F31, FR-23 ke F2/F3, FR-24 ke F15, FR-25 ke F16, FR-26 ke F17/F22, FR-27 ke F18/F22, FR-28 ke F37, FR-29 ke F38, FR-30 ke F19, FR-31 ke F20/F21/F32, FR-32 ke F41.
+- Jumlah per prioritas dihitung ulang dari tabel: Must 30 (F1 s.d. F23, F37, F41, dan F43 s.d. F47), Should 9 (F24 s.d. F32), Could 4 (F33 s.d. F36), Won't 4 (F38 s.d. F40 dan F42), total 47. Tabel kategori dijumlahkan per kolom dan cocok (30, 9, 4, 4).
+- Setiap FR-01 s.d. FR-37 di PRD dipetakan ke fitur: FR-01/02 ke F5, FR-03 ke F6, FR-04 ke F24, FR-05 ke F33, FR-06 ke F7, FR-07 ke F8, FR-08 ke F9, FR-09 ke F25, FR-10 ke F26, FR-11 ke F34, FR-12 ke F10, FR-13 ke F11/F44, FR-14 ke F12, FR-15 ke F13, FR-16 ke F27, FR-17 ke F14, FR-18 ke F35, FR-19 ke F28, FR-20 ke F29, FR-21 ke F30, FR-22 ke F31, FR-23 ke F2, FR-24 ke F15, FR-25 ke F16, FR-26 ke F41, FR-27 ke F41, FR-28 ke F37, FR-29 ke F38, FR-30 ke F19, FR-31 ke F20/F21/F32, FR-32 ke F41, FR-33 ke F43/F44, FR-34 ke F45, FR-35 ke F37, FR-36 ke F46, FR-37 ke F47.
 - Fitur yang tidak berasal dari FR (F4, F21, F23, F36, F39, F40, F42) diberi referensi ke NFR, BG, TECH, atau DESIGN.
 - Landing dan daftar tunggu tetap gratis pada masa validasi; checkout Mayar dibuka saat aplikasi rilis. F41 tetap ID yang sama dan naik ke Must.

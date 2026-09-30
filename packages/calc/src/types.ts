@@ -1,4 +1,4 @@
-﻿import type Big from 'big.js';
+import type Big from 'big.js';
 
 export type BaseUnit = 'g' | 'ml' | 'pcs';
 export type Unit = string;
@@ -66,4 +66,22 @@ export interface QuoteOption {
 export interface ChannelPrice {
   price: number;
   marginBp: number;
+}
+export interface ShoppingListItem {
+  ingredientId: string;
+  name: string;
+  neededQuantity: Big;
+  baseUnit: BaseUnit;
+  purchaseQuantity: Big;
+  purchaseUnit: Unit;
+  packageCount: number;
+  estimatedPurchaseCost: Big;
+}
+export interface OrderTotals {
+  portions: number;
+  pricePerPortion: number;
+  productionCost: Big;
+  grossRevenue: Big;
+  commissionCost: Big;
+  profit: Big;
 }

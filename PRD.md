@@ -45,14 +45,18 @@ Target di atas adalah sasaran internal, bukan klaim publik. Jangan tampilkan ang
 - Gambar daftar harga untuk status WA/Instagram
 - Cadangan dan pulihkan data ke file
 - Kode aktivasi Pro melalui checkout Mayar, dengan transfer manual atau QRIS statis sebagai cadangan
+- What-if perubahan harga bahan dan analisis dampak ke HPP/margin resep, tanpa mengubah data tersimpan
+- Kalkulator order yang menskalakan resep ke jumlah porsi dan menghasilkan daftar belanja
+- Kalkulator publik HPP, margin, BEP, harga jual, dan harga ojol tanpa login
+- Halaman SEO untuk brownies, katering, frozen food, rice bowl, minuman, dan hampers
 
 ### Out of Scope (v1.0)
 
 - Akun, login, dan sinkronisasi cloud antar perangkat
 - Pencatatan penjualan harian, kasir/POS, dan stok gudang
-- Pesanan menjadi daftar belanja (masuk v1.1)
 - Label kemasan otomatis dan riwayat harga bahan (masuk v1.2)
-- Marketplace, ojol, atau WhatsApp API
+- Integrasi marketplace/ojol dan biaya promo lanjutan; kalkulator harga ojol dasar tetap tersedia
+- WhatsApp API
 - Aplikasi native Android/iOS
 - Fitur multi-pengguna atau karyawan
 - Database harga pasar bersama (setiap pengguna memasukkan harga sendiri)
@@ -182,7 +186,7 @@ Prioritas memakai MoSCoW: **M** = Must (MVP), **S** = Should (MVP bila waktu cuk
 | FR-25 | Batas versi gratis: maksimal 3 resep tersimpan dan 1 saluran | M |
 | FR-26 | Akun menjadi Pro otomatis setelah pembayaran Mayar terverifikasi di server | M |
 | FR-27 | Halaman beli menyediakan checkout Mayar; harga dan status pembayaran ditentukan server | M |
-| FR-28 | Pesanan menjadi daftar belanja yang dibulatkan ke ukuran kemasan | W (v1.1) |
+| FR-28 | Pesanan menjadi daftar belanja yang dibulatkan ke ukuran kemasan | M |
 | FR-29 | Label kemasan otomatis (komposisi, tanggal produksi) | W (v1.2) |
 
 ### 8.6 Validasi, daftar tunggu, dan pembayaran
@@ -192,6 +196,11 @@ Prioritas memakai MoSCoW: **M** = Must (MVP), **S** = Should (MVP bila waktu cuk
 | FR-30 | Landing page menampilkan demo kalkulator yang bisa dipakai dan memakai mesin hitung yang sama dengan aplikasi | M |
 | FR-31 | Form daftar tunggu gratis memvalidasi persetujuan, kolom jebakan bot, dan batas kiriman; admin dapat melihat daftar dan mengunduh CSV | M |
 | FR-32 | Checkout Mayar membuat invoice server-side, memverifikasi pembayaran lewat webhook dan API Mayar, lalu membuka Pro pada akun secara otomatis | M |
+| FR-33 | Pengguna dapat mensimulasikan persentase kenaikan satu bahan dan melihat perubahan HPP/margin semua resep terkait tanpa menyimpan perubahan harga | M |
+| FR-34 | Pengguna dapat memilih resep dan jumlah porsi pesanan; takaran bahan diskalakan tepat ke jumlah itu, lalu aplikasi menampilkan HPP, total biaya, omzet, dan laba | M |
+| FR-35 | Daftar belanja dari kalkulator order mengagregasi bahan dasar, menampilkan kebutuhan bersih, jumlah kemasan beli yang dibulatkan ke atas, dan estimasi biayanya | M |
+| FR-36 | Pengunjung tanpa login dapat memakai kalkulator HPP, margin, BEP, harga jual, dan harga ojol; hasil dihitung dengan `packages/calc` dan tidak disimpan | M |
+| FR-37 | Halaman SEO use-case untuk brownies, katering, frozen food, rice bowl, minuman, dan hampers memuat petunjuk kontekstual, metadata unik, dan tautan ke kalkulator terkait | M |
 
 ## 9. Non-Functional Requirements
 
@@ -207,6 +216,7 @@ Prioritas memakai MoSCoW: **M** = Must (MVP), **S** = Should (MVP bila waktu cuk
 | NFR-08 | Tampilan: mobile-first, lebar minimum 320 px; tata letak dua kolom mulai 1024 px (lihat `DESIGN.md`) |
 | NFR-09 | Ketahanan data: cadangan Postgres harian di luar server, dan pemulihannya pernah diuji |
 | NFR-10 | Biaya: satu server sendiri (2 core, 4 GiB) dan domain. Biaya Mayar masuk perhitungan biaya operasional. |
+| NFR-11 | Test kalkulator mencakup contoh brownies, property harga/margin, nilai nol, negatif/invalid, desimal presisi, input besar, pembulatan, channel, What-if, dan order/daftar belanja. |
 
 ## 10. Model Data (garis besar)
 

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { articles } from '@/features/articles/content';
+import { useCases } from '@/features/seo/use-cases';
 
 const publicPaths = [
   '/',
@@ -8,6 +9,11 @@ const publicPaths = [
   '/cara-hitung',
   '/kebijakan-privasi',
   '/artikel',
+  '/kalkulator-hpp',
+  '/margin',
+  '/bep',
+  '/harga-jual',
+  '/harga-ojol',
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -23,6 +29,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: 'yearly' as const,
     priority: 0.6,
   }));
+  const useCasePages = useCases.map((item) => ({
+    url: new URL(`/usaha/${item.slug}`, origin).href,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
 
-  return [...staticPages, ...articlePages];
+  return [...staticPages, ...articlePages, ...useCasePages];
 }

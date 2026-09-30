@@ -26,7 +26,7 @@ test('J-1: resep contoh menghasilkan angka PRD di kartu hasil', async ({
     .first();
   await expect(card.getByText('Rp 5.000', { exact: true })).toBeVisible();
   await expect(card.getByText('41,5%', { exact: true })).toBeVisible();
-  await expect(page.getByText(/Markup 70,9% artinya/)).toBeVisible();
+  await expect(page.getByText(/Markup 70,9% di atas HPP/)).toBeVisible();
   await expect(card.getByText('Rp 22.133', { exact: true })).toBeVisible();
   await expect(page.getByText('Rp 2.925').first()).toBeVisible();
 });
@@ -56,6 +56,41 @@ test('bahan: alarm margin muncul setelah harga bahan naik', async ({
   await expect(
     page.getByText('menu untungnya turun di bawah target'),
   ).toHaveCount(0);
+});
+
+test('bahan: simulasi kenaikan harga menampilkan dampak tanpa menyimpan harga', async ({
+  page,
+}) => {
+  await login(page);
+  await seedBrownies(page);
+  await page.goto('/bahan');
+  const egg = page.getByRole('listitem').filter({ hasText: 'Telur' });
+  await egg.getByRole('button', { name: 'Simulasikan dampak' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Dampak harga Telur' });
+  await expect(dialog.getByText('Harga simulasi Rp 2.300.')).toBeVisible();
+  await expect(dialog.getByText('1 resep terdampak')).toBeVisible();
+  await expect(dialog.getByText(/HPP Rp 2.925 → Rp 3.000/)).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(
+    egg.getByRole('button', { name: 'Ubah harga Telur' }),
+  ).toContainText('2.000');
+});
+
+test('order resep menghitung total dan daftar belanja', async ({ page }) => {
+  await login(page);
+  await seedBrownies(page);
+  const order = page.getByRole('region', {
+    name: 'Hitung pesanan dan belanja',
+  });
+  await order.getByLabel('Jumlah porsi').fill('50');
+  await order.getByLabel('Harga jual per porsi (Rp)').fill('5000');
+  await order.getByLabel('Komisi saluran (%)').fill('0');
+  await order.getByRole('button', { name: 'Hitung pesanan' }).click();
+  await expect(order.getByText('Rp 146.250')).toBeVisible();
+  await expect(order.getByText('Rp 250.000')).toBeVisible();
+  await expect(order.getByText('Rp 103.750')).toBeVisible();
+  await expect(order.getByText(/Tepung terigu: perlu 468.75 g/)).toBeVisible();
+  await expect(order.getByText(/Telur: perlu 12.5 pcs/)).toBeVisible();
 });
 
 test('bahan: form memvalidasi isian dan menolak nama kembar', async ({

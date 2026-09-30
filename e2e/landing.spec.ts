@@ -58,7 +58,46 @@ test('artikel: canonical, robots, dan sitemap memuat halaman publik', async ({
   expect(sitemap.ok()).toBe(true);
   const sitemapBody = await sitemap.text();
   expect(sitemapBody).toContain('/artikel/cara-menghitung-hpp-makanan');
+  expect(sitemapBody).toContain('/kalkulator-hpp');
+  expect(sitemapBody).toContain('/usaha/hpp-brownies');
   expect(sitemapBody).not.toContain('/dashboard');
+});
+
+test('kalkulator publik menghitung HPP dan titik impas tanpa login', async ({
+  page,
+}) => {
+  await page.goto('/kalkulator-hpp');
+  await page.getByLabel('Total biaya bahan satu adonan (Rp)').fill('27800');
+  await page.getByLabel('Biaya produksi lain satu adonan (Rp)').fill('3000');
+  await page.getByLabel('Jumlah porsi yang dihasilkan').fill('16');
+  await page.getByLabel('Biaya kemasan per porsi (Rp)').fill('1000');
+  await page.getByRole('button', { name: 'Hitung sekarang' }).click();
+  await expect(page.getByText('HPP per porsi: Rp 2.925')).toBeVisible();
+
+  await page.goto('/bep');
+  await page.getByLabel('Biaya tetap yang ingin ditutup (Rp)').fill('100000');
+  await page.getByLabel('Biaya variabel per unit / HPP (Rp)').fill('3000');
+  await page.getByLabel('Harga jual per unit (Rp)').fill('5000');
+  await page.getByLabel('Komisi saluran jual (%)').fill('10');
+  await page.getByRole('button', { name: 'Hitung sekarang' }).click();
+  await expect(page.getByText('Titik impas: 67 unit')).toBeVisible();
+});
+
+test('halaman use-case menautkan pengunjung ke kalkulator HPP', async ({
+  page,
+}) => {
+  await page.goto('/usaha/hpp-brownies');
+  await expect(
+    page.getByRole('heading', {
+      name: 'Cara menghitung HPP brownies per potong',
+    }),
+  ).toBeVisible();
+  await expect(page.locator('link[rel=canonical]')).toHaveAttribute(
+    'href',
+    /\/usaha\/hpp-brownies$/,
+  );
+  await page.getByRole('link', { name: 'Buka kalkulator HPP' }).click();
+  await expect(page).toHaveURL(/\/kalkulator-hpp$/);
 });
 
 test('cara hitung: rincian HPP memuat angka contoh PRD', async ({ page }) => {
@@ -121,6 +160,12 @@ for (const path of [
   '/masuk',
   '/artikel',
   '/artikel/cara-menghitung-hpp-makanan',
+  '/kalkulator-hpp',
+  '/margin',
+  '/bep',
+  '/harga-jual',
+  '/harga-ojol',
+  '/usaha/hpp-brownies',
 ]) {
   test(`${path} lolos axe`, async ({ page }) => {
     await page.goto(path);

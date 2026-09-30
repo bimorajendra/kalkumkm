@@ -2,6 +2,7 @@
 
 import { CalcError } from '@takaran/calc';
 import { ChevronLeft } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -16,6 +17,14 @@ import { Button } from '@/components/ui/button';
 import { PaywallDialog } from '@/features/billing/paywall-dialog';
 import { recipeCopy } from './copy';
 import { RecipeEditor } from './recipe-editor';
+
+const OrderCalculator = dynamic(
+  () =>
+    import('./order-calculator').then((module) => ({
+      default: module.OrderCalculator,
+    })),
+  { loading: () => null },
+);
 
 export function ResepDetailScreen({ id }: { id: string }) {
   const { snapshot, results, error } = useRecipeResults();
@@ -114,6 +123,7 @@ export function ResepDetailScreen({ id }: { id: string }) {
         onDeleted={() => router.push('/dashboard/resep')}
         onDuplicate={() => void duplicate()}
       />
+      <OrderCalculator recipeId={recipe.id} />
       <PaywallDialog
         open={paywall}
         trigger="recipe"

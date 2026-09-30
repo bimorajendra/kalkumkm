@@ -1,7 +1,11 @@
 ﻿export type { CalcErrorCode } from './errors';
 export { CalcError } from './errors';
 export { findCycles } from './graph';
-export { actualMarginBp, markupBp, suggestPrice } from './pricing';
+export {
+  actualMarginBp,
+  markupBp,
+  suggestPrice,
+} from './pricing';
 export { profitPerHour, profitPerPortion } from './profit';
 export { priceForChannel, quoteTotals } from './quote';
 export { recalcAll } from './recalc';

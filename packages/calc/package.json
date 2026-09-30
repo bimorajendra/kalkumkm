@@ -3,8 +3,12 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "sideEffects": false,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./order": "./src/order.ts",
+    "./public-pricing": "./src/public-pricing.ts",
+    "./scenario": "./src/scenario.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

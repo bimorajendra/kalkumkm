@@ -2,18 +2,28 @@
 
 import { unitPrice } from '@takaran/calc';
 import { formatRupiah } from '@takaran/ui/format';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useMemo, useRef, useState } from 'react';
 import {
   errorMessage,
+  type Results,
+  useRecipeResults,
   useRun,
-  useSnapshot,
 } from '@/components/takaran/data-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { usageCount } from '@/domain/ingredients';
-import type { IngredientRow } from '@/domain/types';
+import type { IngredientRow, Snapshot } from '@/domain/types';
 import { ingredientCopy } from './copy';
+
+const PriceImpactSimulator = dynamic(
+  () =>
+    import('./price-impact-simulator').then((module) => ({
+      default: module.PriceImpactSimulator,
+    })),
+  { loading: () => null },
+);
 
 const packageFormat = new Intl.NumberFormat('id-ID', {
   maximumFractionDigits: 3,
@@ -32,16 +42,21 @@ function IngredientRowView({
   ingredient,
   used,
   onEdit,
+  snapshot,
+  results,
 }: {
   ingredient: IngredientRow;
   used: number;
   onEdit: (ingredient: IngredientRow) => void;
+  snapshot: Snapshot;
+  results: Results;
 }) {
   const run = useRun();
   const [editing, setEditing] = useState(false);
   const [price, setPrice] = useState(String(ingredient.buyPrice));
   const [error, setError] = useState('');
   const [showUsage, setShowUsage] = useState(false);
+  const [showPriceImpact, setShowPriceImpact] = useState(false);
   const saving = useRef(false);
 
   const base =
@@ -101,6 +116,26 @@ function IngredientRowView({
           Isi kemasan {packageFormat.format(ingredient.packSize)}{' '}
           {ingredient.buyUnit}
         </span>
+        <div className="mt-1">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => setShowPriceImpact(true)}
+          >
+            Simulasikan dampak
+          </Button>
+          {showPriceImpact ? (
+            <PriceImpactSimulator
+              ingredient={ingredient}
+              snapshot={snapshot}
+              results={results}
+              initialOpen
+              hideTrigger
+              onClose={() => setShowPriceImpact(false)}
+            />
+          ) : null}
+        </div>
       </div>
       <div className="grid grid-cols-[auto_1fr] items-center gap-2 sm:block">
         <span className="text-sm text-muted-foreground sm:hidden">
@@ -226,7 +261,8 @@ export function IngredientList({
   query: string;
   onEdit: (ingredient: IngredientRow) => void;
 }) {
-  const { ingredients, recipes } = useSnapshot();
+  const { snapshot, results } = useRecipeResults();
+  const { ingredients, recipes } = snapshot;
   const rows = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase('id-ID');
     return ingredients
@@ -271,6 +307,8 @@ export function IngredientList({
             ingredient={ingredient}
             used={used}
             onEdit={onEdit}
+            snapshot={snapshot}
+            results={results}
           />
         ))}
       </ul>

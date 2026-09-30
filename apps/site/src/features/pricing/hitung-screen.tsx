@@ -328,9 +328,8 @@ function CalculatorScreen({
           />
           {!channelError && result.hpp.gt(0) && price > 0 ? (
             <p className="rounded-xl border border-input/40 bg-card p-4 text-sm">
-              Markup {formatPercent(markup)} artinya harga jual{' '}
-              {formatPercent(markup)} di atas modal. Margin{' '}
-              {formatPercent(actualMargin)} artinya dari setiap{' '}
+              Markup {formatPercent(markup)} di atas HPP. Margin{' '}
+              {formatPercent(actualMargin)} berarti dari setiap{' '}
               {formatRupiah(price)} yang kamu terima,{' '}
               {formatRupiah(profitPerPortion(price, result.hpp, commissionBp))}{' '}
               adalah untung.
