@@ -114,14 +114,22 @@ export async function completePayment(
     invoice.customer?.email?.toLowerCase() !== owner.email.toLowerCase()
   )
     return false;
-  await db.transaction(async (tx) => {
+  return db.transaction(async (tx) => {
     await tx.execute(
       sql`select pg_advisory_xact_lock(hashtext(${order.userId}))`,
     );
-    await tx
+    const paid = await tx
       .update(orders)
       .set({ status: 'paid', paidAt: now })
-      .where(and(eq(orders.id, order.id), eq(orders.status, 'pending')));
+      .where(and(eq(orders.id, order.id), eq(orders.status, 'pending')))
+      .returning({ id: orders.id });
+    if (paid.length === 0) {
+      const [current] = await tx
+        .select({ status: orders.status })
+        .from(orders)
+        .where(eq(orders.id, order.id));
+      return current?.status === 'paid';
+    }
     await tx
       .insert(entitlements)
       .values({
@@ -132,8 +140,8 @@ export async function completePayment(
         grantedAt: now,
       })
       .onConflictDoNothing();
+    return true;
   });
-  return true;
 }
 
 /** Cek ulang ke Mayar. Pesanan yang kedaluwarsa atau ditutup dibatalkan. */
@@ -271,14 +279,23 @@ export async function handleMayarEvent(
 export async function markRefunded(db: Db, orderId: string): Promise<void> {
   await db.transaction(async (tx) => {
     const [order] = await tx
-      .select()
+      .select({ userId: orders.userId })
       .from(orders)
       .where(eq(orders.id, orderId));
     if (!order) throw new BillingError('NOT_FOUND', 'Pesanan tidak ditemukan.');
-    await tx
+    await tx.execute(
+      sql`select pg_advisory_xact_lock(hashtext(${order.userId}))`,
+    );
+    const refunded = await tx
       .update(orders)
       .set({ status: 'refunded' })
-      .where(eq(orders.id, orderId));
+      .where(and(eq(orders.id, orderId), eq(orders.status, 'paid')))
+      .returning({ id: orders.id });
+    if (refunded.length === 0)
+      throw new BillingError(
+        'NOT_FOUND',
+        'Pesanan tidak bisa ditandai refund.',
+      );
     await tx
       .delete(entitlements)
       .where(

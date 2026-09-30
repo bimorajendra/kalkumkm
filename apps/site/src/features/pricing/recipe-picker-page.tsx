@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { formatRupiah } from "@takaran/ui/format";
-import { ChevronRight } from "lucide-react";
-import Link from "next/link";
-import { useRecipeResults } from "@/components/takaran/data-provider";
-import { EmptyState, Page, PageTitle } from "@/components/takaran/page";
-import { Button } from "@/components/ui/button";
+import { formatRupiah } from '@takaran/ui/format';
+import { ChevronRight } from 'lucide-react';
+import Link from 'next/link';
+import { useRecipeResults } from '@/components/takaran/data-provider';
+import { EmptyState, Page, PageTitle } from '@/components/takaran/page';
+import { Button } from '@/components/ui/button';
 
 export function RecipePickerPage() {
   const { snapshot, error } = useRecipeResults();
@@ -43,9 +43,9 @@ export function RecipePickerPage() {
                   <span className="grid gap-1">
                     <span className="font-semibold">{recipe.name}</span>
                     <span className="text-sm text-muted-foreground">
-                      {recipe.yieldPortions} porsi per adonan ·{" "}
+                      {recipe.yieldPortions} porsi per adonan ·{' '}
                       {recipe.currentPrice === null
-                        ? "Harga jual belum diatur"
+                        ? 'Harga jual belum diatur'
                         : `Harga jual ${formatRupiah(recipe.currentPrice)}`}
                     </span>
                   </span>

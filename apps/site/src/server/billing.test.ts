@@ -4,6 +4,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import {
   BillingError,
   checkOrder,
+  completePayment,
   createCheckout,
   currentPrice,
   handleMayarEvent,
@@ -190,6 +191,35 @@ describe('verifikasi pembayaran', () => {
       false,
     );
     expect((await order(other.orderId)).status).toBe('cancelled');
+  });
+
+  it('tidak membuka Pro bila pesanan berubah sebelum konfirmasi selesai', async () => {
+    const mayar = fakeMayar();
+    const { orderId } = await createCheckout(
+      db,
+      mayar.config,
+      account('u3'),
+      input,
+    );
+    const staleOrder = await order(orderId);
+    const invoice = [...mayar.invoices.values()][0];
+    if (!invoice) throw new Error('invoice tidak ada');
+    invoice.status = 'paid';
+    await db
+      .update(orders)
+      .set({ status: 'cancelled' })
+      .where(eq(orders.id, orderId));
+
+    expect(
+      await completePayment(db, staleOrder, {
+        id: staleOrder.mayarInvoiceId ?? '',
+        amount: staleOrder.priceIdr,
+        status: invoice.status,
+        customer: { email: invoice.email },
+      }),
+    ).toBe(false);
+    expect(await isPro(db, 'u3')).toBe(false);
+    expect((await order(orderId)).status).toBe('cancelled');
   });
 });
 

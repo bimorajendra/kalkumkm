@@ -9,6 +9,7 @@ import {
   type RecipeResult,
 } from '@takaran/calc';
 import { formatPercent, formatRupiah } from '@takaran/ui/format';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import {
@@ -27,12 +28,19 @@ import {
 } from '@/components/ui/sheet';
 import type { ChannelRow, RecipeRow, Snapshot } from '@/domain/types';
 import { ChannelPriceTable } from '@/features/channels/channel-price-table';
-import { MarginAlarm } from '@/features/margin-alarm/margin-alarm';
 import { CalculatorResult } from './calculator-result';
 import { pricingCopy } from './copy';
 import { CurrentPriceInput } from './current-price-input';
 import { SliderPanel } from './slider-panel';
 import { useCalculator } from './use-calculator';
+
+const MarginAlarm = dynamic(
+  () =>
+    import('@/features/margin-alarm/margin-alarm').then(
+      (module) => module.MarginAlarm,
+    ),
+  { loading: () => null },
+);
 
 export function HitungScreen({
   initialRecipeId,
@@ -274,7 +282,9 @@ function CalculatorScreen({
         >
           {fromPicker ? 'Kembali ke pilih resep' : 'Kembali ke detail resep'}
         </Link>
-        <MarginAlarm />
+        {settings.marginAlarm && !settings.marginAlarm.dismissed ? (
+          <MarginAlarm />
+        ) : null}
         <section aria-labelledby="calculator-title" className="grid gap-5">
           <h1
             id="calculator-title"

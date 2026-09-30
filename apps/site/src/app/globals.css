@@ -117,13 +117,6 @@
   color: var(--mk-ink);
   font-variant-numeric: tabular-nums;
 }
-.mk h1,
-.mk h2,
-.mk h3 {
-  font-family: var(--font-jakarta), sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-}
 .mk :focus-visible {
   outline: 2px solid var(--mk-primary);
   outline-offset: 3px;
@@ -230,6 +223,14 @@
   .mk a {
     color: inherit;
   }
+}
+
+.mk h1,
+.mk h2,
+.mk h3 {
+  font-family: var(--font-jakarta), sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .takaran-app a:not([data-slot="button"]) {

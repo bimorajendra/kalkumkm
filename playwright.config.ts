@@ -7,7 +7,7 @@ const themes = ['light', 'dark'] as const;
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
-  workers: process.env.CI ? 2 : 4,
+  workers: process.env.CI ? 2 : 1,
   reporter: 'list',
   use: {
     baseURL: `http://localhost:${port}`,
