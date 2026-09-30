@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  CalcError,
-  type RecipeResult,
-  recalcAll,
-  unitFactor,
-} from '@takaran/calc';
+import { CalcError, type RecipeResult, recalcAll } from '@takaran/calc';
 import { PRICING } from '@takaran/schema';
 import { formatRupiah } from '@takaran/ui/format';
 import Link from 'next/link';
@@ -31,16 +26,16 @@ import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { IngredientRow, RecipeRow } from '@/domain/types';
+import type { RecipeRow } from '@/domain/types';
 import { PaywallDialog } from '@/features/billing/paywall-dialog';
 import { recipeCopy } from './copy';
 import { recipeInputFromForm } from './recipe-input';
+import { RecipeItemsSection } from './recipe-items-section';
+import { commonUnits } from './recipe-units';
 import { type RecipeFormValues, recipeFormSchema } from './schema';
 
 const blank: RecipeFormValues = {
@@ -78,7 +73,6 @@ function valuesFor(recipe?: RecipeRow): RecipeFormValues {
   };
 }
 
-const commonUnits = ['g', 'kg', 'ml', 'l', 'butir', 'pcs'];
 const recipeSteps = [
   {
     title: 'Detail resep',
@@ -94,40 +88,6 @@ const recipeSteps = [
       'Isi kemasan dan energi. Tenaga kerja bisa ditambahkan bila diperlukan.',
   },
 ];
-
-/** Satuan yang boleh dipakai satu baris: harus satu dimensi dengan bahannya. */
-function unitsFor(
-  item: RecipeFormValues['items'][number],
-  ingredients: IngredientRow[],
-  recipes: RecipeRow[],
-): string[] {
-  const ingredient =
-    item.refType === 'ingredient'
-      ? ingredients.find((row) => row.id === item.refId)
-      : undefined;
-  const sub =
-    item.refType === 'recipe'
-      ? recipes.find((row) => row.id === item.refId)
-      : undefined;
-  const unit = ingredient?.buyUnit ?? sub?.subRecipeYield?.unit;
-  if (!unit) return [];
-  const custom = ingredient?.customUnits ?? [];
-  let dimension: string;
-  try {
-    dimension = unitFactor(unit, custom).base;
-  } catch {
-    return [unit];
-  }
-  return [
-    ...new Set([...commonUnits, ...custom.map((row) => row.name)]),
-  ].filter((candidate) => {
-    try {
-      return unitFactor(candidate, custom).base === dimension;
-    } catch {
-      return false;
-    }
-  });
-}
 
 export function RecipeEditor({
   open,
@@ -202,6 +162,13 @@ export function RecipeEditor({
       ),
     }));
     setErrors((current) => ({ ...current, [`items.${index}.${field}`]: '' }));
+  }
+
+  function removeItem(index: number) {
+    setValues((current) => ({
+      ...current,
+      items: current.items.filter((_, itemIndex) => itemIndex !== index),
+    }));
   }
 
   function addItem(value: string) {
@@ -477,180 +444,19 @@ export function RecipeEditor({
       >
         <div className="grid content-start gap-5">
           {inline || step === 1 ? (
-            <fieldset
-              className={
-                inline
-                  ? 'grid gap-3 rounded-2xl border border-line bg-surface p-4 sm:p-6'
-                  : 'grid gap-3'
-              }
-            >
-              <legend className="mb-1 text-lg font-semibold">
-                {inline ? 'Bahan per adonan' : 'Bahan dan takaran'}
-              </legend>
-              {!inline ? (
-                <p className="text-sm text-muted-foreground">
-                  Pilih bahan yang sudah kamu simpan. Takaran awal mengikuti
-                  satuan beli dan masih bisa diubah.
-                </p>
-              ) : null}
-              {errors.items ? (
-                <p role="alert" className="text-sm text-destructive">
-                  {errors.items}
-                </p>
-              ) : null}
-              {values.items.length > 0 ? (
-                <ul className="grid divide-y divide-line">
-                  {values.items.map((item, index) => {
-                    const ingredient =
-                      item.refType === 'ingredient'
-                        ? ingredients.find(({ id }) => id === item.refId)
-                        : undefined;
-                    const sub =
-                      item.refType === 'recipe'
-                        ? recipes.find(({ id }) => id === item.refId)
-                        : undefined;
-                    const name = (ingredient ?? sub)?.name;
-                    const error =
-                      errors[`items.${index}.quantity`] ??
-                      errors[`items.${index}.refId`];
-                    return (
-                      <li
-                        key={`${item.refType}-${item.refId}`}
-                        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 py-3 sm:grid-cols-[minmax(0,1fr)_7rem_6rem_auto]"
-                      >
-                        <span className="min-w-0 font-medium">
-                          {name ?? 'Bahan ini sudah dihapus'}
-                        </span>
-                        {name ? (
-                          <div className="col-span-2 grid grid-cols-[minmax(0,1fr)_minmax(5.5rem,auto)] gap-2 sm:col-span-2 sm:col-start-2 sm:row-start-1">
-                            <Input
-                              aria-label={`Takaran ${name}`}
-                              aria-invalid={error ? true : undefined}
-                              inputMode="decimal"
-                              value={item.quantity}
-                              onChange={(event) =>
-                                updateItem(
-                                  index,
-                                  'quantity',
-                                  event.target.value,
-                                )
-                              }
-                            />
-                            <Select
-                              value={item.unit}
-                              onValueChange={(value) =>
-                                updateItem(index, 'unit', value)
-                              }
-                            >
-                              <SelectTrigger
-                                aria-label={`Satuan ${name}`}
-                                className="w-full px-2"
-                              >
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {unitsFor(item, ingredients, recipes).map(
-                                  (option) => (
-                                    <SelectItem key={option} value={option}>
-                                      {option}
-                                    </SelectItem>
-                                  ),
-                                )}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        ) : (
-                          <span className="col-span-2 text-sm text-destructive sm:col-start-2 sm:row-start-1">
-                            Hapus baris ini atau pilih bahan lain.
-                          </span>
-                        )}
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="col-start-2 row-start-1 sm:col-start-4"
-                          onClick={() =>
-                            setValues((current) => ({
-                              ...current,
-                              items: current.items.filter(
-                                (_, i) => i !== index,
-                              ),
-                            }))
-                          }
-                        >
-                          Hapus
-                        </Button>
-                        {error && name ? (
-                          <p
-                            role="alert"
-                            className="col-span-full text-sm text-destructive"
-                          >
-                            {error}
-                          </p>
-                        ) : null}
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : null}
-              {ingredients.length > 0 || subRecipes.length > 0 ? (
-                <Field
-                  id={inline ? 'recipe-add-item-inline' : 'recipe-add-item'}
-                  label="Tambah bahan atau sub-resep"
-                >
-                  <Select
-                    key={values.items.length}
-                    value=""
-                    onValueChange={addItem}
-                  >
-                    <SelectTrigger
-                      id={inline ? 'recipe-add-item-inline' : 'recipe-add-item'}
-                      className="w-full"
-                    >
-                      <SelectValue placeholder="Pilih bahan atau sub-resep" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Bahan</SelectLabel>
-                        {freeIngredients.map((item) => (
-                          <SelectItem
-                            key={item.id}
-                            value={`ingredient:${item.id}`}
-                          >
-                            {item.name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                      {subRecipes.length > 0 ? (
-                        <SelectGroup>
-                          <SelectLabel>Sub-resep</SelectLabel>
-                          {subRecipes.map((item) => (
-                            <SelectItem
-                              key={item.id}
-                              value={`recipe:${item.id}`}
-                            >
-                              {item.name}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      ) : null}
-                    </SelectContent>
-                  </Select>
-                </Field>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  {recipeCopy.noIngredients}
-                </p>
-              )}
-              {inline && currentBatchCost ? (
-                <p className="border-t border-line pt-3 text-right text-sm">
-                  Total biaya adonan{' '}
-                  <strong className="ml-2 tabular-nums">
-                    {formatRupiah(currentBatchCost)}
-                  </strong>
-                </p>
-              ) : null}
-            </fieldset>
+            <RecipeItemsSection
+              items={values.items}
+              errors={errors}
+              ingredients={ingredients}
+              recipes={recipes}
+              freeIngredients={freeIngredients}
+              subRecipes={subRecipes}
+              inline={inline}
+              batchCost={currentBatchCost}
+              onAddItem={addItem}
+              onItemChange={updateItem}
+              onItemRemove={removeItem}
+            />
           ) : null}
         </div>
 
