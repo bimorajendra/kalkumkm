@@ -3,6 +3,7 @@ import { MkLogo } from './logo';
 
 const links = [
   { href: '/cara-hitung', label: 'Cara hitung' },
+  { href: '/artikel', label: 'Artikel' },
   { href: '/fitur', label: 'Fitur' },
   { href: '/harga', label: 'Harga' },
 ];

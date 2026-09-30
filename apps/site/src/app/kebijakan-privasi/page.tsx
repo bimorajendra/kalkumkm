@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { publicMetadata } from '@/features/seo/metadata';
 
-export const metadata: Metadata = {
-  title: 'Kebijakan privasi',
-  description: 'Data apa yang Takaran simpan, untuk apa, dan berapa lama.',
-};
+export const metadata: Metadata = publicMetadata({
+  title: 'Kebijakan privasi Takaran',
+  description: 'Data akun, resep, harga, dan pembayaran yang diproses Takaran.',
+  path: '/kebijakan-privasi',
+});
 
 const sections = [
   {

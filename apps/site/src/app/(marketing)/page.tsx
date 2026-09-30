@@ -6,13 +6,19 @@ import { CtaPanel } from '@/components/marketing/cta-panel';
 import { DemoCalculator } from '@/components/marketing/demo-calculator';
 import { PriceStrip } from '@/components/marketing/price-strip';
 import { TrustGrid } from '@/components/marketing/trust-grid';
+import { JsonLd } from '@/components/seo/json-ld';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { publicMetadata } from '@/features/seo/metadata';
 import { getSessionUser } from '@/server/session';
 
 export const metadata: Metadata = {
-  title: { absolute: 'Takaran, Kalkulator HPP usaha makanan rumahan' },
-  description:
-    'Masukkan harga bahan dari struk belanja. Takaran menghitung modal per potong dan harga jual yang tetap untung.',
+  ...publicMetadata({
+    title: 'Takaran, kalkulator HPP usaha makanan rumahan',
+    description:
+      'Masukkan harga bahan dari struk belanja. Takaran menghitung modal per potong dan harga jual yang tetap untung.',
+    path: '/',
+  }),
+  title: { absolute: 'Takaran, kalkulator HPP usaha makanan rumahan' },
 };
 
 export default async function BerandaPage({
@@ -23,9 +29,32 @@ export default async function BerandaPage({
   const user = await getSessionUser().catch(() => null);
   const start = user ? '/dashboard' : '/masuk';
   const { akun } = await searchParams;
+  const origin = process.env.APP_URL || 'http://localhost:3000';
 
   return (
     <>
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'Takaran',
+          url: origin,
+          inLanguage: 'id-ID',
+        }}
+      />
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'SoftwareApplication',
+          name: 'Takaran',
+          applicationCategory: 'BusinessApplication',
+          operatingSystem: 'Web',
+          url: origin,
+          description:
+            'Kalkulator HPP untuk mencatat harga bahan, menyusun resep, dan menghitung harga jual usaha makanan rumahan.',
+          inLanguage: 'id-ID',
+        }}
+      />
       {akun === 'dihapus' ? (
         <div className="mx-auto w-full max-w-3xl px-5 pt-6 lg:px-20">
           <Alert>
@@ -118,6 +147,49 @@ export default async function BerandaPage({
           </figure>
         </div>
         <PriceStrip />
+      </section>
+
+      <section className="px-5 pb-14 lg:px-20 lg:pb-24">
+        <div className="mx-auto max-w-5xl border-t border-[var(--mk-border)] pt-10">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="max-w-2xl">
+              <h2 className="text-2xl leading-tight font-bold tracking-[-0.03em] lg:text-3xl">
+                Panduan menghitung HPP dan harga jual
+              </h2>
+              <p className="mt-2 leading-7 text-[var(--mk-text-2)]">
+                Baca contoh langkah demi langkah sebelum mencatat resep.
+              </p>
+            </div>
+            <Link
+              className="inline-flex min-h-11 items-center font-semibold text-[var(--mk-primary-ink)] underline underline-offset-4"
+              href="/artikel"
+            >
+              Semua artikel
+            </Link>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            {(
+              [
+                [
+                  'Cara menghitung HPP makanan per porsi',
+                  '/artikel/cara-menghitung-hpp-makanan',
+                ],
+                [
+                  'Beda margin dan markup saat menentukan harga',
+                  '/artikel/beda-margin-dan-markup',
+                ],
+              ] as const
+            ).map(([title, href]) => (
+              <Link
+                className="rounded-[var(--mk-radius-md)] border border-[var(--mk-border)] bg-[var(--mk-surface)] p-4 font-semibold underline-offset-4 hover:underline"
+                href={href}
+                key={href}
+              >
+                {title}
+              </Link>
+            ))}
+          </div>
+        </div>
       </section>
 
       <section className="px-5 pb-14 lg:px-20 lg:pb-24">

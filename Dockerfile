@@ -2,6 +2,8 @@
 # Build dari akar repo: docker build -t takaran .
 
 FROM node:22-alpine AS build
+ARG APP_URL=http://localhost:3000
+ENV APP_URL=${APP_URL}
 RUN corepack enable
 WORKDIR /repo
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./

@@ -29,8 +29,36 @@ test('beranda: tautan ke cara hitung dan masuk', async ({ page }) => {
   await page.getByRole('link', { name: 'Coba gratis' }).first().click();
   await expect(page).toHaveURL(/\/masuk$/);
   await expect(
-    page.getByRole('button', { name: 'Masuk dengan Google' }),
+    page.getByRole('button', { name: 'Lanjut dengan Google' }),
   ).toBeVisible();
+});
+
+test('artikel: canonical, robots, dan sitemap memuat halaman publik', async ({
+  page,
+}) => {
+  await page.goto('/artikel/cara-menghitung-hpp-makanan');
+  await expect(
+    page.getByRole('heading', {
+      name: 'Cara menghitung HPP makanan per porsi',
+    }),
+  ).toBeVisible();
+  await expect(page.locator('link[rel=canonical]')).toHaveAttribute(
+    'href',
+    /\/artikel\/cara-menghitung-hpp-makanan$/,
+  );
+
+  const [robots, sitemap] = await Promise.all([
+    page.request.get('/robots.txt'),
+    page.request.get('/sitemap.xml'),
+  ]);
+  expect(robots.ok()).toBe(true);
+  expect(await robots.text()).toContain(
+    'Sitemap: http://localhost:3100/sitemap.xml',
+  );
+  expect(sitemap.ok()).toBe(true);
+  const sitemapBody = await sitemap.text();
+  expect(sitemapBody).toContain('/artikel/cara-menghitung-hpp-makanan');
+  expect(sitemapBody).not.toContain('/dashboard');
 });
 
 test('cara hitung: rincian HPP memuat angka contoh PRD', async ({ page }) => {
@@ -85,7 +113,15 @@ test('nav aktif benar di tiap halaman (desktop)', async ({ page }) => {
   ).toHaveAttribute('aria-current', 'page');
 });
 
-for (const path of ['/', '/cara-hitung', '/fitur', '/harga', '/masuk']) {
+for (const path of [
+  '/',
+  '/cara-hitung',
+  '/fitur',
+  '/harga',
+  '/masuk',
+  '/artikel',
+  '/artikel/cara-menghitung-hpp-makanan',
+]) {
   test(`${path} lolos axe`, async ({ page }) => {
     await page.goto(path);
     await expectNoA11yViolations(page);

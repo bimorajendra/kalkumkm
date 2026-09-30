@@ -7,7 +7,10 @@ import { Button } from '@/components/ui/button';
 import { getAuth } from '@/server/auth';
 import { getSessionUser } from '@/server/session';
 
-export const metadata: Metadata = { title: 'Masuk atau daftar' };
+export const metadata: Metadata = {
+  title: 'Masuk atau daftar',
+  robots: { index: false, follow: false },
+};
 export const dynamic = 'force-dynamic';
 
 async function signInWithGoogle() {

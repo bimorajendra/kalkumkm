@@ -1,30 +1,23 @@
 import { expect, test } from '@playwright/test';
-import { login } from './helpers';
+import { login, seedBrownies } from './helpers';
 
 test('paket gratis: resep keempat memunculkan batas dan tautan Pro', async ({
   page,
 }) => {
   await login(page);
-  for (const name of ['A', 'B', 'C', 'D']) {
-    await page.goto('/resep');
-    await page
-      .getByRole('button', { name: /^(Buat resep|Buat resep sendiri)$/ })
-      .first()
-      .click();
-    const dialog = page.getByRole('dialog', { name: 'Buat resep' });
-    await dialog.getByLabel('Nama resep').fill(name);
-    await dialog.getByRole('button', { name: 'Simpan resep' }).click();
-    if (name === 'D') {
-      await expect(
-        dialog.getByText('Batas 3 resep di paket gratis sudah tercapai.'),
-      ).toBeVisible();
-      await expect(
-        dialog.getByRole('link', { name: /Takaran Pro/ }),
-      ).toBeVisible();
-    } else {
-      await expect(dialog).not.toBeVisible();
-    }
-  }
+  await seedBrownies(page);
+  await page.getByRole('button', { name: 'Duplikat' }).click();
+  await expect(page.getByLabel('Nama resep')).toHaveValue('Brownies (salinan)');
+  await page.getByRole('button', { name: 'Duplikat' }).click();
+  await expect(page.getByLabel('Nama resep')).toHaveValue(
+    'Brownies (salinan) (salinan)',
+  );
+  await page.getByRole('button', { name: 'Duplikat' }).click();
+  const paywall = page.getByRole('dialog', { name: 'Fitur Takaran Pro' });
+  await expect(paywall).toBeVisible();
+  await expect(
+    paywall.getByText(/Paket gratis dibatasi 3 resep/),
+  ).toBeVisible();
 });
 
 test('penawaran adalah fitur Pro', async ({ page }) => {

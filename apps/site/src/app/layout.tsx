@@ -35,10 +35,26 @@ const jakarta = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.APP_URL || 'http://localhost:3000'),
   title: { default: 'Takaran', template: '%s | Takaran' },
   description:
     'Hitung HPP, harga jual, dan untung per jam untuk usaha makanan rumahan.',
   icons: { icon: '/icon.png', apple: '/apple-icon.png' },
+  applicationName: 'Takaran',
+  openGraph: {
+    type: 'website',
+    locale: 'id_ID',
+    siteName: 'Takaran',
+    title: 'Takaran, kalkulator HPP usaha makanan rumahan',
+    description:
+      'Hitung modal per porsi, tentukan harga jual, dan cek untung usaha makanan rumahan.',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Takaran, kalkulator HPP usaha makanan rumahan',
+    description:
+      'Hitung modal per porsi, tentukan harga jual, dan cek untung usaha makanan rumahan.',
+  },
 };
 
 export const viewport: Viewport = { themeColor: '#fcf8f5' };

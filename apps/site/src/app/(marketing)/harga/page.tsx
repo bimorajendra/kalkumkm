@@ -4,13 +4,15 @@ import type { Metadata } from 'next';
 import { Faq } from '@/components/marketing/faq';
 import { PaymentStrip } from '@/components/marketing/payment-strip';
 import { PlanCard } from '@/components/marketing/plan-card';
+import { publicMetadata } from '@/features/seo/metadata';
 import { getSessionUser } from '@/server/session';
 
-export const metadata: Metadata = {
-  title: 'Harga',
+export const metadata: Metadata = publicMetadata({
+  title: 'Harga Takaran Gratis dan Pro',
   description:
-    'Mulai gratis. Kalau cocok, cukup bayar sekali. Tanpa biaya bulanan.',
-};
+    'Bandingkan paket Takaran Gratis dan Pro untuk menghitung HPP resep dan harga jual usaha makanan.',
+  path: '/harga',
+});
 
 const faqItems = [
   {

@@ -3,13 +3,15 @@ import { BeforeAfter } from '@/components/marketing/before-after';
 import { CtaPanel } from '@/components/marketing/cta-panel';
 import { CustomOrderBuilder } from '@/components/marketing/custom-order-builder';
 import { MarginAlertTable } from '@/components/marketing/margin-alert-table';
+import { publicMetadata } from '@/features/seo/metadata';
 import { getSessionUser } from '@/server/session';
 
-export const metadata: Metadata = {
-  title: 'Fitur',
+export const metadata: Metadata = publicMetadata({
+  title: 'Fitur kalkulator HPP Takaran',
   description:
-    'Dua momen yang paling sering bikin rugi, sekarang ada hitungannya: harga bahan naik, dan pesanan custom.',
-};
+    'Lihat cara Takaran membantu menghitung dampak harga bahan dan menyiapkan harga untuk pesanan custom.',
+  path: '/fitur',
+});
 
 const orderIdeas = [
   {

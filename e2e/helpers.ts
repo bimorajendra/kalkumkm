@@ -48,5 +48,5 @@ export async function expectNoA11yViolations(page: Page) {
 export async function seedBrownies(page: Page) {
   await page.goto('/resep');
   await page.getByRole('button', { name: 'Pakai contoh brownies' }).click();
-  await expect(page).toHaveURL(/\/resep\/.+/);
+  await expect(page).toHaveURL(/\/dashboard\/resep\/.+/);
 }

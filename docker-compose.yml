@@ -22,7 +22,10 @@ services:
       - app
 
   app:
-    build: .
+    build:
+      context: .
+      args:
+        APP_URL: https://${DOMAIN}
     restart: unless-stopped
     env_file: .env
     environment:

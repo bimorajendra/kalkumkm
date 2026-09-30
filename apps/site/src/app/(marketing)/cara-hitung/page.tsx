@@ -3,13 +3,15 @@ import { CostBreakdown } from '@/components/marketing/cost-breakdown';
 import { CtaPanel } from '@/components/marketing/cta-panel';
 import { FormulaList, InfoNote } from '@/components/marketing/formula-list';
 import { StepCard } from '@/components/marketing/step-card';
+import { publicMetadata } from '@/features/seo/metadata';
 import { getSessionUser } from '@/server/session';
 
-export const metadata: Metadata = {
-  title: 'Cara hitung',
+export const metadata: Metadata = publicMetadata({
+  title: 'Cara menghitung HPP resep makanan',
   description:
-    'Dari struk belanja ke harga jual, dalam 3 langkah. Contohnya brownies, 16 potong per loyang.',
-};
+    'Ikuti contoh menghitung harga bahan per satuan, modal satu adonan, HPP per potong, dan harga jual brownies.',
+  path: '/cara-hitung',
+});
 
 function StaticField({ label, value }: { label: string; value: string }) {
   return (

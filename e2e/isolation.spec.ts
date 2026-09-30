@@ -23,7 +23,9 @@ test('data satu akun tidak terlihat di akun lain', async ({ browser }) => {
   // Alamat resep milik A tidak menampilkan apa pun di akun B.
   await pageA.goto('/resep');
   const href = await pageA
-    .getByRole('link', { name: /Brownies/ })
+    .getByRole('list', { name: 'Daftar resep' })
+    .getByRole('link')
+    .first()
     .getAttribute('href');
   await pageB.goto(href ?? '/resep');
   await expect(
