@@ -1,0 +1,50 @@
+name: Deploy
+# Manual: GitHub > Actions > Deploy > Run workflow. Otomatis tiap push bisa ditambah
+# nanti dengan `on: workflow_run` setelah CI lulus.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch, tag, atau commit yang dideploy
+        default: main
+concurrency: deploy
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Siapkan SSH
+        env:
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Deploy, cek health, rollback bila gagal
+        env:
+          HOST: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
+          REF: ${{ inputs.ref }}
+        run: |
+          ssh "$HOST" bash -s -- "$REF" <<'REMOTE'
+          set -eu
+          cd ~/takaran
+          prev=$(git rev-parse HEAD)
+          git fetch --prune origin
+          git checkout --detach "origin/$1" 2>/dev/null || git checkout --detach "$1"
+          deploy() { sudo docker compose up -d --build; }
+          healthy() {
+            for _ in $(seq 1 30); do
+              [ "$(sudo docker inspect -f '{{.State.Health.Status}}' takaran-app-1)" = healthy ] && return 0
+              sleep 5
+            done
+            return 1
+          }
+          if deploy && healthy; then
+            echo "deploy OK: $(git rev-parse --short HEAD)"
+          else
+            echo "deploy GAGAL, kembali ke ${prev}" >&2
+            git checkout --detach "$prev"
+            deploy
+            exit 1
+          fi
+          REMOTE
