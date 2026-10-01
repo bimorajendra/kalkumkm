@@ -7,7 +7,7 @@ ARG NEXT_PUBLIC_GA_ID=
 ENV APP_URL=${APP_URL} NEXT_PUBLIC_GA_ID=${NEXT_PUBLIC_GA_ID}
 RUN corepack enable
 WORKDIR /repo
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY packages ./packages
 COPY apps/site/package.json ./apps/site/package.json
 RUN pnpm install --frozen-lockfile
