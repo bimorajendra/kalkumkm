@@ -30,7 +30,11 @@ export function GoogleAnalytics({ nonce }: { nonce?: string }) {
       return;
     trackedPath.current = pathname;
     window.dataLayer ??= [];
-    window.gtag ??= (...args) => window.dataLayer?.push(args);
+    // gtag.js hanya membaca objek `arguments`; array biasa diabaikan.
+    window.gtag ??= function () {
+      // biome-ignore lint/complexity/noArguments: bentuk resmi snippet gtag
+      window.dataLayer?.push(arguments);
+    };
 
     if (!initialized.current) {
       window.gtag('js', new Date());
