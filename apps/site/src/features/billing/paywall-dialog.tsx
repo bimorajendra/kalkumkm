@@ -1,7 +1,5 @@
 'use client';
 
-import { PRICING } from '@takaran/schema';
-import { formatRupiah } from '@takaran/ui/format';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,7 +41,7 @@ export function PaywallDialog({
           <DialogDescription>{copy[trigger]}</DialogDescription>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          Sekali bayar {formatRupiah(PRICING.pro.idr)}, tanpa langganan.
+          Takaran Pro segera hadir. Pembelian belum dibuka.
         </p>
         <Button asChild size="lg">
           <Link href="/dashboard/beli">Lihat Takaran Pro</Link>

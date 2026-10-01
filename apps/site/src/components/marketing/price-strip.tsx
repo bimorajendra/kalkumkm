@@ -1,5 +1,3 @@
-import { PRICING } from '@takaran/schema';
-import { formatRupiah } from '@takaran/ui/format';
 import Link from 'next/link';
 
 export function PriceStrip() {
@@ -15,9 +13,9 @@ export function PriceStrip() {
           className="hidden h-5 w-px self-center bg-[var(--mk-border)] sm:block"
         />
         <span className="text-base">
-          <strong>Pro {formatRupiah(PRICING.pro.founderIdr)}</strong>{' '}
+          <strong>Pro segera hadir</strong>{' '}
           <span className="text-[var(--mk-text-2)]">
-            sekali bayar, lebih murah dari satu loyang brownies
+            pembelian belum dibuka
           </span>
         </span>
       </div>

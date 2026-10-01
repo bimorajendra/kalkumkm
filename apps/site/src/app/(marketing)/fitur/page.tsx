@@ -168,7 +168,7 @@ export default async function FiturPage() {
           ctaLabel="Coba gratis"
           secondaryHref="/harga"
           secondaryLabel="Lihat harga"
-          text="Pengingat untung menipis sudah gratis. Penawaran custom ada di Pro, Rp 49.000 sekali bayar."
+          text="Pengingat untung menipis sudah gratis. Penawaran custom ada di Pro yang segera hadir."
           title="Mulai dari yang gratis dulu."
         />
       </section>

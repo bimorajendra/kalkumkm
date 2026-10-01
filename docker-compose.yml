@@ -27,10 +27,17 @@ services:
       args:
         APP_URL: https://${DOMAIN}
     restart: unless-stopped
-    env_file: .env
     environment:
       DATABASE_URL: postgres://takaran:${POSTGRES_PASSWORD:?isi POSTGRES_PASSWORD di .env}@db:5432/takaran
       APP_URL: https://${DOMAIN}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?isi BETTER_AUTH_SECRET di .env}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?isi GOOGLE_CLIENT_ID di .env}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?isi GOOGLE_CLIENT_SECRET di .env}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      IP_SALT: ${IP_SALT:?isi IP_SALT di .env}
+      MAYAR_API_KEY: ${MAYAR_API_KEY:-}
+      MAYAR_BASE_URL: ${MAYAR_BASE_URL:-https://api.mayar.io/hl/v2}
+      MAYAR_WEBHOOK_TOKEN: ${MAYAR_WEBHOOK_TOKEN:-}
     depends_on:
       db:
         condition: service_healthy
@@ -61,7 +68,7 @@ services:
       PGUSER: takaran
       PGPASSWORD: ${POSTGRES_PASSWORD}
       PGDATABASE: takaran
-      BACKUP_PASSPHRASE: ${BACKUP_PASSPHRASE:-}
+      BACKUP_PASSPHRASE: ${BACKUP_PASSPHRASE:?isi BACKUP_PASSPHRASE untuk mengenkripsi cadangan}
       BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
     volumes:
       - ./deploy/backup.sh:/backup.sh:ro

@@ -300,7 +300,7 @@ export function AppShell({
                   : 'text-link'
               }
             >
-              {plan === 'pro' ? 'Semua fitur terbuka' : 'Lihat Pro'}
+              {plan === 'pro' ? 'Semua fitur terbuka' : 'Pro segera hadir'}
             </span>
           </span>
         </Link>

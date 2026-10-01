@@ -5,6 +5,9 @@ import { redirect } from 'next/navigation';
 import { MkLogo } from '@/components/marketing/logo';
 import { Button } from '@/components/ui/button';
 import { getAuth } from '@/server/auth';
+import { getDb } from '@/server/db';
+import { getEnv } from '@/server/env';
+import { clientIp, consumeRateLimit, hashKey } from '@/server/rate-limit';
 import { getSessionUser } from '@/server/session';
 
 export const metadata: Metadata = {
@@ -15,6 +18,15 @@ export const dynamic = 'force-dynamic';
 
 async function signInWithGoogle() {
   'use server';
+  const requestHeaders = await headers();
+  const ipHash = hashKey(
+    getEnv().IP_SALT,
+    'google-sign-in',
+    clientIp(requestHeaders),
+  );
+  if (!(await consumeRateLimit(await getDb(), `auth:${ipHash}`, 30, 60)))
+    redirect('/masuk?dibatasi=1');
+
   const auth = await getAuth();
   const result = await auth.api.signInSocial({
     body: {
@@ -22,7 +34,7 @@ async function signInWithGoogle() {
       callbackURL: '/dashboard',
       errorCallbackURL: '/masuk?galat=1',
     },
-    headers: await headers(),
+    headers: requestHeaders,
   });
   if (!result.url) redirect('/masuk?galat=1');
   redirect(result.url);
@@ -54,10 +66,10 @@ function GoogleMark() {
 export default async function MasukPage({
   searchParams,
 }: {
-  searchParams: Promise<{ galat?: string }>;
+  searchParams: Promise<{ galat?: string; dibatasi?: string }>;
 }) {
   if (await getSessionUser()) redirect('/dashboard');
-  const { galat } = await searchParams;
+  const { galat, dibatasi } = await searchParams;
 
   return (
     <main className="min-h-dvh px-4 py-8 sm:px-6 lg:grid lg:place-items-center lg:px-8">
@@ -99,6 +111,14 @@ export default async function MasukPage({
               className="mb-4 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive"
             >
               Masuk belum berhasil. Coba lagi sebentar lagi.
+            </p>
+          ) : null}
+          {dibatasi ? (
+            <p
+              role="alert"
+              className="mb-4 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive"
+            >
+              Terlalu banyak percobaan masuk. Coba lagi dalam satu menit.
             </p>
           ) : null}
           <form action={signInWithGoogle}>

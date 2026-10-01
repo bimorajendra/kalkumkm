@@ -1,8 +1,5 @@
-import { PRICING } from '@takaran/schema';
-import { formatRupiah } from '@takaran/ui/format';
 import type { Metadata } from 'next';
 import { Faq } from '@/components/marketing/faq';
-import { PaymentStrip } from '@/components/marketing/payment-strip';
 import { PlanCard } from '@/components/marketing/plan-card';
 import { publicMetadata } from '@/features/seo/metadata';
 import { getSessionUser } from '@/server/session';
@@ -16,13 +13,14 @@ export const metadata: Metadata = publicMetadata({
 
 const faqItems = [
   {
-    question: 'Benar cuma bayar sekali?',
-    answer: 'Iya. Sekali bayar, termasuk fitur baru di pembaruan berikutnya.',
+    question: 'Apakah Pro sudah bisa dibeli?',
+    answer:
+      'Belum. Takaran Pro segera hadir. Sementara ini, kamu bisa memakai paket Gratis.',
   },
   {
     question: 'Kalau di versi gratis sudah 3 resep?',
     answer:
-      'Resep yang sudah ada tetap aman. Untuk menyimpan resep keempat, perlu Pro.',
+      'Kamu tetap bisa memakai dan mengubah 3 resep yang sudah ada. Tambahan resep tersedia saat Pro dibuka.',
   },
   {
     question: 'Siapa yang bisa melihat resepku?',
@@ -41,10 +39,11 @@ export default async function HargaPage() {
           Harga
         </span>
         <h1 className="max-w-[760px] text-[34px] leading-[1.15] font-bold tracking-[-0.035em] lg:text-[52px] lg:leading-[1.1]">
-          Mulai gratis. Kalau cocok, cukup bayar sekali.
+          Mulai gratis. Pro segera hadir.
         </h1>
         <p className="text-base leading-[1.6] text-[var(--mk-text-2)] lg:text-lg">
-          Tanpa biaya bulanan. Tanpa langganan yang lupa diputus.
+          Hitung HPP dan simpan 3 resep dengan paket Gratis. Pembelian Pro belum
+          dibuka.
         </p>
       </section>
 
@@ -64,10 +63,8 @@ export default async function HargaPage() {
           price="Rp 0"
         />
         <PlanCard
-          badge="Harga awal · 100 pembeli pertama"
-          ctaHref={user ? '/dashboard/beli' : '/masuk'}
-          ctaLabel="Beli Pro"
-          description="Sekali bayar. Lebih murah dari satu loyang brownies (Rp 80.000)."
+          ctaLabel="Pembelian belum dibuka"
+          description="Untuk menambah resep dan saluran jual saat paket Pro tersedia."
           features={[
             <>
               <strong className="font-semibold">Semua fitur Gratis</strong>,
@@ -80,13 +77,8 @@ export default async function HargaPage() {
           ]}
           highlighted
           name="Pro"
-          originalPrice={formatRupiah(PRICING.pro.idr)}
-          price={formatRupiah(PRICING.pro.founderIdr)}
+          price="Segera hadir"
         />
-      </section>
-
-      <section className="px-5 pb-14 lg:px-20 lg:pb-20">
-        <PaymentStrip />
       </section>
 
       <section className="flex-1 px-5 pb-20 lg:px-20 lg:pb-24">

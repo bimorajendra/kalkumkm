@@ -22,7 +22,7 @@ Di penyedia domain, buat record **A** untuk `takaran.contoh.id` ke IP server. Tu
 ```sh
 # Masuk sebagai root atau pengguna dengan sudo
 apt update && apt -y upgrade
-apt -y install ca-certificates curl git ufw fail2ban unattended-upgrades
+apt -y install ca-certificates curl git ufw fail2ban unattended-upgrades openssl
 
 # Docker
 curl -fsSL https://get.docker.com | sh
@@ -62,7 +62,7 @@ chmod 600 .env
 nano .env
 ```
 
-Isi `.env`. Nilai acak dibuat dengan perintah yang tertulis di komentarnya, misalnya `openssl rand -base64 32`. Isi minimal: `DOMAIN`, `POSTGRES_PASSWORD`, `BETTER_AUTH_SECRET`, `IP_SALT`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `ADMIN_EMAILS` (email Google-mu). Simpan `.env` dan `BACKUP_PASSPHRASE` di password manager: tanpa keduanya kamu tidak bisa memulihkan server.
+Isi `.env`. Nilai acak dibuat dengan perintah yang tertulis di komentarnya, misalnya `openssl rand -base64 32`. Isi minimal: `DOMAIN`, `POSTGRES_PASSWORD`, `BETTER_AUTH_SECRET`, `IP_SALT`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `ADMIN_EMAILS` (email Google-mu), dan `BACKUP_PASSPHRASE` (`openssl rand -hex 32`). Simpan `.env` dan passphrase backup di password manager. Letakkan passphrase backup terpisah dari berkas cadangannya.
 
 ## 5. Jalankan
 
@@ -87,7 +87,7 @@ Biaya Mayar ditanggung proyek (harga ke pembeli tetap). Cek biaya per kanal di h
 
 ## 7. Cadangan
 
-Layanan `backup` menulis `pg_dump` terkompresi tiap 24 jam ke folder `./backups` (14 hari terakhir; terenkripsi bila `BACKUP_PASSPHRASE` diisi). **Cadangan di server yang sama tidak melindungi dari server yang rusak**, jadi salin ke tempat lain secara berkala. Contoh dari komputermu, tiap hari lewat cron atau Task Scheduler:
+Layanan `backup` menulis `pg_dump` terkompresi dan terenkripsi dengan AES-256-CBC tiap 24 jam ke folder `./backups` (14 hari terakhir). Layanan gagal mulai bila `BACKUP_PASSPHRASE` kosong; dump tidak disimpan tanpa enkripsi. Hanya container backup yang menerima passphrase. Simpan passphrase di password manager yang tidak berada di server atau direktori cadangan. **Cadangan di server yang sama tidak melindungi dari server yang rusak**, jadi salin berkas `.enc` ke tempat lain secara berkala. Contoh dari komputermu, tiap hari lewat cron atau Task Scheduler:
 
 ```sh
 rsync -av user@takaran.contoh.id:~/takaran/backups/ ~/cadangan-takaran/
@@ -96,8 +96,8 @@ rsync -av user@takaran.contoh.id:~/takaran/backups/ ~/cadangan-takaran/
 Pulihkan (uji ini sekali sebelum kamu benar-benar membutuhkannya):
 
 ```sh
-# berkas terenkripsi: buka dulu
-openssl enc -d -aes-256-cbc -pbkdf2 -pass pass:"$BACKUP_PASSPHRASE" \
+# Buka berkas terenkripsi; simpan passphrase dari password manager, bukan dari server.
+openssl enc -d -aes-256-cbc -pbkdf2 -pass env:BACKUP_PASSPHRASE \
   -in backups/takaran-XXXX.sql.gz.enc -out /tmp/pulih.sql.gz
 gunzip -c /tmp/pulih.sql.gz | docker compose exec -T db psql -U takaran -d takaran
 ```

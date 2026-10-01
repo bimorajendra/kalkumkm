@@ -1,7 +1,6 @@
 'use client';
 
 import { CalcError, type RecipeResult, recalcAll } from '@takaran/calc';
-import { PRICING } from '@takaran/schema';
 import { formatRupiah } from '@takaran/ui/format';
 import Link from 'next/link';
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
@@ -673,7 +672,7 @@ export function RecipeEditor({
                 href="/dashboard/beli"
                 className="underline underline-offset-4"
               >
-                Takaran Pro, {formatRupiah(PRICING.pro.idr)} sekali bayar
+                Takaran Pro segera hadir
               </Link>
             </>
           ) : null}

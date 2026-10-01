@@ -10,6 +10,7 @@ test-results/
 .env.*
 !.env.example
 .dev.vars
+backups/
 .DS_Store
 
 # Next.js dan data lokal

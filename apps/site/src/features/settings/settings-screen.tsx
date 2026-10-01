@@ -84,7 +84,7 @@ export function SettingsScreen({
           <p>
             {plan === 'pro'
               ? 'Terima kasih, semua fitur Pro sudah terbuka.'
-              : 'Tambah resep dan saluran sesuai kebutuhan usahamu.'}
+              : 'Takaran Pro segera hadir. Pembelian belum dibuka.'}
           </p>
           <Button asChild variant="outline">
             <Link href="/dashboard/beli">

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { login, seedBrownies } from './helpers';
+import { expectNoA11yViolations, login, seedBrownies } from './helpers';
 
 test('paket gratis: resep keempat memunculkan batas dan tautan Pro', async ({
   page,
@@ -35,31 +35,35 @@ test('penawaran adalah fitur Pro', async ({ page }) => {
   ).toBeVisible();
 });
 
-test('halaman beli menunjukkan harga pendiri dan memvalidasi isian', async ({
+test('halaman Pro segera hadir tanpa formulir pembayaran', async ({
   page,
-}) => {
+}, testInfo) => {
   await login(page);
   await page.goto('/beli');
-  await expect(page.getByText('Rp 49.000').first()).toBeVisible();
-  await page.getByRole('button', { name: 'Bayar dengan Mayar' }).click();
-  await expect(page.getByText('Nama usaha wajib diisi.')).toBeVisible();
   await expect(
-    page.getByText('Masukkan nomor WhatsApp Indonesia.'),
+    page.getByRole('heading', { name: 'Takaran Pro segera hadir' }),
   ).toBeVisible();
   await expect(
-    page.getByText('Centang persetujuan untuk melanjutkan.'),
-  ).toBeVisible();
-
-  // Mayar belum dikonfigurasi di lingkungan uji: pesan jelas, bukan galat mentah.
-  await page.getByLabel('Nama usaha').fill('Kue Bu Rina');
-  await page
-    .getByRole('textbox', { name: 'Nomor WhatsApp' })
-    .fill('081234567890');
-  await page.getByRole('checkbox').click();
-  await page.getByRole('button', { name: 'Bayar dengan Mayar' }).click();
-  await expect(
-    page.getByText('Pembayaran belum dibuka. Coba lagi nanti.'),
-  ).toBeVisible();
+    page.getByRole('button', { name: 'Bayar dengan Mayar' }),
+  ).toHaveCount(0);
+  await expect(page.getByLabel('Nomor WhatsApp')).toHaveCount(0);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+  await expectNoA11yViolations(page);
+  await page.screenshot({
+    path: testInfo.outputPath('pro-coming-soon.png'),
+    fullPage: true,
+  });
+  const back = page.getByRole('link', { name: 'Kembali ke resep' });
+  await back.focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
+  await expect(back).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/\/dashboard\/resep$/);
 });
 
 test('akun Pro melihat statusnya di halaman beli', async ({ page }) => {

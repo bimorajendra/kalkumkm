@@ -8,12 +8,12 @@ const items = [
     text: 'Hanya akunmu yang bisa membuka resep. Bisa diunduh atau dihapus.',
   },
   {
-    title: 'Pembayaran resmi',
-    text: 'Diproses Mayar lewat QRIS, virtual account, atau e-wallet.',
+    title: 'Mulai gratis',
+    text: 'Simpan 3 resep dan hitung untung per jam kerja.',
   },
   {
-    title: 'Sekali bayar',
-    text: 'Tidak ada tagihan bulanan yang lupa diputus.',
+    title: 'Pro segera hadir',
+    text: 'Paket untuk menambah resep dan saluran jual sedang disiapkan.',
   },
 ];
 

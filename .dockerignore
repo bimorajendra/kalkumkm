@@ -3,9 +3,11 @@
 **/.data
 .git
 .github
-.env
-.env.*
-!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+**/.dev.vars
+backups
 e2e
 test-results
 playwright-report

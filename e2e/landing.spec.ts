@@ -167,18 +167,35 @@ test('fitur: contoh harga bahan naik dan builder pesanan custom', async ({
   await expect(page.getByText('Rp 195.000').first()).toBeVisible();
 });
 
-test('harga: dua paket dan FAQ', async ({ page }) => {
+test('harga: Pro segera hadir dan FAQ bisa dipakai dengan keyboard', async ({
+  page,
+}, testInfo) => {
   await page.goto('/harga');
   await expect(
     page.getByRole('heading', { name: 'Gratis', exact: true }),
   ).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Pro' })).toBeVisible();
-  await expect(page.getByText('Rp 49.000')).toBeVisible();
-  await expect(page.getByText('Rp 79.000')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Pro', exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText('Segera hadir', { exact: true })).toBeVisible();
+  await expect(
+    page.getByText('Pembelian belum dibuka', { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Beli Pro' })).toHaveCount(0);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath('harga-coming-soon.png'),
+    fullPage: true,
+  });
 
   const closedItem = page.getByText('Siapa yang bisa melihat resepku?');
   await expect(closedItem).toBeVisible();
-  await closedItem.click();
+  await closedItem.focus();
+  await page.keyboard.press('Enter');
   await expect(
     page.getByText('Hanya akunmu. Semua data bisa kamu unduh'),
   ).toBeVisible();

@@ -1,67 +1,22 @@
 'use server';
 
 import { and, desc, eq } from 'drizzle-orm';
-import { z } from 'zod';
-import { normalizeWhatsApp } from '@/lib/phone';
-import {
-  BillingError,
-  checkOrder,
-  createCheckout,
-  currentPrice,
-  isPro,
-} from '@/server/billing';
+import { checkOrder, currentPrice, isPro } from '@/server/billing';
 import { getDb } from '@/server/db';
 import { orders } from '@/server/db/schema';
 import { mayarConfig } from '@/server/env';
 import { consumeRateLimit } from '@/server/rate-limit';
 import { getSessionUser } from '@/server/session';
 
-const checkoutSchema = z.object({
-  businessName: z.string().trim().min(1).max(120),
-  whatsapp: z.string().trim().min(8).max(32),
-  consent: z.literal(true),
-});
-
 export type CheckoutResult =
   | { ok: true; paymentUrl: string }
   | { ok: false; message: string };
 
-export async function startCheckout(raw: unknown): Promise<CheckoutResult> {
-  const user = await getSessionUser();
-  if (!user) return { ok: false, message: 'Masuk dulu untuk membeli Pro.' };
-  const parsed = checkoutSchema.safeParse(raw);
-  if (!parsed.success)
-    return {
-      ok: false,
-      message: 'Periksa lagi isian dan centang persetujuan.',
-    };
-  const whatsapp = normalizeWhatsApp(parsed.data.whatsapp);
-  if (!whatsapp)
-    return { ok: false, message: 'Masukkan nomor WhatsApp Indonesia.' };
-  const mayar = mayarConfig();
-  if (!mayar)
-    return { ok: false, message: 'Pembayaran belum dibuka. Coba lagi nanti.' };
-  const db = await getDb();
-  if (!(await consumeRateLimit(db, `checkout:${user.id}`, 5, 3600)))
-    return {
-      ok: false,
-      message: 'Batas checkout tercapai. Coba lagi satu jam lagi.',
-    };
-  try {
-    const result = await createCheckout(db, mayar, user, {
-      whatsapp,
-      businessName: parsed.data.businessName,
-    });
-    return { ok: true, paymentUrl: result.paymentUrl };
-  } catch (error) {
-    if (error instanceof BillingError)
-      return { ok: false, message: error.message };
-    console.error('checkout gagal');
-    return {
-      ok: false,
-      message: 'Pembayaran belum bisa dibuat. Coba lagi nanti.',
-    };
-  }
+export async function startCheckout(_raw: unknown): Promise<CheckoutResult> {
+  return {
+    ok: false,
+    message: 'Takaran Pro segera hadir. Pembelian belum dibuka.',
+  };
 }
 
 export interface BillingStatus {
