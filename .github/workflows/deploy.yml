@@ -1,7 +1,10 @@
 name: Deploy
-# Manual: GitHub > Actions > Deploy > Run workflow. Otomatis tiap push bisa ditambah
-# nanti dengan `on: workflow_run` setelah CI lulus.
+# Otomatis setiap CI di main lulus. Manual: Actions > Deploy > Run workflow.
 on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
     inputs:
       ref:
@@ -10,6 +13,7 @@ on:
 concurrency: deploy
 jobs:
   deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Siapkan SSH
@@ -23,14 +27,15 @@ jobs:
       - name: Deploy, cek health, rollback bila gagal
         env:
           HOST: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
-          REF: ${{ inputs.ref }}
+          REF: ${{ inputs.ref || github.event.workflow_run.head_sha }}
         run: |
           ssh "$HOST" bash -s -- "$REF" <<'REMOTE'
           set -eu
           cd ~/takaran
           prev=$(git rev-parse HEAD)
           git fetch --prune origin
-          git checkout --detach "origin/$1" 2>/dev/null || git checkout --detach "$1"
+          # -f: server tidak boleh punya perubahan lokal pada berkas terlacak (.env tidak terlacak)
+          git checkout -f --detach "origin/$1" 2>/dev/null || git checkout -f --detach "$1"
           deploy() { sudo docker compose up -d --build; }
           healthy() {
             for _ in $(seq 1 30); do
@@ -43,7 +48,7 @@ jobs:
             echo "deploy OK: $(git rev-parse --short HEAD)"
           else
             echo "deploy GAGAL, kembali ke ${prev}" >&2
-            git checkout --detach "$prev"
+            git checkout -f --detach "$prev"
             deploy
             exit 1
           fi
