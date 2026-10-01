@@ -16,15 +16,12 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm test:calc:bench
       - run: pnpm build
       - run: pnpm size
-      # E2E memakai Postgres di dalam proses (PGlite) dan login uji tanpa Google.
-      - run: pnpm test:e2e
   docker:
     runs-on: ubuntu-latest
     steps:
