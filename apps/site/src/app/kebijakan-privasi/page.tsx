@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AnalyticsConsentSettingsButton } from '@/components/analytics/analytics-consent';
 import { publicMetadata } from '@/features/seo/metadata';
 
 export const metadata: Metadata = publicMetadata({
@@ -27,7 +28,11 @@ const sections = [
   },
   {
     title: 'Cookie',
-    body: 'Kami memakai satu cookie sesi agar kamu tetap masuk. Kami tidak memakai cookie pelacak iklan.',
+    body: 'Kami memakai cookie sesi agar kamu tetap masuk. Jika kamu mengizinkan analitik, Google Analytics memakai cookie _ga pada halaman pemasaran publik untuk membedakan kunjungan. Kami tidak memakai cookie pelacak iklan.',
+  },
+  {
+    title: 'Analitik',
+    body: 'Jika kamu mengizinkan analitik, kami memakai Google Analytics untuk menghitung kunjungan ke halaman pemasaran publik. Google menerima alamat dan judul halaman tanpa query string, asal situs tanpa path, informasi browser dan perangkat, serta lokasi perkiraan. Halaman login, kebijakan privasi, dan aplikasi setelah masuk tidak kami ukur. Kami tidak mengirim nama, email, isi resep, takaran, atau harga bahan. Google Analytics memproses data tersebut sesuai kebijakannya.',
   },
 ];
 
@@ -51,6 +56,23 @@ export default function PrivacyPage() {
         <section key={section.title}>
           <h2 className="mb-2 mt-8 text-[28px] leading-8">{section.title}</h2>
           <p className="leading-7">{section.body}</p>
+          {section.title === 'Analitik' ? (
+            <div className="mt-2 grid justify-items-start gap-2 leading-7">
+              <p>
+                Baca{' '}
+                <a
+                  href="https://policies.google.com/privacy?hl=id"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-link underline underline-offset-4"
+                >
+                  kebijakan privasi Google
+                </a>
+                .
+              </p>
+              <AnalyticsConsentSettingsButton />
+            </div>
+          ) : null}
         </section>
       ))}
     </main>

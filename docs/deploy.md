@@ -62,7 +62,11 @@ chmod 600 .env
 nano .env
 ```
 
-Isi `.env`. Nilai acak dibuat dengan perintah yang tertulis di komentarnya, misalnya `openssl rand -base64 32`. Isi minimal: `DOMAIN`, `POSTGRES_PASSWORD`, `BETTER_AUTH_SECRET`, `IP_SALT`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `ADMIN_EMAILS` (email Google-mu), dan `BACKUP_PASSPHRASE` (`openssl rand -hex 32`). Simpan `.env` dan passphrase backup di password manager. Letakkan passphrase backup terpisah dari berkas cadangannya.
+Isi `.env`. Nilai acak dibuat dengan perintah yang tertulis di komentarnya, misalnya `openssl rand -base64 32`. Isi minimal: `DOMAIN`, `POSTGRES_PASSWORD`, `BETTER_AUTH_SECRET`, `IP_SALT`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `ADMIN_EMAILS` (email Google-mu), dan `BACKUP_PASSPHRASE` (`openssl rand -hex 32`). `NEXT_PUBLIC_GA_ID` sudah diisi dengan Measurement ID GA4 Takaran. Nilai ini bersifat publik dan ditanam saat build; perubahan perlu `docker compose up -d --build`. Simpan `.env` dan passphrase backup di password manager. Letakkan passphrase backup terpisah dari berkas cadangannya.
+
+Di GA4, buka **Admin → Data Streams → stream web → Enhanced Measurement**. Matikan pengukuran otomatis, khususnya **Page views on browser history changes**. Aplikasi mengirim pageview sendiri hanya untuk halaman publik dan menghilangkan query string. Jangan aktifkan Google Signals atau personalisasi iklan untuk tag ini.
+
+Pada kunjungan pertama, pengunjung memilih Izinkan atau Tolak analitik. Tag tidak dimuat sebelum pilihan Izinkan. Pilihan ini dapat dibuka lagi di bagian Analitik pada kebijakan privasi.
 
 ## 5. Jalankan
 

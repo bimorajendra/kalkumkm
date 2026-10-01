@@ -10,7 +10,7 @@
 2. **Satu aplikasi.** Landing, kalkulator, API, dan admin ada dalam satu proyek Next.js.
 3. **Rumus di satu tempat.** `packages/calc` dipakai klien (hasil instan) dan test. UI tidak menghitung sendiri.
 4. **Server yang memutuskan.** Batas paket gratis, kepemilikan data, dan status Pro dicek di server, bukan di layar.
-5. **Sesedikit mungkin layanan luar.** Google (login) dan Mayar (bayar). Tidak ada analitik pihak ketiga.
+5. **Sesedikit mungkin layanan luar.** Google (login), Mayar (bayar), dan Google Analytics untuk kunjungan halaman publik saja.
 
 ## 2. Arsitektur
 
@@ -19,6 +19,7 @@ Peramban -> Caddy (HTTPS) -> Next.js (Docker) -> Postgres (jaringan internal)
                                  |
                                  +-> Google (login OAuth)
                                  +-> Mayar API v2 (invoice) <- webhook payment.received
+                                 +-> Google Analytics (pageview halaman publik)
 ```
 
 Tiga proses di satu server (Docker Compose): `caddy`, `app`, `db`, ditambah `backup` (cadangan harian).
@@ -86,6 +87,7 @@ Pro adalah satu baris `entitlements` per akun. Hanya dua jalur yang menulisnya: 
 - **Rahasia:** hanya di `.env` server. `getEnv()` menolak menyala bila konfigurasi kurang. Log tidak memuat nama bahan, resep, atau harga.
 - **Anti-spam:** batas percobaan per IP (di database) untuk waitlist dan per akun untuk checkout; kolom jebakan bot di form waitlist.
 - **Data pribadi:** unduh data (`/api/me/export`) dan hapus akun (cascade) dari Pengaturan.
+- **Analitik:** GA4 hanya mencatat kunjungan halaman publik, tanpa query/referrer path, identitas akun, atau data resep dan harga. Pengaturan tag dicatat di `docs/CHANGE-004-google-analytics.md`.
 - **Server:** Postgres tidak dibuka ke internet; hanya Caddy yang punya port publik. Lihat `docs/deploy.md` untuk SSH, firewall, dan cadangan.
 - **Rute uji:** `/api/e2e/login` hanya ada bila `E2E_TEST_AUTH=1` dan `NODE_ENV != production`; di produksi membalas 404.
 

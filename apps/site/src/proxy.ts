@@ -10,14 +10,14 @@ export function proxy(request: NextRequest) {
   const dev = process.env.NODE_ENV === 'development';
   const csp = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev ? " 'unsafe-eval'" : ''}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://www.googletagmanager.com${dev ? " 'unsafe-eval'" : ''}`,
     dev
       ? "style-src 'self' 'unsafe-inline'"
       : `style-src 'self' 'nonce-${nonce}'`,
     "style-src-attr 'unsafe-inline'",
-    "img-src 'self' blob: data: https://lh3.googleusercontent.com",
+    "img-src 'self' blob: data: https://lh3.googleusercontent.com https://www.googletagmanager.com https://*.google-analytics.com",
     "font-src 'self'",
-    "connect-src 'self'",
+    "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.google.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self' https://accounts.google.com",

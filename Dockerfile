@@ -3,7 +3,8 @@
 
 FROM node:22-alpine AS build
 ARG APP_URL=http://localhost:3000
-ENV APP_URL=${APP_URL}
+ARG NEXT_PUBLIC_GA_ID=
+ENV APP_URL=${APP_URL} NEXT_PUBLIC_GA_ID=${NEXT_PUBLIC_GA_ID}
 RUN corepack enable
 WORKDIR /repo
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./

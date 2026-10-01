@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
+import { AnalyticsConsentProvider } from '@/components/analytics/analytics-consent';
 import './globals.css';
 
 const jakarta = localFont({
@@ -66,7 +67,9 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="id" data-theme="light" className={jakarta.variable}>
-      <body>{children}</body>
+      <body>
+        <AnalyticsConsentProvider>{children}</AnalyticsConsentProvider>
+      </body>
     </html>
   );
 }

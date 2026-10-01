@@ -26,6 +26,7 @@ services:
       context: .
       args:
         APP_URL: https://${DOMAIN}
+        NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:-}
     restart: unless-stopped
     environment:
       DATABASE_URL: postgres://takaran:${POSTGRES_PASSWORD:?isi POSTGRES_PASSWORD di .env}@db:5432/takaran
