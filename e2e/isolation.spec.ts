@@ -63,6 +63,15 @@ test('rute admin tidak terlihat oleh non-admin', async ({ page }) => {
   expect(csv.status()).toBe(404);
 });
 
+test('daftar tunggu menolak request yang melampaui batas ukuran', async ({
+  page,
+}) => {
+  const response = await page.request.post('/api/waitlist', {
+    data: 'x'.repeat(8193),
+  });
+  expect(response.status()).toBe(413);
+});
+
 test('admin melihat pesanan dan daftar tunggu, dan bisa mengunduh CSV', async ({
   page,
 }) => {

@@ -2,6 +2,7 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { handleMayarEvent } from '@/server/billing';
 import { getDb } from '@/server/db';
 import { getEnv, mayarConfig } from '@/server/env';
+import { readLimitedText } from '@/server/request-body';
 
 const MAX_BYTES = 64 * 1024;
 
@@ -25,9 +26,11 @@ export async function POST(request: Request) {
   if (!expected || !mayar || !sameSecret(provided, expected))
     return json(404, 'NOT_FOUND', 'Webhook tidak ditemukan.');
 
-  const text = await request.text();
-  if (Buffer.byteLength(text) > MAX_BYTES)
+  const bodyText = await readLimitedText(request, MAX_BYTES);
+  if (!bodyText.ok && bodyText.reason === 'too_large')
     return json(413, 'TOO_LARGE', 'Data webhook terlalu besar.');
+  if (!bodyText.ok) return json(400, 'INVALID', 'Data webhook tidak valid.');
+  const { text } = bodyText;
   let body: unknown;
   try {
     body = JSON.parse(text);

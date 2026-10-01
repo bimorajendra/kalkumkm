@@ -5,6 +5,7 @@ import { getDb } from '@/server/db';
 import { waitlist } from '@/server/db/schema';
 import { getEnv } from '@/server/env';
 import { clientIp, consumeRateLimit, hashKey } from '@/server/rate-limit';
+import { readLimitedText } from '@/server/request-body';
 
 const schema = z
   .object({
@@ -27,9 +28,12 @@ const fail = (status: number, code: string, message: string) =>
   Response.json({ error: { code, message } }, { status });
 
 export async function POST(request: Request) {
-  const text = await request.text();
-  if (Buffer.byteLength(text) > 8192)
+  const bodyText = await readLimitedText(request, 8192);
+  if (!bodyText.ok && bodyText.reason === 'too_large')
     return fail(413, 'VALIDATION_FAILED', 'Isian terlalu besar.');
+  if (!bodyText.ok)
+    return fail(400, 'VALIDATION_FAILED', 'Format permintaan tidak valid.');
+  const { text } = bodyText;
   let body: unknown;
   try {
     body = JSON.parse(text);

@@ -4,6 +4,7 @@ import { getTestAuth } from '@/server/auth';
 import { grantPro } from '@/server/billing';
 import { getDb } from '@/server/db';
 import { user } from '@/server/db/schema';
+import { readLimitedText } from '@/server/request-body';
 
 const body = z.object({
   email: z.email(),
@@ -21,7 +22,21 @@ export async function POST(request: Request) {
     process.env.E2E_TEST_AUTH !== '1'
   )
     return new Response('Tidak ditemukan.', { status: 404 });
-  const parsed = body.safeParse(await request.json().catch(() => null));
+  const bodyText = await readLimitedText(request, 4096);
+  if (!bodyText.ok)
+    return new Response(
+      bodyText.reason === 'too_large'
+        ? 'Isian terlalu besar.'
+        : 'Format permintaan tidak valid.',
+      { status: bodyText.reason === 'too_large' ? 413 : 400 },
+    );
+  let input: unknown;
+  try {
+    input = JSON.parse(bodyText.text);
+  } catch {
+    return new Response('Format permintaan tidak valid.', { status: 400 });
+  }
+  const parsed = body.safeParse(input);
   if (!parsed.success)
     return new Response('Isian tidak valid.', { status: 400 });
 

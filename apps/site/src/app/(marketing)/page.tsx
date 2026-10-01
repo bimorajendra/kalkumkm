@@ -9,6 +9,7 @@ import { TrustGrid } from '@/components/marketing/trust-grid';
 import { JsonLd } from '@/components/seo/json-ld';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { publicMetadata } from '@/features/seo/metadata';
+import { useCases } from '@/features/seo/use-cases';
 import { getSessionUser } from '@/server/session';
 
 export const metadata: Metadata = {
@@ -154,10 +155,11 @@ export default async function BerandaPage({
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-2xl">
               <h2 className="text-2xl leading-tight font-bold tracking-[-0.03em] lg:text-3xl">
-                Panduan menghitung HPP dan harga jual
+                Panduan HPP sesuai jenis usahamu
               </h2>
               <p className="mt-2 leading-7 text-[var(--mk-text-2)]">
-                Baca contoh langkah demi langkah sebelum mencatat resep.
+                Pilih produk yang kamu jual untuk melihat cara menghitung
+                HPP-nya.
               </p>
             </div>
             <Link
@@ -167,27 +169,39 @@ export default async function BerandaPage({
               Semua artikel
             </Link>
           </div>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {(
-              [
-                [
-                  'Cara menghitung HPP makanan per porsi',
-                  '/artikel/cara-menghitung-hpp-makanan',
-                ],
-                [
-                  'Beda margin dan markup saat menentukan harga',
-                  '/artikel/beda-margin-dan-markup',
-                ],
-              ] as const
-            ).map(([title, href]) => (
+          <nav
+            aria-label="Panduan HPP berdasarkan jenis usaha"
+            className="mt-5 grid gap-x-8 gap-y-2 sm:grid-cols-2"
+          >
+            {useCases.map(({ slug, title }) => (
               <Link
-                className="rounded-[var(--mk-radius-md)] border border-[var(--mk-border)] bg-[var(--mk-surface)] p-4 font-semibold underline-offset-4 hover:underline"
-                href={href}
-                key={href}
+                className="flex min-h-11 items-center border-b border-[var(--mk-border)] py-2 font-semibold text-[var(--mk-primary-ink)] underline-offset-4 hover:underline"
+                href={`/usaha/${slug}`}
+                key={slug}
               >
                 {title}
               </Link>
             ))}
+          </nav>
+          <div className="mt-6 border-t border-[var(--mk-border)] pt-4">
+            <p className="text-sm font-semibold">Dasar menghitung harga</p>
+            <nav
+              aria-label="Artikel dasar perhitungan"
+              className="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-sm"
+            >
+              <Link
+                className="min-h-11 inline-flex items-center text-[var(--mk-primary-ink)] underline underline-offset-4"
+                href="/artikel/cara-menghitung-hpp-makanan"
+              >
+                Cara menghitung HPP makanan per porsi
+              </Link>
+              <Link
+                className="min-h-11 inline-flex items-center text-[var(--mk-primary-ink)] underline underline-offset-4"
+                href="/artikel/beda-margin-dan-markup"
+              >
+                Beda margin dan markup
+              </Link>
+            </nav>
           </div>
         </div>
       </section>

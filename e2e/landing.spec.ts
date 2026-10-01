@@ -33,6 +33,49 @@ test('beranda: tautan ke cara hitung dan masuk', async ({ page }) => {
   ).toBeVisible();
 });
 
+test('beranda: panduan usaha bisa ditemukan dan dibuka dengan keyboard', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const guides = page.getByRole('navigation', {
+    name: 'Panduan HPP berdasarkan jenis usaha',
+  });
+  const guideLinks = [
+    ['/usaha/hpp-brownies', 'Cara menghitung HPP brownies per potong'],
+    ['/usaha/hpp-katering', 'Cara menghitung HPP katering per porsi'],
+    ['/usaha/hpp-frozen-food', 'Cara menghitung HPP frozen food'],
+    ['/usaha/hpp-rice-bowl', 'Cara menghitung HPP rice bowl'],
+    ['/usaha/hpp-minuman', 'Cara menghitung HPP minuman per gelas'],
+    ['/usaha/hpp-hampers', 'Cara menghitung HPP hampers makanan'],
+  ] as const;
+
+  for (const [href, name] of guideLinks) {
+    await expect(guides.getByRole('link', { name })).toHaveAttribute(
+      'href',
+      href,
+    );
+  }
+
+  await page.getByRole('link', { name: 'Semua artikel' }).focus();
+  for (const [, name] of guideLinks) {
+    await page.keyboard.press('Tab');
+    await expect(guides.getByRole('link', { name })).toBeFocused();
+  }
+  for (let index = 1; index < guideLinks.length; index += 1) {
+    await page.keyboard.press('Shift+Tab');
+  }
+  await expect(
+    guides.getByRole('link', { name: guideLinks[0][1] }),
+  ).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/\/usaha\/hpp-brownies$/);
+  await expect(
+    page.getByRole('heading', {
+      name: 'Cara menghitung HPP brownies per potong',
+    }),
+  ).toBeVisible();
+});
+
 test('artikel: canonical, robots, dan sitemap memuat halaman publik', async ({
   page,
 }) => {
