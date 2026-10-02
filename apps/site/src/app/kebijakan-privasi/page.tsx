@@ -3,6 +3,10 @@ import Link from 'next/link';
 import { AnalyticsConsentSettingsButton } from '@/components/analytics/analytics-consent';
 import { publicMetadata } from '@/features/seo/metadata';
 
+// Baca APP_URL saat permintaan, bukan saat build: image yang dibuat tanpa
+// build arg APP_URL tetap menghasilkan URL domain produksi.
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = publicMetadata({
   title: 'Kebijakan privasi Takaran',
   description: 'Data akun, resep, harga, dan pembayaran yang diproses Takaran.',

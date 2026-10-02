@@ -73,3 +73,63 @@ test('autosave lama tidak membatalkan perubahan slider terbaru', async ({
   await page.reload();
   await expect(slider).toHaveAttribute('aria-valuetext', '60 persen');
 });
+
+test('kalkulator HPP menerima format rupiah umum dan tetap menolak desimal', async ({
+  page,
+}) => {
+  await page.goto('/kalkulator-hpp');
+  const material = page.getByLabel('Total biaya bahan satu adonan (Rp)');
+  const portions = page.getByLabel('Jumlah porsi yang dihasilkan');
+  await material.fill('Rp 27.800');
+  await page.getByLabel('Biaya produksi lain satu adonan (Rp)').fill('3.000');
+  await portions.fill('16');
+  await page.getByLabel('Biaya kemasan per porsi (Rp)').fill('rp1.000');
+  const submit = page.getByRole('button', { name: 'Hitung sekarang' });
+  await submit.click();
+  await expect(page.getByText('HPP per porsi: Rp 2.925')).toBeVisible();
+
+  await material.fill('27.8');
+  await submit.click();
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'Biaya bahan' }),
+  ).toBeVisible();
+
+  await material.fill('27800');
+  await portions.fill('1.600');
+  await submit.click();
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'Jumlah porsi' }),
+  ).toBeVisible();
+});
+
+const articleCalculators = [
+  ['cara-menghitung-hpp-makanan', '/kalkulator-hpp'],
+  ['cara-menentukan-harga-jual-makanan', '/harga-jual'],
+  ['beda-margin-dan-markup', '/margin'],
+] as const;
+
+for (const [slug, href] of articleCalculators) {
+  test(`artikel ${slug}: tautan kalkulator dan og:url`, async ({ page }) => {
+    await page.goto(`/artikel/${slug}`);
+    await expect(
+      page.locator('article').getByRole('link', { name: /^Buka kalkulator/ }),
+    ).toHaveAttribute('href', href);
+    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+      'content',
+      new RegExp(`/artikel/${slug}$`),
+    );
+  });
+}
+
+test('beranda: tanpa placeholder foto dan memuat contoh hitungan brownies', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect(page.getByText('[Foto]')).toHaveCount(0);
+  await expect(
+    page.getByText('Contoh hitungan: modal satu potong brownies'),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Lihat cara menghitungnya' }),
+  ).toHaveAttribute('href', '/cara-hitung');
+});

@@ -15,6 +15,7 @@ import { mkButtonClasses } from './button-classes';
 import { MkLogo } from './logo';
 
 const navItems = [
+  { href: '/kalkulator-hpp', label: 'Kalkulator HPP' },
   { href: '/cara-hitung', label: 'Cara hitung' },
   { href: '/artikel', label: 'Artikel' },
   { href: '/fitur', label: 'Fitur' },

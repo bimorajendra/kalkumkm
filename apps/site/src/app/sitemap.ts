@@ -2,6 +2,10 @@ import type { MetadataRoute } from 'next';
 import { articles } from '@/features/articles/content';
 import { useCases } from '@/features/seo/use-cases';
 
+// Baca APP_URL saat permintaan, bukan saat build: image yang dibuat tanpa
+// build arg APP_URL tetap menghasilkan URL domain produksi.
+export const dynamic = 'force-dynamic';
+
 const publicPaths = [
   '/',
   '/fitur',
