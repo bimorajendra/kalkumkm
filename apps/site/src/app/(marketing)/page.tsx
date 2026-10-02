@@ -188,16 +188,16 @@ export default async function BerandaPage({
             </div>
             <Link
               className="inline-flex min-h-11 items-center font-semibold text-[var(--mk-primary-ink)] underline underline-offset-4"
-              href="/artikel"
+              href="/usaha"
             >
-              Semua artikel
+              Lihat semua jenis usaha
             </Link>
           </div>
           <nav
             aria-label="Panduan HPP berdasarkan jenis usaha"
             className="mt-5 grid gap-x-8 gap-y-2 sm:grid-cols-2"
           >
-            {useCases.map(({ slug, title }) => (
+            {useCases.slice(0, 6).map(({ slug, title }) => (
               <Link
                 className="flex min-h-11 items-center border-b border-[var(--mk-border)] py-2 font-semibold text-[var(--mk-primary-ink)] underline-offset-4 hover:underline"
                 href={`/usaha/${slug}`}

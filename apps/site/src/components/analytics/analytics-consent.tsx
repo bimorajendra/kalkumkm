@@ -36,6 +36,7 @@ export function AnalyticsConsentProvider({
         '/harga-ojol',
         '/kalkulator-hpp',
         '/margin',
+        '/usaha',
       ].some((route) => path === route || path.startsWith(`${route}/`)) ||
       path.startsWith('/usaha/');
     let hasSavedChoice = false;

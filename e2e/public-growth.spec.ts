@@ -1,5 +1,15 @@
 import { expect, test } from '@playwright/test';
+import Big from 'big.js';
+import { useCases } from '../apps/site/src/features/seo/use-cases';
+import { hppFromCosts } from '../packages/calc/src/public-pricing';
+import { formatRupiah } from '../packages/ui/src/format';
 import { expectNoA11yViolations } from './helpers';
+
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() =>
+    localStorage.setItem('takaran-analytics-consent-v2', 'denied'),
+  );
+});
 
 test('contoh kelima kalkulator dapat dihitung dan ditautkan', async ({
   page,
@@ -24,23 +34,32 @@ test('contoh kelima kalkulator dapat dihitung dan ditautkan', async ({
   }
 });
 
-test('enam halaman usaha berisi contoh kontekstual dan breadcrumb', async ({
+test('setiap halaman usaha menghitung contoh dan memiliki breadcrumb', async ({
   page,
 }, testInfo) => {
-  for (const [slug, hpp] of [
-    ['brownies', '2.925'],
-    ['katering', '11.600'],
-    ['frozen-food', '7.500'],
-    ['rice-bowl', '18.000'],
-    ['minuman', '6.000'],
-    ['hampers', '70.000'],
-  ]) {
-    await page.goto(`/usaha/hpp-${slug}`);
+  test.setTimeout(120_000);
+  for (const item of useCases) {
+    expect(item.description.length).toBeLessThanOrEqual(155);
+    await page.goto(`/usaha/${item.slug}`);
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
     await page.getByRole('button', { name: 'Isi angka contoh' }).click();
     await page.getByRole('button', { name: 'Hitung sekarang' }).click();
+    const {
+      material,
+      production,
+      packaging,
+      yield: quantity,
+    } = item.example.values;
+    const hpp = formatRupiah(
+      hppFromCosts(
+        new Big(material),
+        new Big(production),
+        new Big(packaging),
+        Number(quantity),
+      ),
+    );
     await expect(
-      page.getByText(`HPP per porsi: Rp ${hpp}`, { exact: true }),
+      page.getByText(`HPP per porsi: ${hpp}`, { exact: true }),
     ).toBeVisible();
     expect(
       await page
@@ -49,12 +68,74 @@ test('enam halaman usaha berisi contoh kontekstual dan breadcrumb', async ({
     ).toEqual(
       expect.arrayContaining([expect.stringContaining('BreadcrumbList')]),
     );
+    const breadcrumbs = page.locator('nav[aria-label="Navigasi halaman"]');
+    await expect(
+      breadcrumbs.getByRole('link', { name: 'Beranda' }),
+    ).toHaveAttribute('href', '/');
+    await expect(
+      breadcrumbs.getByRole('link', { name: 'Jenis usaha' }),
+    ).toHaveAttribute('href', '/usaha');
+    await expect(breadcrumbs.locator('[aria-current="page"]')).toHaveText(
+      item.title,
+    );
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      expect.stringContaining(`/usaha/${item.slug}`),
+    );
     await expectNoA11yViolations(page);
   }
   await page.screenshot({
     path: testInfo.outputPath('use-case.png'),
     fullPage: true,
   });
+});
+
+test('hub usaha lolos axe dan menautkan setiap panduan', async ({ page }) => {
+  await page.goto('/usaha');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+  const links = page.locator('nav[aria-label^="Panduan "] a');
+  await expect(links).toHaveCount(useCases.length);
+  for (const item of useCases)
+    await expect(links.filter({ hasText: item.title })).toHaveAttribute(
+      'href',
+      `/usaha/${item.slug}`,
+    );
+  expect(
+    await page
+      .locator('script[type="application/ld+json"]')
+      .evaluate((script) => script.textContent),
+  ).toContain('BreadcrumbList');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    expect.stringContaining('/usaha'),
+  );
+  const sitemap = await page.request.get('/sitemap.xml');
+  expect(await sitemap.text()).toMatch(/<loc>[^<]+\/usaha<\/loc>/);
+  await expectNoA11yViolations(page);
+});
+
+test('kalkulator menyediakan panduan dan FAQ yang bisa dibuka dengan Enter', async ({
+  page,
+}) => {
+  for (const path of [
+    '/kalkulator-hpp',
+    '/harga-jual',
+    '/margin',
+    '/harga-ojol',
+    '/bep',
+  ]) {
+    await page.goto(path);
+    await expect(page.getByRole('heading', { name: /Panduan/ })).toBeVisible();
+    const details = page.locator('details');
+    await expect(details).toHaveCount(path === '/kalkulator-hpp' ? 5 : 4);
+    const summary = details.first().locator('summary');
+    await summary.focus();
+    await page.keyboard.press('Enter');
+    await expect(details.first()).toHaveAttribute('open', '');
+    await page.keyboard.press('Enter');
+    await expect(details.first()).not.toHaveAttribute('open', '');
+    await expectNoA11yViolations(page);
+  }
 });
 
 test('berbagi, pembatalan, salin, dan fallback dapat dipakai tanpa mengirim query', async ({
@@ -110,7 +191,7 @@ test('berbagi, pembatalan, salin, dan fallback dapat dipakai tanpa mengirim quer
   );
   expect(captured).toHaveLength(2);
   expect(captured[0]).toContain('Rp 2.925');
-  expect(captured[0]).toContain('http://localhost:3100/margin');
+  expect(captured[0]).toContain(`${new URL(page.url()).origin}/margin`);
   expect(captured.join('')).not.toContain('private');
   await expectNoA11yViolations(page);
   await page.screenshot({

@@ -18,6 +18,7 @@ const publicPaths = [
   '/bep',
   '/harga-jual',
   '/harga-ojol',
+  '/usaha',
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

@@ -60,7 +60,11 @@ test('beranda: panduan usaha bisa ditemukan dan dibuka dengan keyboard', async (
     );
   }
 
-  await page.getByRole('link', { name: 'Semua artikel' }).focus();
+  const allGuides = page.getByRole('link', {
+    name: 'Lihat semua jenis usaha',
+  });
+  await expect(allGuides).toHaveAttribute('href', '/usaha');
+  await allGuides.focus();
   for (const [, name] of guideLinks) {
     await page.keyboard.press('Tab');
     await expect(guides.getByRole('link', { name })).toBeFocused();
