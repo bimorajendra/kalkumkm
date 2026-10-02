@@ -35,7 +35,7 @@ import { recipeCopy } from './copy';
 import { recipeInputFromForm } from './recipe-input';
 import { RecipeItemsSection } from './recipe-items-section';
 import { commonUnits } from './recipe-units';
-import { type RecipeFormValues, recipeFormSchema } from './schema';
+import type { RecipeFormValues } from './schema';
 
 const blank: RecipeFormValues = {
   name: '',
@@ -120,6 +120,9 @@ export function RecipeEditor({
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showPaywallLink, setShowPaywallLink] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [formSchema, setFormSchema] = useState<
+    typeof import('./schema')['recipeFormSchema'] | null
+  >(null);
   const [paywall, setPaywall] = useState<'sub_recipe' | 'recipe' | null>(null);
 
   useEffect(() => {
@@ -199,20 +202,35 @@ export function RecipeEditor({
     }));
   }
 
-  async function saveRecipe() {
-    const parsed = recipeFormSchema.safeParse(values);
-    if (!parsed.success) {
-      const next: Record<string, string> = {};
-      for (const issue of parsed.error.issues)
-        next[issue.path.join('.')] = issue.message;
-      setErrors(next);
-      return;
+  // Validasi dimuat saat form dipakai; HPP awal tetap dari data yang sudah divalidasi server.
+  async function prepareSchema() {
+    if (formSchema) return formSchema;
+    try {
+      const { recipeFormSchema } = await import('./schema');
+      setFormSchema(recipeFormSchema);
+      return recipeFormSchema;
+    } catch {
+      setMessage('Form belum siap. Periksa koneksi lalu coba lagi.');
+      return null;
     }
+  }
+
+  async function saveRecipe() {
     setSaving(true);
     setMessage('');
     setSaveSuccess(false);
     setShowPaywallLink(false);
     try {
+      const schema = await prepareSchema();
+      if (!schema) return;
+      const parsed = schema.safeParse(values);
+      if (!parsed.success) {
+        const next: Record<string, string> = {};
+        for (const issue of parsed.error.issues)
+          next[issue.path.join('.')] = issue.message;
+        setErrors(next);
+        return;
+      }
       const input = recipeInputFromForm(
         parsed.data,
         { targetMarginBp: settings.defaultMarginBp },
@@ -243,26 +261,34 @@ export function RecipeEditor({
     }
   }
 
-  function continueStep() {
+  async function continueStep() {
     if (step >= recipeSteps.length - 1 || saving) return;
-    const fields = step === 0 ? ['name', 'yieldPortions'] : ['items'];
-    const parsed = recipeFormSchema.safeParse(values);
-    const nextErrors: Record<string, string> = {};
-    if (!parsed.success) {
-      for (const issue of parsed.error.issues) {
-        if (fields.includes(String(issue.path[0])))
-          nextErrors[issue.path.join('.')] = issue.message;
+    setSaving(true);
+    try {
+      const schema = await prepareSchema();
+      if (!schema) return;
+      const fields = step === 0 ? ['name', 'yieldPortions'] : ['items'];
+      const parsed = schema.safeParse(values);
+      const nextErrors: Record<string, string> = {};
+      if (!parsed.success) {
+        for (const issue of parsed.error.issues) {
+          if (fields.includes(String(issue.path[0])))
+            nextErrors[issue.path.join('.')] = issue.message;
+        }
       }
+      setErrors((current) => {
+        const next = { ...current };
+        for (const field of fields) {
+          for (const key of Object.keys(next))
+            if (key === field || key.startsWith(`${field}.`)) delete next[key];
+        }
+        return { ...next, ...nextErrors };
+      });
+      if (Object.keys(nextErrors).length === 0)
+        setStep((current) => current + 1);
+    } finally {
+      setSaving(false);
     }
-    setErrors((current) => {
-      const next = { ...current };
-      for (const field of fields) {
-        for (const key of Object.keys(next))
-          if (key === field || key.startsWith(`${field}.`)) delete next[key];
-      }
-      return { ...next, ...nextErrors };
-    });
-    if (Object.keys(nextErrors).length === 0) setStep((current) => current + 1);
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -295,8 +321,8 @@ export function RecipeEditor({
       ),
   );
   const preview = useMemo(() => {
-    if (!inline || !recipe) return undefined;
-    const parsed = recipeFormSchema.safeParse(values);
+    if (!inline || !recipe || !formSchema) return undefined;
+    const parsed = formSchema.safeParse(values);
     if (!parsed.success) return undefined;
     const nextRecipe = {
       ...recipe,
@@ -315,12 +341,17 @@ export function RecipeEditor({
     });
     const result = nextResults.get(recipe.id);
     return result instanceof CalcError ? undefined : result;
-  }, [inline, ingredients, recipe, recipes, settings, values]);
+  }, [inline, ingredients, recipe, recipes, settings, values, formSchema]);
   const currentHpp = preview?.hpp ?? hpp;
   const currentBatchCost = preview?.batchCost ?? batchCost;
 
   const form = (
-    <form className="grid gap-5" onSubmit={submit} noValidate>
+    <form
+      className="grid gap-5"
+      onSubmit={submit}
+      onFocusCapture={() => void prepareSchema()}
+      noValidate
+    >
       {!inline ? (
         <div className="grid gap-2">
           <div className="flex items-center justify-between gap-3">
@@ -708,6 +739,7 @@ export function RecipeEditor({
               <Button
                 type="button"
                 variant="outline"
+                disabled={saving}
                 onClick={() => setStep((current) => Math.max(0, current - 1))}
               >
                 Kembali
@@ -721,8 +753,8 @@ export function RecipeEditor({
               Batal
             </Button>
             {step < recipeSteps.length - 1 ? (
-              <Button type="button" onClick={continueStep}>
-                Lanjutkan
+              <Button type="button" disabled={saving} onClick={continueStep}>
+                {saving ? 'Memeriksa…' : 'Lanjutkan'}
               </Button>
             ) : (
               <Button

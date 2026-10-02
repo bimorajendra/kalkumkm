@@ -156,7 +156,7 @@ export function updateIngredient(
     ...normalized,
     updatedAt: context.now,
   };
-  return { ingredients: { put: [updated] } };
+  return ingredientChanges(snapshot, current, updated, context);
 }
 
 export function updatePrice(
@@ -174,18 +174,31 @@ export function updatePrice(
     buyPrice,
     updatedAt: context.now,
   };
+  return ingredientChanges(snapshot, current, updated, context);
+}
+
+function ingredientChanges(
+  snapshot: Snapshot,
+  current: IngredientRow,
+  updated: IngredientRow,
+  context: CommandContext,
+): Changes {
+  const id = current.id;
   const changes: Changes = {
     ingredients: { put: [updated] },
-    priceHistory: [
-      {
-        ingredientId: id,
-        changedAt: context.now,
-        oldPrice: current.buyPrice,
-        newPrice: buyPrice,
-      },
-    ],
+    priceHistory:
+      current.buyPrice === updated.buyPrice
+        ? []
+        : [
+            {
+              ingredientId: id,
+              changedAt: context.now,
+              oldPrice: current.buyPrice,
+              newPrice: updated.buyPrice,
+            },
+          ],
   };
-  if (buyPrice > current.buyPrice) {
+  if (unitPrice(updated).gt(unitPrice(current))) {
     const ingredients = snapshot.ingredients.map((row) =>
       row.id === id ? updated : row,
     );
@@ -201,7 +214,14 @@ export function updatePrice(
       snapshot.settings.roundingStep,
     );
     const alarm: MarginAlarm = {
-      recipeIds: affected.map(({ recipe }) => recipe.id),
+      recipeIds: [
+        ...new Set([
+          ...(snapshot.settings.marginAlarm?.dismissed
+            ? []
+            : (snapshot.settings.marginAlarm?.recipeIds ?? [])),
+          ...affected.map(({ recipe }) => recipe.id),
+        ]),
+      ],
       triggeredBy: id,
       createdAt: context.now,
       dismissed: false,

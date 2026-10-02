@@ -24,11 +24,7 @@ import {
 import type { IngredientRow } from '@/domain/types';
 import { commonIngredients, findCommonIngredient } from './common-ingredients';
 import { ingredientCopy } from './copy';
-import {
-  type IngredientFormValues,
-  ingredientFormSchema,
-  ingredientInputFromForm,
-} from './schema';
+import type { IngredientFormValues } from './schema';
 
 const defaults: IngredientFormValues = {
   name: '',
@@ -94,21 +90,24 @@ export function IngredientForm({
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const parsed = ingredientFormSchema.safeParse(values);
-    if (!parsed.success) {
-      setErrors(
-        Object.fromEntries(
-          parsed.error.issues.map((issue) => [
-            String(issue.path[0]),
-            issue.message,
-          ]),
-        ),
-      );
-      return;
-    }
     setSaving(true);
     setFormError('');
     try {
+      const { ingredientFormSchema, ingredientInputFromForm } = await import(
+        './schema'
+      );
+      const parsed = ingredientFormSchema.safeParse(values);
+      if (!parsed.success) {
+        setErrors(
+          Object.fromEntries(
+            parsed.error.issues.map((issue) => [
+              String(issue.path[0]),
+              issue.message,
+            ]),
+          ),
+        );
+        return;
+      }
       const input = ingredientInputFromForm(parsed.data);
       await run(
         ingredient

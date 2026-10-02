@@ -36,6 +36,7 @@ export function useCalculator(recipe: RecipeRow) {
 
   useEffect(() => {
     if (draft.recipeId !== recipe.id || !dirty) return;
+    let active = true;
     const timer = setTimeout(async () => {
       try {
         await run({
@@ -46,13 +47,18 @@ export function useCalculator(recipe: RecipeRow) {
             laborMinutesPerBatch: draft.laborMinutesPerBatch,
           },
         });
-        setSaveError(false);
-        setDirty(false);
+        if (active) {
+          setSaveError(false);
+          setDirty(false);
+        }
       } catch {
-        setSaveError(true);
+        if (active) setSaveError(true);
       }
     }, 300);
-    return () => clearTimeout(timer);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
   }, [dirty, draft, recipe.id, run]);
 
   const change = (patch: Partial<Draft>) => {

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod';
 import { quoteOptionSchema } from '@/domain/quotes';
 
 export type { QuoteOptionInput } from '@/domain/quotes';

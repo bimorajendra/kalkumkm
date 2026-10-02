@@ -12,7 +12,10 @@ const schema = z.object({
   MAYAR_BASE_URL: z
     .enum(['https://api.mayar.io/hl/v2', 'https://api.mayar.id/hl/v2'])
     .default('https://api.mayar.io/hl/v2'),
-  MAYAR_WEBHOOK_TOKEN: z.string().min(16).optional(),
+  MAYAR_WEBHOOK_TOKEN: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.string().min(16).optional(),
+  ),
 });
 
 export type Env = z.infer<typeof schema>;

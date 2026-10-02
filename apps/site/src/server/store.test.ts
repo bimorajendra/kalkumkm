@@ -383,6 +383,74 @@ describe('contoh brownies (PRD bagian 7)', () => {
 });
 
 describe('alarm margin', () => {
+  it('form ubah bahan mencatat harga dan alarm seperti ubah harga langsung', async () => {
+    await createUser(db, 'ingredient-edit');
+    const before = await run('ingredient-edit', { type: 'recipe.seedExample' });
+    const egg = before.ingredients.find((row) => row.name === 'Telur');
+    if (!egg) throw new Error('Telur tidak ada');
+    const after = await run('ingredient-edit', {
+      type: 'ingredient.update',
+      id: egg.id,
+      input: { ...egg, buyPrice: 2600 },
+    });
+    expect(after.priceHistory).toMatchObject([
+      { ingredientId: egg.id, oldPrice: 2000, newPrice: 2600 },
+    ]);
+    expect(after.settings.marginAlarm?.recipeIds).toEqual([
+      before.recipes[0]?.id,
+    ]);
+    const again = await run('ingredient-edit', {
+      type: 'ingredient.update',
+      id: egg.id,
+      input: { ...egg, buyPrice: 2600, name: 'Telur ayam' },
+    });
+    expect(again.priceHistory).toHaveLength(1);
+  });
+
+  it('kemasan mengecil memicu alarm tanpa mengarang riwayat harga beli', async () => {
+    await createUser(db, 'pack-edit');
+    const before = await run('pack-edit', { type: 'recipe.seedExample' });
+    const flour = before.ingredients.find(
+      (row) => row.name === 'Tepung terigu',
+    );
+    if (!flour) throw new Error('Tepung tidak ada');
+    const after = await run('pack-edit', {
+      type: 'ingredient.update',
+      id: flour.id,
+      input: { ...flour, packSize: flour.packSize / 2 },
+    });
+    expect(after.settings.marginAlarm?.recipeIds).toEqual([
+      before.recipes[0]?.id,
+    ]);
+    expect(after.priceHistory).toEqual([]);
+  });
+
+  it('kenaikan bahan lain tidak menghapus alarm yang belum ditangani', async () => {
+    await createUser(db, 'alarm-merge');
+    const before = await run('alarm-merge', { type: 'recipe.seedExample' });
+    const egg = before.ingredients.find((row) => row.name === 'Telur');
+    await run('alarm-merge', {
+      type: 'ingredient.price',
+      id: egg?.id,
+      buyPrice: 2600,
+    });
+    const added = await run('alarm-merge', {
+      type: 'ingredient.create',
+      input: { ...flour, name: 'Bahan belum dipakai' },
+    });
+    const unused = added.ingredients.find(
+      (row) => row.name === 'Bahan belum dipakai',
+    );
+    const after = await run('alarm-merge', {
+      type: 'ingredient.price',
+      id: unused?.id,
+      buyPrice: 16000,
+    });
+    expect(after.settings.marginAlarm?.recipeIds).toEqual([
+      before.recipes[0]?.id,
+    ]);
+  });
+
   it('menandai resep yang untungnya turun setelah harga bahan naik', async () => {
     const snapshot = await getSnapshot(db, 'ani');
     const egg = snapshot.ingredients.find((row) => row.name === 'Telur');

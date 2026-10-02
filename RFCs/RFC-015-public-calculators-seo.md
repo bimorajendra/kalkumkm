@@ -15,3 +15,13 @@ Menyediakan kalkulator dasar tanpa login dan halaman use-case yang membantu pemi
 - Halaman use-case brownies, katering, frozen food, rice bowl, minuman, dan hampers memberi petunjuk kontekstual tanpa statistik/testimoni buatan.
 - Tidak ada input kalkulator yang dikirim ke server atau disimpan.
 - Lolos test, axe, keyboard, viewport 320 px dan 1280 px dalam tema yang didukung.
+
+## Perluasan audit, 2 Oktober 2026
+
+Disetujui melalui instruksi lanjut setelah rencana diajukan di chat. Keputusan analytics terpisah ada di `docs/CHANGE-005-public-calculator-events.md`.
+
+- Lima kalkulator menyediakan tombol angka contoh dan petunjuk membaca hasil; margin juga menjelaskan markup dengan rumus yang sudah ada.
+- Enam halaman usaha berisi kalkulator interaktif dengan contoh kontekstual berlabel ilustrasi, satu H1, dan breadcrumb terstruktur.
+- Hasil dapat dibagikan lewat share sheet perangkat atau disalin, membawa nama Takaran dan URL halaman tanpa query, fragmen, atau angka dalam URL. Jika clipboard gagal, tersedia teks untuk disalin manual; pembatalan berbagi tidak ditampilkan sebagai keberhasilan.
+- Tautan hasil menuju masuk hanya mengukur klik, tidak otomatis menyimpan atau memindahkan hasil ke akun.
+- Isian dan hasil tetap lokal, kecuali ketika pengguna sendiri memilih menyalin atau berbagi hasil.

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod';
 
 const baseUnits = ['g', 'ml', 'pcs'] as const;
 const standardUnits = ['kg', 'g', 'l', 'ml', 'butir', 'pcs'] as const;

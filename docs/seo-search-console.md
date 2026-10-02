@@ -23,4 +23,4 @@ Lakukan langkah ini setelah domain produksi aktif dengan HTTPS. Sitemap memakai 
 - Pastikan halaman publik tidak meminta login dan artikel mengembalikan status sukses. Halaman dashboard, login, admin, dan API memang dikecualikan.
 - Ulangi inspeksi URL setelah konten utama berubah. Pengindeksan dan peringkat tetap ditentukan mesin pencari.
 
-Takaran belum memasang analytics pihak ketiga. Untuk evaluasi pencarian organik, gunakan laporan Search Console dan Bing Webmaster Tools terlebih dahulu.
+Takaran mendukung GA4 opsional setelah consent. Lihat `CHANGE-004-google-analytics.md` dan perluasan event kalkulator di `CHANGE-005-public-calculator-events.md`. Gunakan Search Console dan Bing Webmaster Tools untuk kueri serta pengindeksan; event kalkulator mengukur penggunaan dan klik menuju masuk, bukan keberhasilan membuat akun.

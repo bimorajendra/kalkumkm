@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { JsonLd } from '@/components/seo/json-ld';
 import { Button } from '@/components/ui/button';
+import { PublicCalculator } from '@/features/public-calculators/public-calculator';
 import { publicMetadata } from '@/features/seo/metadata';
 import { getUseCase, useCases } from '@/features/seo/use-cases';
 
@@ -32,8 +34,29 @@ export default async function UseCasePage({
   const { slug } = await params;
   const item = getUseCase(slug);
   if (!item) notFound();
+  const origin = process.env.APP_URL || 'http://localhost:3000';
   return (
     <article className="mk mx-auto grid w-full max-w-4xl gap-8 px-5 py-10 lg:py-16">
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Takaran',
+              item: new URL('/', origin).href,
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: item.title,
+              item: new URL(`/usaha/${item.slug}`, origin).href,
+            },
+          ],
+        }}
+      />
       <header className="grid gap-4">
         <p className="text-sm font-semibold text-[var(--mk-primary-ink)]">
           Panduan HPP per jenis usaha
@@ -57,6 +80,7 @@ export default async function UseCasePage({
           </section>
         ))}
       </div>
+      <PublicCalculator mode="hpp" example={item.example} embedded />
       <section className="grid justify-items-start gap-3 rounded-2xl border border-input/60 bg-card p-5 lg:p-7">
         <h2 className="text-2xl font-semibold">Coba hitung HPP usahamu</h2>
         <p className="text-[var(--mk-text-2)]">

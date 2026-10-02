@@ -36,6 +36,21 @@ export function GoogleAnalytics({ nonce }: { nonce?: string }) {
       window.dataLayer?.push(arguments);
     };
 
+    let referrerOrigin = '';
+    try {
+      referrerOrigin = document.referrer
+        ? new URL(document.referrer).origin
+        : '';
+    } catch {
+      referrerOrigin = '';
+    }
+
+    window.gtag('set', {
+      page_location: new URL(pathname, window.location.origin).href,
+      page_title: document.title,
+      page_referrer: referrerOrigin,
+    });
+
     if (!initialized.current) {
       window.gtag('js', new Date());
       window.gtag('consent', 'default', {
@@ -56,20 +71,6 @@ export function GoogleAnalytics({ nonce }: { nonce?: string }) {
         allow_ad_personalization_signals: false,
       });
       initialized.current = true;
-    }
-
-    window.gtag('set', {
-      page_location: new URL(pathname, window.location.origin).href,
-      page_title: document.title,
-    });
-
-    let referrerOrigin: string | undefined;
-    try {
-      referrerOrigin = document.referrer
-        ? new URL(document.referrer).origin
-        : undefined;
-    } catch {
-      referrerOrigin = undefined;
     }
 
     window.gtag('event', 'page_view', {
