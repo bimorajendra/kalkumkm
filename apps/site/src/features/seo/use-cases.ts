@@ -1,6 +1,16 @@
 export const useCases = [
   {
     slug: 'hpp-brownies',
+    example: {
+      description:
+        'Ilustrasi satu loyang: bahan Rp 27.800, energi Rp 3.000, 16 potong layak jual, dan kemasan Rp 1.000 per potong. Ganti dengan harga dari strukmu.',
+      values: {
+        material: '27800',
+        production: '3000',
+        yield: '16',
+        packaging: '1000',
+      },
+    },
     title: 'Cara menghitung HPP brownies per potong',
     description:
       'Hitung HPP brownies dari bahan, energi oven, hasil potong, dan kemasan untuk menetapkan harga jual.',
@@ -23,6 +33,16 @@ export const useCases = [
   },
   {
     slug: 'hpp-katering',
+    example: {
+      description:
+        'Ilustrasi 50 kotak: bahan seluruh menu Rp 400.000, gas dan tenaga Rp 80.000, serta kotak dan perlengkapan Rp 2.000 per porsi. Angka ini bukan harga pasar.',
+      values: {
+        material: '400000',
+        production: '80000',
+        yield: '50',
+        packaging: '2000',
+      },
+    },
     title: 'Cara menghitung HPP katering per porsi',
     description:
       'Susun HPP katering dengan memperhitungkan bahan, lauk, tenaga, kemasan, dan jumlah porsi yang diproduksi.',
@@ -45,6 +65,16 @@ export const useCases = [
   },
   {
     slug: 'hpp-frozen-food',
+    example: {
+      description:
+        'Ilustrasi 60 bungkus produk layak jual: bahan Rp 300.000, produksi Rp 60.000, dan plastik serta label Rp 1.500 per bungkus. Isi jumlah hasil dengan bungkus, bukan jumlah potong di dalamnya.',
+      values: {
+        material: '300000',
+        production: '60000',
+        yield: '60',
+        packaging: '1500',
+      },
+    },
     title: 'Cara menghitung HPP frozen food',
     description:
       'Hitung biaya frozen food per kemasan dari bahan, hasil produksi, susut, dan kemasan.',
@@ -67,6 +97,16 @@ export const useCases = [
   },
   {
     slug: 'hpp-rice-bowl',
+    example: {
+      description:
+        'Ilustrasi 20 mangkuk: nasi, lauk, dan saus Rp 280.000, produksi Rp 40.000, serta wadah dan sendok Rp 2.000 per mangkuk. Ganti takaran dan biaya sesuai menumu.',
+      values: {
+        material: '280000',
+        production: '40000',
+        yield: '20',
+        packaging: '2000',
+      },
+    },
     title: 'Cara menghitung HPP rice bowl',
     description:
       'Hitung HPP rice bowl dari nasi, lauk, saus, topping, wadah, dan biaya produksi.',
@@ -89,6 +129,16 @@ export const useCases = [
   },
   {
     slug: 'hpp-minuman',
+    example: {
+      description:
+        'Ilustrasi 20 gelas kopi susu: bahan termasuk es Rp 90.000, produksi Rp 10.000, serta gelas, tutup, dan sedotan Rp 1.000 per gelas. Gunakan ukuran gelas yang sama untuk semua porsi.',
+      values: {
+        material: '90000',
+        production: '10000',
+        yield: '20',
+        packaging: '1000',
+      },
+    },
     title: 'Cara menghitung HPP minuman per gelas',
     description:
       'Hitung HPP minuman dari takaran cairan, bubuk, pemanis, topping, es, dan gelas.',
@@ -111,6 +161,16 @@ export const useCases = [
   },
   {
     slug: 'hpp-hampers',
+    example: {
+      description:
+        'Ilustrasi 12 paket: total HPP seluruh isi Rp 600.000, perakitan Rp 60.000, serta kotak luar, pita, dan kartu Rp 15.000 per paket. Kemasan produk yang sudah masuk HPP isi tidak perlu dihitung lagi.',
+      values: {
+        material: '600000',
+        production: '60000',
+        yield: '12',
+        packaging: '15000',
+      },
+    },
     title: 'Cara menghitung HPP hampers makanan',
     description:
       'Hitung biaya hampers dari isi produk, kemasan luar, kartu, pita, dan biaya perakitan.',

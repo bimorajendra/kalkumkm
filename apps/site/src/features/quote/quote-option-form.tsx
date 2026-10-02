@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import type { QuoteOptionRow } from '@/domain/types';
-import { type QuoteOptionFormValues, quoteOptionFormSchema } from './schema';
+import type { QuoteOptionFormValues } from './schema';
 
 const blank: QuoteOptionFormValues = { name: '', priceAdd: '0', costAdd: '0' };
 
@@ -57,21 +57,22 @@ export function QuoteOptionForm({
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const parsed = quoteOptionFormSchema.safeParse(values);
-    if (!parsed.success) {
-      setErrors(
-        Object.fromEntries(
-          parsed.error.issues.map((issue) => [
-            String(issue.path[0]),
-            issue.message,
-          ]),
-        ),
-      );
-      return;
-    }
     setSaving(true);
     setMessage('');
     try {
+      const { quoteOptionFormSchema } = await import('./schema');
+      const parsed = quoteOptionFormSchema.safeParse(values);
+      if (!parsed.success) {
+        setErrors(
+          Object.fromEntries(
+            parsed.error.issues.map((issue) => [
+              String(issue.path[0]),
+              issue.message,
+            ]),
+          ),
+        );
+        return;
+      }
       await run(
         option
           ? { type: 'quote.update', id: option.id, input: parsed.data }

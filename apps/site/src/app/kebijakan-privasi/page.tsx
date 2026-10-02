@@ -32,7 +32,7 @@ const sections = [
   },
   {
     title: 'Analitik',
-    body: 'Jika kamu mengizinkan analitik, kami memakai Google Analytics untuk menghitung kunjungan ke halaman pemasaran publik. Google menerima alamat dan judul halaman tanpa query string, asal situs tanpa path, informasi browser dan perangkat, serta lokasi perkiraan. Halaman login, kebijakan privasi, dan aplikasi setelah masuk tidak kami ukur. Kami tidak mengirim nama, email, isi resep, takaran, atau harga bahan. Google Analytics memproses data tersebut sesuai kebijakannya.',
+    body: 'Jika kamu mengizinkan analitik, kami memakai Google Analytics untuk menghitung kunjungan halaman publik dan penggunaan kalkulator: jenis kalkulator, hitungan yang berhasil, berbagi hasil yang berhasil, dan klik menuju halaman masuk. Google menerima alamat dan judul halaman tanpa query string, asal situs tanpa path, informasi browser dan perangkat, serta lokasi perkiraan. Halaman login, kebijakan privasi, dan aplikasi setelah masuk tidak kami ukur. Kami tidak mengirim nama, email, isi resep, takaran, harga bahan, isian kalkulator, atau hasil hitungan. Google Analytics memproses data tersebut sesuai kebijakannya.',
   },
 ];
 

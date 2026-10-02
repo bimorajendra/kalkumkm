@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { createContext, useContext, useEffect, useState } from 'react';
 
-const CONSENT_KEY = 'takaran-analytics-consent-v1';
+const CONSENT_KEY = 'takaran-analytics-consent-v2';
 const SETTINGS_EVENT = 'takaran:analytics-settings';
 
 const AnalyticsConsentContext = createContext(false);
@@ -40,7 +40,11 @@ export function AnalyticsConsentProvider({
       path.startsWith('/usaha/');
     let hasSavedChoice = false;
     try {
-      const saved = localStorage.getItem(CONSENT_KEY);
+      const saved =
+        localStorage.getItem(CONSENT_KEY) ??
+        (localStorage.getItem('takaran-analytics-consent-v1') === 'denied'
+          ? 'denied'
+          : null);
       if (saved === 'granted' || saved === 'denied') {
         hasSavedChoice = true;
         setConsent(saved);
@@ -92,8 +96,9 @@ export function AnalyticsConsentProvider({
               Pengukuran kunjungan
             </h2>
             <p className="text-sm leading-6 text-muted-foreground">
-              Takaran memakai Google Analytics untuk menghitung kunjungan
-              halaman pemasaran. Pilihanmu tidak memengaruhi fitur kalkulator.
+              Takaran memakai Google Analytics untuk menghitung kunjungan dan
+              penggunaan kalkulator publik, tanpa mengirim isian atau hasil
+              hitungan. Pilihanmu tidak memengaruhi fitur kalkulator.
             </p>
             <Link
               href="/kebijakan-privasi"

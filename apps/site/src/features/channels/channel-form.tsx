@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/select';
 import type { ChannelRow } from '@/domain/types';
 import { PaywallDialog } from '@/features/billing/paywall-dialog';
-import { type ChannelFormValues, channelFormSchema } from './schema';
+import type { ChannelFormValues } from './schema';
 
 const blank: ChannelFormValues = { name: '', kind: 'commission', rate: '20' };
 
@@ -68,21 +68,22 @@ export function ChannelForm({
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const parsed = channelFormSchema.safeParse(values);
-    if (!parsed.success) {
-      setErrors(
-        Object.fromEntries(
-          parsed.error.issues.map((issue) => [
-            String(issue.path[0]),
-            issue.message,
-          ]),
-        ),
-      );
-      return;
-    }
     setSaving(true);
     setMessage('');
     try {
+      const { channelFormSchema } = await import('./schema');
+      const parsed = channelFormSchema.safeParse(values);
+      if (!parsed.success) {
+        setErrors(
+          Object.fromEntries(
+            parsed.error.issues.map((issue) => [
+              String(issue.path[0]),
+              issue.message,
+            ]),
+          ),
+        );
+        return;
+      }
       const input = {
         name: parsed.data.name,
         kind: parsed.data.kind,

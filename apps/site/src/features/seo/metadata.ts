@@ -20,7 +20,8 @@ export function publicMetadata({
       title,
       description,
       url: path,
+      images: [{ url: '/icon.png', alt: 'Takaran' }],
     },
-    twitter: { card: 'summary', title, description },
+    twitter: { card: 'summary', title, description, images: ['/icon.png'] },
   };
 }

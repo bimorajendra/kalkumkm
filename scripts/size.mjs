@@ -14,18 +14,16 @@ if (!existsSync(root)) {
 
 const JS_LIMIT = 220 * 1024;
 const TOTAL_LIMIT = 300 * 1024;
-const routes = [
-  {
-    name: 'Kalkulator (/dashboard/hitung)',
-    manifest: 'app/(app)/dashboard/hitung/page',
-  },
-  {
-    name: 'Dashboard (/dashboard)',
-    manifest: 'app/(app)/dashboard/page',
-  },
-  { name: 'Landing (/)', manifest: 'app/(marketing)/page' },
-  { name: 'Halaman statis (/kebijakan-privasi)', manifest: 'app/kebijakan-privasi/page' },
-];
+const suffix = '_client-reference-manifest.js';
+const routes = readdirSync(join(root, 'server/app'), { recursive: true })
+  .filter((file) => typeof file === 'string' && file.endsWith(`page${suffix}`))
+  .map((file) => {
+    const manifest = `app/${file.replaceAll('\\', '/').slice(0, -suffix.length)}`;
+    const name = manifest.replace(/^app/, '').replace(/\/\([^/]+\)/g, '').replace(/\/page$/, '') || '/';
+    return { name, manifest };
+  })
+  .sort((left, right) => left.name.localeCompare(right.name));
+if (routes.length === 0) throw new Error('Manifest halaman tidak ditemukan. Jalankan pnpm build.');
 
 const buildManifest = JSON.parse(
   readFileSync(join(root, 'build-manifest.json'), 'utf8'),
