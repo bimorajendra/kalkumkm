@@ -26,7 +26,7 @@ export function usePublicAnalytics(calculator: keyof typeof calculatorPaths) {
     const path = window.location.pathname;
     const isUseCase =
       calculator === 'hpp' &&
-      /^\/usaha\/hpp-(brownies|katering|frozen-food|rice-bowl|minuman|hampers)$/.test(
+      /^\/usaha\/hpp-(brownies|katering|frozen-food|rice-bowl|minuman|hampers|nastar|kue-ulang-tahun-custom|cookies|donat|roti-manis|risoles|dimsum|pempek|nasi-kotak|ayam-geprek|seblak|es-kopi-susu|sambal-botolan|keripik|kue-basah)$/.test(
         path,
       );
     if (

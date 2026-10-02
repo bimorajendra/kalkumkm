@@ -79,7 +79,7 @@ Next.js, Drizzle dan `pg`, Better Auth, shadcn/ui (Radix). Ukuran gzip dilaporka
 |---|---|
 | Anggaran ukuran diubah dari 170/250 KB menjadi 220/300 KB gzip (`pnpm size`) | Runtime Next.js dan React saja sekitar 135 KB gzip. Angka lama tidak mungkin dengan Next.js. Perlu konfirmasi pemilik |
 | Tanpa PWA, service worker, dan offline | Model online per akun (keputusan 1) |
-| Awalnya tanpa Umami/analitik pihak ketiga | Keputusan ini disesuaikan oleh `CHANGE-004-google-analytics.md`: GA4 hanya untuk kunjungan halaman publik |
+| Awalnya tanpa Umami/analitik pihak ketiga | Keputusan ini disesuaikan oleh `CHANGE-004-google-analytics.md` untuk pageview publik dan `CHANGE-005-public-calculator-events.md` untuk event kalkulator setelah consent |
 | Tanpa Turnstile; waitlist memakai kolom jebakan bot dan batas per IP | Kurangi layanan luar; checkout sudah di belakang login |
 | Transfer/QRIS manual tidak dibangun; admin bisa memberi Pro manual | Ditunda di keputusan awal; jalur cadangan cukup dari admin |
 | Perubahan resep dari formulir kini mempertahankan target untung dan harga jual yang sudah ada | Versi lama menimpa keduanya dengan bawaan saat resep diubah |

@@ -51,12 +51,38 @@ export default async function UseCasePage({
             {
               '@type': 'ListItem',
               position: 2,
+              name: 'Jenis usaha',
+              item: new URL('/usaha', origin).href,
+            },
+            {
+              '@type': 'ListItem',
+              position: 3,
               name: item.title,
               item: new URL(`/usaha/${item.slug}`, origin).href,
             },
           ],
         }}
       />
+      <nav
+        aria-label="Navigasi halaman"
+        className="flex flex-wrap items-center gap-2 text-sm"
+      >
+        <Link
+          className="inline-flex min-h-11 items-center text-link underline underline-offset-4"
+          href="/"
+        >
+          Beranda
+        </Link>
+        <span aria-hidden="true">›</span>
+        <Link
+          className="inline-flex min-h-11 items-center text-link underline underline-offset-4"
+          href="/usaha"
+        >
+          Jenis usaha
+        </Link>
+        <span aria-hidden="true">›</span>
+        <span aria-current="page">{item.title}</span>
+      </nav>
       <header className="grid gap-4">
         <p className="text-sm font-semibold text-[var(--mk-primary-ink)]">
           Panduan HPP per jenis usaha
@@ -96,7 +122,10 @@ export default async function UseCasePage({
         className="grid gap-2 border-t border-input/50 pt-5 sm:grid-cols-2"
       >
         {useCases
-          .filter((other) => other.slug !== item.slug)
+          .filter(
+            (other) => other.group === item.group && other.slug !== item.slug,
+          )
+          .slice(0, 6)
           .map((other) => (
             <Link
               key={other.slug}
@@ -106,6 +135,12 @@ export default async function UseCasePage({
               {other.title}
             </Link>
           ))}
+        <Link
+          href="/usaha"
+          className="min-h-11 py-2 text-link underline underline-offset-4"
+        >
+          Lihat semua panduan usaha
+        </Link>
       </nav>
     </article>
   );

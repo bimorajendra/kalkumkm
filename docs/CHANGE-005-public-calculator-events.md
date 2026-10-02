@@ -10,7 +10,7 @@ Status: disetujui pemilik melalui chat, 2 Oktober 2026. Memperluas CHANGE-004.
 - Tidak mengirim input, hasil, nama resep, identitas akun, query string, atau fragmen URL. Event berbagi hanya dikirim setelah aksi berhasil; pembatalan bukan keberhasilan.
 - Klik menuju masuk adalah ukuran minat membuat akun, bukan bukti signup berhasil. Tidak menambahkan pelacakan pada alur autentikasi.
 - Consent dan kebijakan privasi menjelaskan perluasan ini. Penolakan atau pencabutan consent menghentikan event berikutnya.
-- Persetujuan memakai versi v2. Persetujuan v1 hanya untuk pageview sehingga diminta ulang; penolakan v1 tetap dihormati. Event HPP juga berlaku pada enam URL usaha yang diizinkan secara eksplisit.
+- Persetujuan memakai versi v2. Persetujuan v1 hanya untuk pageview sehingga diminta ulang; penolakan v1 tetap dihormati. Event HPP berlaku pada `/kalkulator-hpp` dan 21 URL usaha yang diizinkan secara eksplisit: `hpp-brownies`, `hpp-katering`, `hpp-frozen-food`, `hpp-rice-bowl`, `hpp-minuman`, `hpp-hampers`, `hpp-nastar`, `hpp-kue-ulang-tahun-custom`, `hpp-cookies`, `hpp-donat`, `hpp-roti-manis`, `hpp-risoles`, `hpp-dimsum`, `hpp-pempek`, `hpp-nasi-kotak`, `hpp-ayam-geprek`, `hpp-seblak`, `hpp-es-kopi-susu`, `hpp-sambal-botolan`, `hpp-keripik`, dan `hpp-kue-basah`.
 - Enhanced Measurement tetap harus dimatikan di properti GA4 agar pelacakan otomatis tidak melewati batas ini. Lihat [panduan pageview GA4](https://developers.google.com/analytics/devguides/collection/ga4/views).
 
 ## Pengelolaan perubahan
