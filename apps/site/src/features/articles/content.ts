@@ -21,6 +21,7 @@ export type Article = {
     note: string;
   };
   references?: Array<{ label: string; href: string }>;
+  calculator: { href: string; label: string };
   related: string[];
 };
 
@@ -79,6 +80,7 @@ export const articles: Article[] = [
         href: 'https://legacy.sba.gov/business-guide/plan-your-business/calculate-your-startup-costs/break-even-point/calculate',
       },
     ],
+    calculator: { href: '/kalkulator-hpp', label: 'Buka kalkulator HPP' },
     related: ['cara-menentukan-harga-jual-makanan', 'beda-margin-dan-markup'],
   },
   {
@@ -123,6 +125,7 @@ export const articles: Article[] = [
       result: 'Harga saran: Rp5.000 per potong',
       note: 'Rp2.925 ÷ (1 − 40%) = Rp4.875 sebelum pembulatan.',
     },
+    calculator: { href: '/harga-jual', label: 'Buka kalkulator harga jual' },
     related: ['cara-menghitung-hpp-makanan', 'beda-margin-dan-markup'],
   },
   {
@@ -164,6 +167,7 @@ export const articles: Article[] = [
       result: 'Markup 40%, margin sekitar 28,6%',
       note: 'Markup: Rp1.200 ÷ Rp3.000. Margin: Rp1.200 ÷ Rp4.200.',
     },
+    calculator: { href: '/margin', label: 'Buka kalkulator margin' },
     related: [
       'cara-menghitung-hpp-makanan',
       'cara-menentukan-harga-jual-makanan',

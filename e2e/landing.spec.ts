@@ -8,13 +8,17 @@ test('beranda: demo memakai mesin hitung, tanpa scroll horizontal', async ({
   await expect(
     page.getByRole('heading', { name: /Jualan laris/ }),
   ).toBeVisible();
-  await expect(page.getByText('Rp 2.925')).toBeVisible();
-  await expect(page.getByText('Rp 5.000', { exact: true })).toBeVisible();
-  const slider = page.getByLabel('Target untung');
+  // Contoh brownies di bagian bawah beranda juga memuat "Rp 5.000".
+  const hero = page.locator('section').filter({
+    has: page.getByRole('heading', { name: /Jualan laris/ }),
+  });
+  await expect(hero.getByText('Rp 2.925')).toBeVisible();
+  await expect(hero.getByText('Rp 5.000', { exact: true })).toBeVisible();
+  const slider = hero.getByLabel('Target untung');
   await slider.fill('70');
   await slider.dispatchEvent('change');
   await expect(
-    page.getByText('Rp 10.000', { exact: true }).first(),
+    hero.getByText('Rp 10.000', { exact: true }).first(),
   ).toBeVisible();
   const overflow = await page.evaluate(
     () =>

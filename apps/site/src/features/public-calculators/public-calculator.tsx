@@ -91,9 +91,16 @@ const fields: Record<
 };
 
 function wholeRupiah(raw: string, label: string, unit = 'rupiah bulat'): Big {
-  if (!/^\d+$/.test(raw.trim()))
-    throw new Error(`${label} harus berupa ${unit}.`);
-  const value = new Big(raw.trim());
+  let text = raw.trim();
+  // Kolom uang menerima "Rp 27.800" dan "27.800". Titik dianggap pemisah ribuan
+  // hanya bila polanya pas, jadi "27.8" tetap ditolak, tidak ditebak sebagai
+  // desimal. Jumlah porsi tidak memakai titik.
+  if (unit === 'rupiah bulat') {
+    text = text.replace(/^rp\.?\s*/i, '');
+    if (/^\d{1,3}(?:\.\d{3})+$/.test(text)) text = text.replace(/\./g, '');
+  }
+  if (!/^\d+$/.test(text)) throw new Error(`${label} harus berupa ${unit}.`);
+  const value = new Big(text);
   if (!Number.isSafeInteger(value.toNumber()))
     throw new Error(`${label} melebihi batas angka yang aman.`);
   return value;

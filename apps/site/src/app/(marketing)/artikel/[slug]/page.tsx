@@ -24,6 +24,8 @@ export async function generateMetadata({
     alternates: { canonical: `/artikel/${article.slug}` },
     openGraph: {
       type: 'article',
+      url: `/artikel/${slug}`,
+      siteName: 'Takaran',
       title: article.title,
       description: article.description,
       publishedTime: article.publishedAt,
@@ -39,12 +41,13 @@ export async function generateMetadata({
               alt: article.image.alt,
             },
           ]
-        : undefined,
+        : [{ url: '/icon.png', alt: 'Takaran' }],
     },
     twitter: {
       card: 'summary',
       title: article.title,
       description: article.description,
+      images: [article.image?.src ?? '/icon.png'],
     },
   };
 }
@@ -73,6 +76,12 @@ export default async function ArtikelDetailPage({
     inLanguage: 'id-ID',
     articleSection: article.category,
     mainEntityOfPage: articleUrl,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Takaran',
+      url: origin,
+      logo: new URL('/logo.png', origin).href,
+    },
     ...(article.author
       ? {
           author: {
@@ -250,17 +259,25 @@ export default async function ArtikelDetailPage({
           ) : null}
         </div>
         <section className="mt-10 rounded-[var(--mk-radius-lg)] bg-[var(--mk-surface)] p-5 sm:p-6">
-          <h2 className="text-xl font-bold">Coba hitung HPP resep sendiri</h2>
+          <h2 className="text-xl font-bold">Coba hitung dengan angkamu</h2>
           <p className="mt-2 leading-7 text-[var(--mk-text-2)]">
-            Masukkan harga bahan dan takaran resep untuk melihat modal per
-            porsi.
+            Kalkulator ini bisa dipakai tanpa akun. Masuk bila ingin menyimpan
+            harga bahan dan resep.
           </p>
-          <Link
-            className="mt-4 inline-flex min-h-11 items-center font-semibold text-[var(--mk-primary-ink)] underline underline-offset-4"
-            href="/masuk"
-          >
-            Mulai hitung resep
-          </Link>
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1">
+            <Link
+              className="inline-flex min-h-11 items-center font-semibold text-[var(--mk-primary-ink)] underline underline-offset-4"
+              href={article.calculator.href}
+            >
+              {article.calculator.label}
+            </Link>
+            <Link
+              className="inline-flex min-h-11 items-center font-semibold text-[var(--mk-primary-ink)] underline underline-offset-4"
+              href="/masuk"
+            >
+              Masuk untuk menyimpan resep
+            </Link>
+          </div>
         </section>
         {relatedArticles.length ? (
           <nav

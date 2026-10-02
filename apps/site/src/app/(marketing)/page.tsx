@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { mkButtonClasses } from '@/components/marketing/button-classes';
 import { ComparisonRows } from '@/components/marketing/comparison-rows';
+import { CostBreakdown } from '@/components/marketing/cost-breakdown';
 import { CtaPanel } from '@/components/marketing/cta-panel';
 import { DemoCalculator } from '@/components/marketing/demo-calculator';
 import { PriceStrip } from '@/components/marketing/price-strip';
@@ -138,16 +140,38 @@ export default async function BerandaPage({
             </div>
             <TrustGrid />
           </div>
-          <figure
-            className="m-0 flex min-h-[200px] items-end rounded-[var(--mk-radius-xl)] bg-[var(--mk-sand)] bg-[repeating-linear-gradient(135deg,#ECE6DE_0_1px,transparent_1px_12px)] p-3 lg:min-h-[420px]"
-            style={{ boxSizing: 'border-box' }}
-          >
-            <figcaption className="rounded-[var(--mk-radius-sm)] bg-[var(--mk-surface)] px-2.5 py-2 text-xs leading-[1.5] text-[var(--mk-text-2)] lg:px-3.5 lg:py-2.5 lg:text-[13px]">
-              [Foto] Penjual kue di dapur rumahnya, menimbang bahan.
-            </figcaption>
+          <figure className="relative m-0 min-h-[200px] overflow-hidden rounded-[var(--mk-radius-xl)] bg-[var(--mk-sand)] lg:min-h-[420px]">
+            <Image
+              alt="Tangan mengocok adonan di mangkuk kaca, dengan telur, keju, dan buku catatan resep di meja dapur."
+              className="object-cover"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              src="/dapur-kue.png"
+            />
           </figure>
         </div>
         <PriceStrip />
+      </section>
+
+      <section className="border-y border-[var(--mk-border)] bg-[var(--mk-surface)] px-5 py-14 lg:px-20 lg:py-24">
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-6">
+          <div className="grid gap-4">
+            <h2 className="text-[28px] leading-[1.2] font-bold tracking-[-0.03em] lg:text-[40px] lg:leading-[1.15]">
+              Contoh hitungan: modal satu potong brownies
+            </h2>
+            <p className="text-base leading-[1.6] text-[var(--mk-text-2)] lg:text-[17px]">
+              Bahan, gas, dan kemasan dijumlahkan, lalu dibagi 16 potong per
+              loyang.
+            </p>
+            <Link
+              className="inline-flex min-h-11 items-center font-semibold text-[var(--mk-primary-ink)] underline underline-offset-4"
+              href="/cara-hitung"
+            >
+              Lihat cara menghitungnya
+            </Link>
+          </div>
+          <CostBreakdown />
+        </div>
       </section>
 
       <section className="px-5 pb-14 lg:px-20 lg:pb-24">
